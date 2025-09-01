@@ -1,13 +1,14 @@
 <header class="custom-header">
   <div class="header-left">
-    <div class="dropdown-container">
-      <button class="dropdown-trigger">
-        <span class="red-circle">!</span>
-        <span class="dropdown-text">More Info</span>
-      </button>
-      <div class="dropdown-content">
-        <a href="#">Dropdown Link 1</a>
-        <a href="#">Dropdown Link 2</a>
+    <div class="circle-dropdown-container">
+      <div class="large-red-circle">
+        <button class="circle-dropdown-trigger">
+          <span class="circle-dropdown-text">More Info</span>
+        </button>
+        <div class="circle-dropdown-content">
+          <a href="#">Dropdown Link 1</a>
+          <a href="#">Dropdown Link 2</a>
+        </div>
       </div>
     </div>
     <a href="{{ routes.root_url }}" class="logo">
@@ -26,11 +27,50 @@
     </form>
   </div>
   <div class="header-right">
-    <a href="/collections/all" class="header-btn">About</a>
-    <a href="/pages/about-us" class="header-btn">Products</a>
-    <a href="/pages/contact" class="header-btn">Resources</a>
-    <a href="/cart" class="header-btn red-btn">Contact Us</a>
-    <a href="/cart" class="header-btn red-btn">Contact Us</a>
+    <div class="dropdown header-btn">
+      <button class="dropdown-trigger">About</button>
+      <div class="dropdown-content">
+        <a href="/collections/all">About Us</a>
+        <a href="/pages/about-us">Our Story</a>
+      </div>
+    </div>
+    <div class="dropdown header-btn">
+      <button class="dropdown-trigger">Products</button>
+      <div class="dropdown-content">
+        <a href="/collections/all">All Products</a>
+        <a href="/collections/new">New Arrivals</a>
+      </div>
+    </div>
+    <div class="dropdown header-btn">
+      <button class="dropdown-trigger">Resources</button>
+      <div class="dropdown-content">
+        <a href="/pages/resources">Resource Center</a>
+        <a href="/pages/blog">Blog</a>
+      </div>
+    </div>
+    <div class="dropdown header-btn red-btn">
+      <button class="dropdown-trigger">Contact Us</button>
+      <div class="dropdown-content">
+        <a href="/pages/contact">Contact Form</a>
+        <a href="mailto:info@example.com">Email Us</a>
+      </div>
+    </div>
+    <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
+      {% if cart == empty %}
+        <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
+      {% else %}
+        <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
+      {% endif %}
+      <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+      {%- if cart != empty -%}
+        <div class="cart-count-bubble">
+          {%- if cart.item_count < 100 -%}
+            <span aria-hidden="true">{{ cart.item_count }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
+        </div>
+      {%- endif -%}
+    </a>
   </div>
 </header>
 
@@ -41,44 +81,54 @@
     justify-content: space-between;
     padding: 0 32px;
     background: #fff;
-    height: 64px;
+    height: 96px;
     border-bottom: 1px solid #eee;
     font-family: inherit;
   }
   .header-left {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
   }
-  .dropdown-container {
+  .circle-dropdown-container {
     position: relative;
-  }
-  .dropdown-trigger {
-    background: none;
-    border: none;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0;
-  }
-  .red-circle {
-    background: #c1151b;
-    color: #fff;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 8px;
-    font-weight: bold;
-    font-size: 18px;
+    height: 96px;
+    width: 96px;
   }
-  .dropdown-content {
+  .large-red-circle {
+    background: #c1151b;
+    border-radius: 50%;
+    width: 96px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .circle-dropdown-trigger {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .circle-dropdown-content {
     display: none;
     position: absolute;
-    top: 36px;
+    top: 100px;
     left: 0;
     background: #fff;
     border: 1px solid #eee;
@@ -87,27 +137,27 @@
     z-index: 10;
     flex-direction: column;
   }
-  .dropdown-container:hover .dropdown-content,
-  .dropdown-trigger:focus + .dropdown-content {
+  .large-red-circle:hover .circle-dropdown-content,
+  .circle-dropdown-trigger:focus + .circle-dropdown-content {
     display: flex;
   }
-  .dropdown-content a {
+  .circle-dropdown-content a {
     padding: 10px 16px;
     text-decoration: none;
     color: #333;
     font-size: 15px;
     transition: background 0.2s;
   }
-  .dropdown-content a:hover {
+  .circle-dropdown-content a:hover {
     background: #f5f5f5;
   }
   .logo img {
-    height: 40px;
+    height: 56px;
     width: auto;
     display: block;
   }
   .logo span {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
     color: #333;
   }
@@ -122,22 +172,22 @@
     gap: 8px;
   }
   .search-label {
-    font-size: 16px;
+    font-size: 18px;
     color: #333;
     margin-right: 4px;
   }
   .search-input {
-    padding: 6px 12px;
+    padding: 8px 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 15px;
+    font-size: 16px;
   }
   .search-btn {
     background: #eee;
     border: none;
-    padding: 6px 14px;
+    padding: 8px 18px;
     border-radius: 4px;
-    font-size: 15px;
+    font-size: 16px;
     cursor: pointer;
   }
   .header-right {
@@ -146,16 +196,21 @@
     gap: 16px;
   }
   .header-btn {
-    padding: 8px 18px;
+    position: relative;
+    padding: 10px 22px;
     border-radius: 4px;
     background: none;
     color: #c1151b;
     border: 1px solid #c1151b;
     text-decoration: none;
-    font-size: 15px;
+    font-size: 16px;
     transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
   }
-  .header-btn:hover {
+  .header-btn:hover,
+  .header-btn:focus {
     background: #c1151b;
     color: #fff;
   }
@@ -164,17 +219,69 @@
     color: #fff;
     border: 1px solid #c1151b;
   }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    top: 48px;
+    left: 0;
+    background: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-width: 140px;
+    z-index: 10;
+    flex-direction: column;
+  }
+  .dropdown:hover .dropdown-content,
+  .dropdown-trigger:focus + .dropdown-content {
+    display: flex;
+  }
+  .dropdown-content a {
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #333;
+    font-size: 15px;
+    transition: background 0.2s;
+  }
+  .dropdown-content a:hover {
+    background: #f5f5f5;
+  }
+  .cart-btn {
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: #fff;
+    color: #c1151b;
+    border: 1px solid #c1151b;
+    padding: 10px 22px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .cart-btn:hover {
+    background: #c1151b;
+    color: #fff;
+  }
+  .svg-wrapper {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .cart-count-bubble {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: #c1151b;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
 </style>
 
 {% schema %}
-{
-  "name": "Custom Header",
-  "settings": [
-    {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Logo"
-    }
-  ]
-}
-{% endschema %}
+{ "name": "Custom Header", "settings": [ { "type": "image_picker", "id": "logo", "label": "Logo" } ] }
