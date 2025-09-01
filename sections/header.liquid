@@ -13,7 +13,7 @@
     </div>
     <a href="{{ routes.root_url }}" class="logo">
       {% if settings.logo %}
-        <img src="{{ settings.logo | image_url: width: 120 }}" alt="{{ shop.name }}" width="512" height="auto">
+        <img src="{{ settings.logo | image_url: width: 512 }}" alt="{{ shop.name }}" width="512" height="auto">
       {% else %}
         <span>{{ shop.name }}</span>
       {% endif %}
@@ -21,7 +21,7 @@
   </div>
   <div class="header-center">
     <form action="{{ routes.search_url }}" method="get" class="search-form">
-      <input id="SearchBarInput" type="search" name="q" placeholder="Search products..." class="search-input">
+      <input id="SearchBarInput" type="search" name="q" placeholder="" class="search-input">
       <button type="submit" class="search-btn">Search</button>
     </form>
   </div>
@@ -84,6 +84,7 @@
     font-family: inherit;
     position: relative;
     z-index: 2;
+    padding-left: 100px; /* Add padding to contain the circle */
   }
   .header-left {
     display: flex;
@@ -99,17 +100,17 @@
   }
   .large-red-ellipse {
     position: absolute;
-    left: -80px;
-    top: -120px;
+    left: -160px; /* Adjusted position */
+    top: -100px; /* Adjusted position */
     width: 200px;
     height: 200px;
     background: #c1151b;
-    border-radius: 100px 100px;
+    border-radius: 100px;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
     z-index: 1;
-    overflow: hidden;
+    /* FIX 1: Removed 'overflow: hidden' which was trapping the dropdown */
   }
   .circle-dropdown-trigger {
     background: none;
@@ -119,8 +120,8 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    left: 60px;
-    top: 40px;
+    left: 80px; /* Adjusted position */
+    top: 50px; /* Adjusted position */
     z-index: 2;
     width: auto;
     height: auto;
@@ -131,28 +132,39 @@
   .circle-dropdown-content {
     display: none;
     position: absolute;
-    left: 60px;
-    top: 70px;
-    background: #fff;
+    left: 80px; /* Adjusted position */
+    top: 80px; /* Adjusted position */
     border: 1px solid #eee;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    min-width: 140px;
+    min-width: 160px; /* Gave it a bit more width */
     z-index: 10;
     flex-direction: column;
+    /* FIX 3: Style the dropdown to be red with white links */
+    background: #c1151b;
+    border: 1px solid #a10f16;
   }
   .large-red-ellipse:hover .circle-dropdown-content,
-  .circle-dropdown-trigger:focus + .circle-dropdown-content {
+  .circle-dropdown-trigger:focus + .circle-dropdown-content,
+  .circle-dropdown-content:hover {
+    /* Added to keep it open on hover */
     display: flex;
   }
   .circle-dropdown-content a {
-    padding: 10px 16px;
+    padding: 12px 20px;
     text-decoration: none;
-    color: #333;
     font-size: 15px;
     transition: background 0.2s;
+    /* FIX 3: Style the dropdown links */
+    color: #fff;
   }
   .circle-dropdown-content a:hover {
-    background: #f5f5f5;
+    /* FIX 3: Better hover effect for a red background */
+    background: #a10f16;
+  }
+  .logo {
+    /* FIX 2: Removed margin and let the container's gap handle spacing */
+    position: relative;
+    z-index: 2; /* Ensure logo is above the circle */
   }
   .logo img {
     height: 56px;
@@ -205,14 +217,15 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    padding-right: 24px; /* Added some padding for balance */
   }
   .header-btn {
     position: relative;
     padding: 10px 22px;
     border-radius: 4px;
     background: none;
-    color: #c1151b;
-    border: 1px solid #c1151b;
+    color: black;
+    font-weight: 500; /* Adjusted from 800 for better balance */
     text-decoration: none;
     font-size: 16px;
     transition: background 0.2s, color 0.2s;
@@ -274,7 +287,6 @@
     position: relative;
     background: #fff;
     color: #c1151b;
-    border: 1px solid #c1151b;
     padding: 10px 22px;
     border-radius: 4px;
     transition: background 0.2s, color 0.2s;
