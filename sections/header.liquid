@@ -13,9 +13,15 @@
     </div>
     <a href="{{ routes.root_url }}" class="logo">
       {% if settings.logo %}
-        <img src="{{ settings.logo | image_url: width: 120 }}" alt="{{ shop.name }}" width="120" height="auto">
+        <img
+          src="{{ settings.logo | image_url: width: 120 }}"
+          alt="{{ shop.name }}"
+          style="padding-left: 32px; padding-right: 16px; height: 56px; width: auto;"
+          width="512"
+          height="512"
+        >
       {% else %}
-        <span>{{ shop.name }}</span>
+        <span style="padding-left: 32px; padding-right: 16px;">{{ shop.name }}</span>
       {% endif %}
     </a>
   </div>
@@ -26,22 +32,22 @@
     </form>
   </div>
   <div class="header-right">
-    <div class="dropdown header-btn">
-      <a href="#" class="dropdown-link">About</a>
+    <div class="dropdown header-btn no-border">
+      <a href="#" class="dropdown-link bold-link">About</a>
       <div class="dropdown-content">
         <a href="/collections/all">About Us</a>
         <a href="/pages/about-us">Our Story</a>
       </div>
     </div>
-    <div class="dropdown header-btn">
-      <a href="#" class="dropdown-link">Products</a>
+    <div class="dropdown header-btn no-border">
+      <a href="#" class="dropdown-link bold-link">Products</a>
       <div class="dropdown-content">
         <a href="/collections/all">All Products</a>
         <a href="/collections/new">New Arrivals</a>
       </div>
     </div>
-    <div class="dropdown header-btn">
-      <a href="#" class="dropdown-link">Resources</a>
+    <div class="dropdown header-btn no-border">
+      <a href="#" class="dropdown-link bold-link">Resources</a>
       <div class="dropdown-content">
         <a href="/pages/resources">Resource Center</a>
         <a href="/pages/blog">Blog</a>
@@ -62,7 +68,7 @@
       {% endif %}
       <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
       {%- if cart != empty -%}
-        <div class="cart-count-bubble">
+        <div class="cart-count-bubble displaced">
           {%- if cart.item_count < 100 -%}
             <span aria-hidden="true">{{ cart.item_count }}</span>
           {%- endif -%}
@@ -104,10 +110,10 @@
     width: 200px;
     height: 200px;
     background: #c1151b;
-    border-radius: 100px 100px;
+    border-radius: 100px 200px;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
     z-index: 1;
     overflow: hidden;
   }
@@ -119,14 +125,23 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    left: 60px;
-    top: 40px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     z-index: 2;
     width: auto;
     height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .circle-dropdown-text {
+    display: block;
+    text-align: center;
+    width: 100%;
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
   }
   .circle-dropdown-content {
     display: none;
@@ -163,6 +178,8 @@
     font-size: 28px;
     font-weight: bold;
     color: #333;
+    padding-left: 32px;
+    padding-right: 16px;
   }
   .header-center {
     flex: 1;
@@ -173,7 +190,8 @@
     display: flex;
     align-items: center;
     gap: 0;
-    width: 80%;
+    width: 100%;
+    max-width: 480px;
   }
   .search-input {
     flex: 1;
@@ -184,9 +202,11 @@
     font-size: 16px;
     color: #333;
     outline: none;
+    min-width: 320px;
+    max-width: 420px;
   }
   .search-btn {
-    background: white;
+    background: #f3f3f3;
     border: none;
     border-radius: 0 4px 4px 0;
     font-size: 16px;
@@ -211,36 +231,37 @@
     padding: 10px 22px;
     border-radius: 4px;
     background: none;
-    color: #c1151b;
-    border: 1px solid #c1151b;
+    color: #222;
     text-decoration: none;
     font-size: 16px;
     transition: background 0.2s, color 0.2s;
     cursor: pointer;
     display: flex;
     align-items: center;
+    font-weight: bold;
+  }
+  .header-btn.no-border {
+    border: none;
+    background: none;
+  }
+  .bold-link {
+    color: #222;
+    font-weight: bold;
+    border: none;
+    background: none;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
   }
   .header-btn:hover,
   .header-btn:focus {
-    background: #c1151b;
-    color: #fff;
+    background: #f5f5f5;
+    color: #c1151b;
   }
   .red-btn {
     background: #c1151b;
     color: #fff;
     border: 1px solid #c1151b;
-  }
-  .dropdown-link {
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    background: none;
-    border: none;
-    padding: 0;
-    display: flex;
-    align-items: center;
   }
   .dropdown-content {
     display: none;
@@ -291,8 +312,8 @@
   }
   .cart-count-bubble {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 0px;
+    right: -18px;
     background: #c1151b;
     color: #fff;
     border-radius: 50%;
@@ -303,6 +324,10 @@
     align-items: center;
     justify-content: center;
     font-weight: bold;
+  }
+  .cart-count-bubble.displaced {
+    top: 6px;
+    right: -10px;
   }
 </style>
 
