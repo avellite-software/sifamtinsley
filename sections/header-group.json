@@ -7,12 +7,7 @@
       "blocks": {
         "announcement-bar-0": {
           "type": "announcement",
-          "settings": {
-            "text": "Welcome to our store",
-            "text_alignment": "center",
-            "color_scheme": "scheme-1",
-            "link": ""
-          }
+          "settings": {}
         }
       },
       "block_order": [
@@ -20,7 +15,7 @@
       ]
     },
     "header": {
-      "type": "header",
+      "type": "header-old",
       "settings": {
         "color_scheme": "scheme-1",
         "logo_position": "middle-left",
