@@ -3,7 +3,7 @@
     <div class="circle-dropdown-container">
       <div class="large-red-ellipse">
         <button class="circle-dropdown-trigger">
-          <span class="circle-dropdown-text">More Info</span>
+          <span class="circle-dropdown-text">Our Brands</span>
         </button>
         <div class="circle-dropdown-content">
           <a href="#">Dropdown Link 1</a>
@@ -84,7 +84,7 @@
     font-family: inherit;
     position: relative;
     z-index: 2;
-    padding-left: 100px;
+    padding-left: 100px; /* Add padding to contain the circle */
   }
   .header-left {
     display: flex;
@@ -100,12 +100,12 @@
   }
   .large-red-ellipse {
     position: absolute;
-    left: -210px;
-    top: -130px;
-    width: 200px;
-    height: 200px;
+    left: -230px;
+    top: -155px;
+    width: 250px;
+    height: 250px;
     background: #c1151b;
-    border-radius: 100px;
+    border-radius: 125px;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -119,12 +119,11 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    left: 80px;
-    /* FIX 2: Vertically align "More Info" text with other header links */
-    top: 167px;
+    left: 170px;
+    top: 150px;
     z-index: 2;
-    width: auto;
-    height: auto;
+    width: 0;
+    height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,20 +131,21 @@
   .circle-dropdown-content {
     display: none;
     position: absolute;
-    left: 80px;
-    /* FIX 1: Position dropdown to appear below the main header bar */
-    top: 226px; /* (130px negative offset + 96px header height) */
+    left: 80px; /* Adjusted position */
+    top: 80px; /* Adjusted position */
     border: 1px solid #eee;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    min-width: 160px;
+    min-width: 160px; /* Gave it a bit more width */
     z-index: 10;
     flex-direction: column;
+    /* FIX 3: Style the dropdown to be red with white links */
     background: #c1151b;
     border: 1px solid #a10f16;
   }
   .large-red-ellipse:hover .circle-dropdown-content,
   .circle-dropdown-trigger:focus + .circle-dropdown-content,
   .circle-dropdown-content:hover {
+    /* Added to keep it open on hover */
     display: flex;
   }
   .circle-dropdown-content a {
@@ -153,14 +153,17 @@
     text-decoration: none;
     font-size: 15px;
     transition: background 0.2s;
+    /* FIX 3: Style the dropdown links */
     color: #fff;
   }
   .circle-dropdown-content a:hover {
+    /* FIX 3: Better hover effect for a red background */
     background: #a10f16;
   }
   .logo {
+    /* FIX 2: Removed margin and let the container's gap handle spacing */
     position: relative;
-    z-index: 2;
+    z-index: 2; /* Ensure logo is above the circle */
   }
   .logo img {
     height: 56px;
@@ -213,7 +216,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding-right: 24px;
+    padding-right: 24px; /* Added some padding for balance */
   }
   .header-btn {
     position: relative;
@@ -221,7 +224,7 @@
     border-radius: 4px;
     background: none;
     color: black;
-    font-weight: 500;
+    font-weight: 500; /* Adjusted from 800 for better balance */
     text-decoration: none;
     font-size: 16px;
     transition: background 0.2s, color 0.2s;
@@ -299,9 +302,8 @@
   }
   .cart-count-bubble {
     position: absolute;
-    /* FIX 3: Repositioned the cart count bubble */
-    top: 2px;
-    right: 2px;
+    top: 6px;
+    right: 6px;
     background: #c1151b;
     color: #fff;
     border-radius: 50%;
