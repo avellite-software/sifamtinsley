@@ -4,6 +4,9 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
+      "settings": {
+        "announcement_text": "Welcome to sifamtinsley.com!",
+      }
     },
     "header": {
       "type": "header",
