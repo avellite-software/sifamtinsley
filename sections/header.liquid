@@ -84,7 +84,7 @@
     font-family: inherit;
     position: relative;
     z-index: 2;
-    padding-left: 100px; /* Add padding to contain the circle */
+    padding-left: 100px;
   }
   .header-left {
     display: flex;
@@ -100,8 +100,8 @@
   }
   .large-red-ellipse {
     position: absolute;
-    left: -160px; /* Adjusted position */
-    top: -100px; /* Adjusted position */
+    left: -210px;
+    top: -130px;
     width: 200px;
     height: 200px;
     background: #c1151b;
@@ -110,7 +110,6 @@
     align-items: flex-start;
     justify-content: flex-start;
     z-index: 1;
-    /* FIX 1: Removed 'overflow: hidden' which was trapping the dropdown */
   }
   .circle-dropdown-trigger {
     background: none;
@@ -120,8 +119,9 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    left: 80px; /* Adjusted position */
-    top: 50px; /* Adjusted position */
+    left: 80px;
+    /* FIX 2: Vertically align "More Info" text with other header links */
+    top: 167px;
     z-index: 2;
     width: auto;
     height: auto;
@@ -132,21 +132,20 @@
   .circle-dropdown-content {
     display: none;
     position: absolute;
-    left: 80px; /* Adjusted position */
-    top: 80px; /* Adjusted position */
+    left: 80px;
+    /* FIX 1: Position dropdown to appear below the main header bar */
+    top: 226px; /* (130px negative offset + 96px header height) */
     border: 1px solid #eee;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    min-width: 160px; /* Gave it a bit more width */
+    min-width: 160px;
     z-index: 10;
     flex-direction: column;
-    /* FIX 3: Style the dropdown to be red with white links */
     background: #c1151b;
     border: 1px solid #a10f16;
   }
   .large-red-ellipse:hover .circle-dropdown-content,
   .circle-dropdown-trigger:focus + .circle-dropdown-content,
   .circle-dropdown-content:hover {
-    /* Added to keep it open on hover */
     display: flex;
   }
   .circle-dropdown-content a {
@@ -154,17 +153,14 @@
     text-decoration: none;
     font-size: 15px;
     transition: background 0.2s;
-    /* FIX 3: Style the dropdown links */
     color: #fff;
   }
   .circle-dropdown-content a:hover {
-    /* FIX 3: Better hover effect for a red background */
     background: #a10f16;
   }
   .logo {
-    /* FIX 2: Removed margin and let the container's gap handle spacing */
     position: relative;
-    z-index: 2; /* Ensure logo is above the circle */
+    z-index: 2;
   }
   .logo img {
     height: 56px;
@@ -217,7 +213,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding-right: 24px; /* Added some padding for balance */
+    padding-right: 24px;
   }
   .header-btn {
     position: relative;
@@ -225,7 +221,7 @@
     border-radius: 4px;
     background: none;
     color: black;
-    font-weight: 500; /* Adjusted from 800 for better balance */
+    font-weight: 500;
     text-decoration: none;
     font-size: 16px;
     transition: background 0.2s, color 0.2s;
@@ -248,7 +244,7 @@
     text-decoration: none;
     cursor: pointer;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 900;
     background: none;
     border: none;
     padding: 0;
@@ -303,8 +299,9 @@
   }
   .cart-count-bubble {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    /* FIX 3: Repositioned the cart count bubble */
+    top: 2px;
+    right: 2px;
     background: #c1151b;
     color: #fff;
     border-radius: 50%;
