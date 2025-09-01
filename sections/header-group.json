@@ -15,7 +15,7 @@
       ]
     },
     "header": {
-      "type": "header-old",
+      "type": "header",
       "settings": {
         "color_scheme": "scheme-1",
         "logo_position": "middle-left",
