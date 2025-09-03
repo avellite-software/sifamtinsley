@@ -8,28 +8,33 @@
 
 <style>
   .custom-footer {
-    background-color: #b02328;
+    background-color: #c1151b;
     color: #ffffff;
     padding: 60px 0 30px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   }
 
   .custom-footer-container {
-    max-width: 1400px;
     margin: 0 auto;
     padding: 0 40px;
   }
 
   .footer-grid {
-    display: grid;
+    display: flex;
     grid-template-columns: repeat(4, 1fr) 1.5fr;
     gap: 40px;
     align-items: flex-start;
+    justify-content: space-around;
   }
 
-  .footer-block h3,
   .newsletter-heading {
-    font-size: 18px;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .footer-block h3 {
+    font-size: 24px;
     font-weight: 700;
     margin: 0 0 20px;
     text-transform: capitalize;
@@ -207,8 +212,8 @@
       {%- endfor -%}
 
       <div class="newsletter-wrapper">
+        <h3 class="newsletter-heading">{{ section.settings.newsletter_heading }}</h3>
         <div class="newsletter-container">
-          <h3 class="newsletter-heading">{{ section.settings.newsletter_heading }}</h3>
           {%- form 'customer', id: 'footer-newsletter-form' -%}
             <input type="hidden" name="contact[tags]" value="newsletter">
             <div class="newsletter-form-fields">
