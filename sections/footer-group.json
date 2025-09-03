@@ -34,14 +34,14 @@
             "heading": "Contact Us",
             "text": "<p>sales@sifamtinsley.com<br/>01376 335271</p>",
             "secondary_heading": "Legal",
-            "secondary_menu": ""
+            "secondary_menu": "legal-menu"
           }
         },
         "text_9AWbMV": {
           "type": "text",
           "settings": {
-            "heading": "Contact Us",
-            "text": "<p>sales@sifamtinsley.com<br/>01376 335271</p>",
+            "heading": "About Us",
+            "text": "<p>Sifam Tinsley is a trusted provider of precision electrical and electronic instrumentation, offering innovative solutions for energy monitoring, control, and measurement across industries worldwide.</p>",
             "secondary_heading": "",
             "secondary_menu": ""
           }
