@@ -1,9 +1,7 @@
 {% comment %}
   Custom Footer Section
-  - Uses CSS Grid for a flexible, responsive layout.
-  - Simplified schema for easy customization of content.
-  - FIX: Text block now supports an optional secondary menu.
-  - FIX: Copyright Liquid logic simplified to pass theme-check.
+  - RESTRUCTURED: Uses Flexbox for the main 5-column layout.
+  - The first 4 columns are managed by blocks, the 5th (newsletter) is separate.
 {% endcomment %}
 
 <style>
@@ -19,21 +17,34 @@
     padding: 0 40px;
   }
 
-  .footer-grid {
+  /* --- FLEXBOX LAYOUT --- */
+  .footer-flex-container {
     display: flex;
-    grid-template-columns: repeat(4, 1fr) 1.5fr;
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
     gap: 40px;
     align-items: flex-start;
-    justify-content: space-around;
   }
 
+  .footer-block {
+    flex: 1; /* Each content block will take up an equal amount of space */
+    min-width: 200px; /* Prevents blocks from getting too squished */
+  }
+
+  .newsletter-wrapper {
+    flex: 1.5; /* Makes the newsletter section wider than the others */
+    min-width: 300px;
+  }
+  /* --- END FLEXBOX LAYOUT --- */
+
   .newsletter-heading {
+    color: #ffffff;
     font-size: 36px;
     font-weight: 700;
-    margin: 0;
+    margin: 0 0 15px; /* Added margin to space it from the form */
   }
 
   .footer-block h3 {
+    color: #ffffff;
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 20px;
@@ -63,7 +74,6 @@
     text-decoration: underline;
   }
 
-  /* Style for the secondary heading (e.g., "Legal") */
   .footer-block .secondary-heading {
     margin-top: 30px;
   }
@@ -147,31 +157,28 @@
 
   /* Responsive Adjustments */
   @media (max-width: 1200px) {
-    .footer-grid {
-      grid-template-columns: repeat(3, 1fr);
+    /* For tablet, content blocks take ~33% width, newsletter takes ~66% */
+    .footer-block {
+      flex-basis: calc(33.33% - 30px);
     }
     .newsletter-wrapper {
-      grid-column: 1 / -1;
-      margin-top: 30px;
+      flex-basis: calc(66.66% - 30px);
     }
   }
 
   @media (max-width: 768px) {
-    .footer-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .footer-grid {
-      grid-template-columns: 1fr;
+    /* For mobile, all blocks become full width */
+    .footer-block,
+    .newsletter-wrapper {
+      flex-basis: 100%;
     }
   }
 </style>
 
 <footer class="custom-footer">
   <div class="custom-footer-container">
-    <div class="footer-grid">
+    <div class="footer-flex-container">
+      {% # This loop creates the first 4 columns using blocks # %}
       {%- for block in section.blocks -%}
         <div class="footer-block" {{ block.shopify_attributes }}>
           {%- case block.type -%}
@@ -211,6 +218,7 @@
         </div>
       {%- endfor -%}
 
+      {% # This is the 5th item in the flex container # %}
       <div class="newsletter-wrapper">
         <h3 class="newsletter-heading">{{ section.settings.newsletter_heading }}</h3>
         <div class="newsletter-container">
@@ -240,7 +248,6 @@
     </div>
 
     <div class="footer-copyright">
-      {% # FINAL FIX: Simplified the copyright line to satisfy the linter. # %}
       <small>
         {{- section.settings.copyright_text }}
         {{ 'now' | date: '%Y' -}}
@@ -336,7 +343,20 @@
     }
   ],
   "default": {
-    "blocks": [{ "type": "link_list" }, { "type": "link_list" }, { "type": "text" }, { "type": "text" }]
+    "blocks": [
+      {
+        "type": "link_list"
+      },
+      {
+        "type": "link_list"
+      },
+      {
+        "type": "text"
+      },
+      {
+        "type": "text"
+      }
+    ]
   }
 }
 {% endschema %}
