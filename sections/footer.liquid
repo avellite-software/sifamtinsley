@@ -21,7 +21,7 @@
   .footer-flex-container {
     display: flex;
     flex-wrap: wrap; /* Allows items to wrap on smaller screens */
-    gap: 40px;
+    gap: 25px;
     align-items: flex-start;
   }
 
@@ -31,7 +31,7 @@
   }
 
   .newsletter-wrapper {
-    flex: 2;
+    flex: 2.5;
     min-width: 300px;
   }
   /* --- END FLEXBOX LAYOUT --- */
@@ -40,7 +40,8 @@
     color: #ffffff;
     font-size: 32px;
     font-weight: 700;
-    margin: 0 0 15px; /* Added margin to space it from the form */
+    margin: 0;
+    top: -10px;
   }
 
   .footer-block h3 {
@@ -99,7 +100,6 @@
   .newsletter-form-fields label {
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 8px;
     display: block;
   }
 
@@ -107,7 +107,7 @@
     width: 100%;
     padding: 12px;
     background-color: #f0f0f0;
-    border: 1px solid #e0e0e0;
+    border: none;
     border-radius: 8px;
     font-size: 16px;
   }
@@ -122,7 +122,8 @@
   .newsletter-form-footer .terms-link {
     font-size: 12px;
     color: #555;
-    text-decoration: underline;
+    text-decoration: none;
+    font-style: italic;
   }
 
   .newsletter-form-footer .signup-button {
@@ -144,7 +145,6 @@
   /* Copyright Styles */
   .footer-copyright {
     text-align: left;
-    padding-top: 30px;
     border-top: 1px solid rgba(255, 255, 255);
   }
 
