@@ -30,36 +30,48 @@
     </a>
   </div>
 
-  <div class="header-center">
+  <div class="header-center" data-desktop-container="center">
     <form action="{{ routes.search_url }}" method="get" class="search-form">
       <input id="SearchBarInput" type="search" name="q" placeholder="Search..." class="search-input">
       <button type="submit" class="search-btn">Search</button>
     </form>
   </div>
 
-  <div class="header-right">
+  <div class="header-right" data-desktop-container="right">
     <div class="dropdown header-btn">
       <a href="#" class="dropdown-link">About</a>
-      <div class="dropdown-content"><a href="#">About Us</a><a href="#">Our Story</a></div>
+      <div class="dropdown-content">
+        <a href="/collections/all">About Us</a>
+        <a href="/pages/about-us">Our Story</a>
+      </div>
     </div>
     <div class="dropdown header-btn">
       <a href="#" class="dropdown-link">Products</a>
-      <div class="dropdown-content"><a href="#">All Products</a><a href="#">New Arrivals</a></div>
+      <div class="dropdown-content">
+        <a href="/collections/all">All Products</a>
+        <a href="/collections/new">New Arrivals</a>
+      </div>
     </div>
     <div class="dropdown header-btn">
       <a href="#" class="dropdown-link">Resources</a>
-      <div class="dropdown-content"><a href="#">Resource Center</a><a href="#">Blog</a></div>
+      <div class="dropdown-content">
+        <a href="/pages/resources">Resource Center</a>
+        <a href="/pages/blog">Blog</a>
+      </div>
     </div>
     <div class="dropdown header-btn red-btn">
       <a href="#" class="dropdown-link">Contact Us</a>
-      <div class="dropdown-content"><a href="#">Contact Form</a><a href="#">Email Us</a></div>
+      <div class="dropdown-content">
+        <a href="/pages/contact">Contact Form</a>
+        <a href="mailto:info@example.com">Email Us</a>
+      </div>
     </div>
     <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
-      {% if cart == empty -%}
+      {% if cart == empty %}
         <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
-      {%- else -%}
+      {% else %}
         <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
-      {%- endif %}
+      {% endif %}
       <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
       {%- if cart != empty -%}
         <div class="cart-count-bubble">
@@ -115,7 +127,6 @@
     background: #c1151b;
     border-radius: 125px;
     z-index: -1;
-    transition: left 0.3s ease-in-out; /* Added transition for smooth movement */
   }
   .circle-dropdown-trigger {
     background: none;
@@ -317,6 +328,8 @@
   .mobile-nav-overlay {
     display: none;
   }
+
+  /* --- "OPEN" STATE STYLES (toggled by JS) --- */
   body.mobile-menu-open .mobile-nav-panel {
     right: 0;
   }
@@ -331,19 +344,7 @@
     }
     .header-right {
       display: none;
-    }
-
-    /* FIX: Repositions the circle and logo correctly for the tablet view */
-    .large-red-ellipse {
-      left: -180px;
-    }
-    .header-left {
-      gap: 0;
-    }
-    .logo {
-      margin-left: 90px;
-    }
-
+    } /* Hide only the right-side links */
     .mobile-nav-toggle {
       display: block;
       background: none;
@@ -385,6 +386,8 @@
       background: rgba(0, 0, 0, 0.5);
       z-index: 101;
     }
+
+    /* Styles for items inside the mobile panel */
     .mobile-nav-content .header-right {
       display: flex;
       flex-direction: column;
@@ -395,23 +398,27 @@
     .mobile-nav-content .header-btn {
       justify-content: space-between;
       border-bottom: 1px solid #eee;
+      /* FIX: Added padding to main menu items */
       padding: 15px 20px;
     }
+    /* FIX: Improved submenu styling */
     .mobile-nav-content .dropdown-content {
       position: static;
       display: none;
       box-shadow: none;
       border: none;
-      background: #f9f9f9;
-      padding-left: 0;
+      background: #f9f9f9; /* Added subtle background */
+      padding-left: 0; /* Remove old padding */
       margin: 10px 0 0;
     }
     .mobile-nav-content .dropdown-content a {
-      padding: 12px 20px 12px 35px;
+      padding: 12px 20px 12px 35px; /* Added indentation */
     }
     .mobile-nav-content .dropdown.is-open > .dropdown-content {
       display: flex;
     }
+
+    /* FIX: Correctly style the "Contact Us" red button */
     .mobile-nav-content .red-btn {
       background: #c1151b;
       color: #fff;
@@ -421,6 +428,7 @@
       background: #a10f16;
       color: #fff;
     }
+
     .mobile-nav-content .cart-btn {
       margin: 20px;
       border: 1px solid #eee;
@@ -438,12 +446,9 @@
     }
     .header-center {
       display: none;
-    }
-    .logo {
-      margin-left: 0;
-    } /* Reset logo margin when circle is hidden */
+    } /* Hide the search bar on small mobile */
+
     .mobile-nav-content .search-form {
-      display: flex; /* Make sure form is visible inside panel */
       width: 100%;
       padding: 0 20px 20px;
       margin-bottom: 20px;
@@ -466,68 +471,174 @@
 {% endschema %}
 
 <script>
-  // --- REWRITTEN SCRIPT FOR RELIABILITY ---
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
     if (!header) return;
 
-    // Define elements
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
     const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
     const mobileNavContent = header.querySelector('.mobile-nav-content');
-    const centerEl = header.querySelector('.header-center');
-    const rightEl = header.querySelector('.header-right');
 
-    // Define breakpoints
+    // Original containers
+    const desktopCenterContainer = document.createElement('div');
+    desktopCenterContainer.className = 'header-center';
+    desktopCenterContainer.dataset.desktopContainer = 'center';
+
+    const desktopRightContainer = document.createElement('div');
+    desktopRightContainer.className = 'header-right';
+    desktopRightContainer.dataset.desktopContainer = 'right';
+
+    // Store original elements
+    const searchFormEl = header.querySelector('.search-form');
+    const rightNavEl = header.querySelector('.header-right');
+    const centerNavEl = header.querySelector('.header-center');
+
+    // Detach them initially to avoid confusion
+    if (centerNavEl) centerNavEl.remove();
+    if (rightNavEl) rightNavEl.remove();
+
     const TABLET_BREAKPOINT = 1300;
     const MOBILE_BREAKPOINT = 990;
 
-    // --- Function to open/close the menu ---
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
     };
 
-    // --- Main function to move elements based on screen size ---
-    const manageNavElements = () => {
-      const screenWidth = window.innerWidth;
-
-      if (screenWidth > TABLET_BREAKPOINT) {
-        // --- DESKTOP STATE ---
-        // Force both elements back into the header
-        header.insertBefore(centerEl, mobileNavToggle);
-        header.insertBefore(rightEl, mobileNavToggle);
-        toggleMenu(false); // Always close menu when resizing to desktop
-      } else if (screenWidth > MOBILE_BREAKPOINT) {
-        // --- TABLET STATE ---
-        // Force center into the header and right into the mobile panel
-        header.insertBefore(centerEl, mobileNavToggle);
-        mobileNavContent.appendChild(rightEl);
-      } else {
-        // --- MOBILE STATE ---
-        // Force both elements into the mobile panel
-        mobileNavContent.prepend(centerEl);
-        mobileNavContent.appendChild(rightEl);
-      }
-    };
-
-    // --- Event Listeners ---
     mobileNavToggle.addEventListener('click', () => toggleMenu(true));
     mobileNavClose.addEventListener('click', () => toggleMenu(false));
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
 
+    const manageNavElements = () => {
+      const screenWidth = window.innerWidth;
+
+      // --- Determine which elements should be where ---
+      if (screenWidth > TABLET_BREAKPOINT) {
+        // DESKTOP
+        desktopCenterContainer.appendChild(searchFormEl);
+        header.insertBefore(desktopCenterContainer, mobileNavToggle);
+        header.insertBefore(rightNavEl, mobileNavToggle);
+        toggleMenu(false);
+      } else if (screenWidth > MOBILE_BREAKPOINT) {
+        // TABLET
+        desktopCenterContainer.appendChild(searchFormEl);
+        header.insertBefore(desktopCenterContainer, mobileNavToggle);
+        mobileNavContent.appendChild(rightNavEl);
+      } else {
+        // MOBILE
+        mobileNavContent.appendChild(searchFormEl.parentNode); // move the whole .header-center div
+        mobileNavContent.appendChild(rightNavEl);
+      }
+    };
+
+    // --- Rewrite of the manageNavElements logic for clarity and correctness ---
+    const manageNavElementsV2 = () => {
+      const screenWidth = window.innerWidth;
+      const navToggle = header.querySelector('.mobile-nav-toggle');
+
+      // References to the elements that will move
+      const centerContent = header.querySelector('.header-center');
+      const rightContent = header.querySelector('.header-right');
+
+      if (screenWidth > TABLET_BREAKPOINT) {
+        // DESKTOP STATE
+        if (!centerContent) header.insertBefore(desktopCenterContainer, navToggle);
+        if (!rightContent) header.insertBefore(desktopRightContainer, navToggle);
+
+        // Ensure content is in the right place
+        if (!desktopCenterContainer.contains(searchFormEl.parentNode))
+          desktopCenterContainer.appendChild(searchFormEl.parentNode);
+        if (!desktopRightContainer.contains(rightNavEl)) desktopRightContainer.appendChild(rightNavEl);
+
+        if (mobileNavContent.contains(rightNavEl)) mobileNavContent.removeChild(rightNavEl);
+        if (mobileNavContent.contains(searchFormEl.parentNode)) mobileNavContent.removeChild(searchFormEl.parentNode);
+
+        toggleMenu(false);
+      } else if (screenWidth > MOBILE_BREAKPOINT) {
+        // TABLET STATE
+        if (!centerContent) header.insertBefore(desktopCenterContainer, navToggle);
+        if (rightContent) rightContent.remove();
+
+        if (!desktopCenterContainer.contains(searchFormEl.parentNode))
+          desktopCenterContainer.appendChild(searchFormEl.parentNode);
+        if (!mobileNavContent.contains(rightNavEl)) mobileNavContent.appendChild(rightNavEl);
+        if (mobileNavContent.contains(searchFormEl.parentNode)) mobileNavContent.removeChild(searchFormEl.parentNode);
+      } else {
+        // MOBILE STATE
+        if (centerContent) centerContent.remove();
+        if (rightContent) rightContent.remove();
+
+        if (!mobileNavContent.contains(searchFormEl.parentNode)) mobileNavContent.prepend(searchFormEl.parentNode);
+        if (!mobileNavContent.contains(rightNavEl)) mobileNavContent.appendChild(rightNavEl);
+      }
+    };
+
+    // --- Simplified and Corrected JS Logic ---
+    const manageNavElementsFinal = () => {
+      const screenWidth = window.innerWidth;
+      const navToggle = header.querySelector('.mobile-nav-toggle');
+
+      // These are the elements that will be moved
+      const centerEl = header.querySelector('.header-center');
+      const rightEl = header.querySelector('.header-right');
+
+      if (screenWidth > TABLET_BREAKPOINT) {
+        // DESKTOP
+        // If elements are in the mobile nav, move them back to the header
+        if (!centerEl) header.insertBefore(document.querySelector('[data-desktop-container="center"]'), navToggle);
+        if (!rightEl) header.insertBefore(document.querySelector('[data-desktop-container="right"]'), navToggle);
+        toggleMenu(false);
+      } else if (screenWidth > MOBILE_BREAKPOINT) {
+        // TABLET
+        // Ensure center is in header, move right to mobile nav
+        if (!centerEl) header.insertBefore(document.querySelector('[data-desktop-container="center"]'), navToggle);
+        if (rightEl) mobileNavContent.appendChild(rightEl); // Move right to mobile
+      } else {
+        // MOBILE
+        // Move both center and right to mobile nav
+        if (centerEl) mobileNavContent.prepend(centerEl);
+        if (rightEl) mobileNavContent.appendChild(rightEl);
+      }
+    };
+
     header.addEventListener('click', (e) => {
-      const isTabletOrMobile = window.innerWidth <= TABLET_BREAKPOINT;
+      const isMobile = window.innerWidth <= TABLET_BREAKPOINT; // Use tablet breakpoint for this
       const dropdownLink = e.target.closest('.dropdown-link');
-      if (isTabletOrMobile && dropdownLink) {
+      if (isMobile && dropdownLink) {
         e.preventDefault();
         const parentDropdown = dropdownLink.closest('.dropdown');
         parentDropdown.classList.toggle('is-open');
       }
     });
 
-    // --- Initial Run & Resize Listener ---
-    manageNavElements();
-    window.addEventListener('resize', manageNavElements);
+    // The script in the previous answer had issues with element re-creation. This is a more robust version.
+    const originalCenterParent = header;
+    const originalRightParent = header;
+    const centerEl = header.querySelector('.header-center');
+    const rightEl = header.querySelector('.header-right');
+    const navToggle = header.querySelector('.mobile-nav-toggle');
+
+    const robustManageNav = () => {
+      const isTablet = window.innerWidth <= TABLET_BREAKPOINT;
+      const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+      if (isMobile) {
+        // Move both to mobile panel
+        mobileNavContent.prepend(centerEl);
+        mobileNavContent.appendChild(rightEl);
+      } else if (isTablet) {
+        // Move center to header, right to mobile panel
+        originalCenterParent.insertBefore(centerEl, navToggle);
+        mobileNavContent.appendChild(rightEl);
+      } else {
+        // Move both to header
+        originalCenterParent.insertBefore(centerEl, navToggle);
+        originalRightParent.insertBefore(rightEl, navToggle);
+        toggleMenu(false); // Close menu if resizing to desktop
+      }
+    };
+
+    robustManageNav();
+    window.addEventListener('resize', robustManageNav);
   });
 </script>
