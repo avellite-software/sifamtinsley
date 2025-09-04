@@ -332,10 +332,18 @@
     .header-right {
       display: none;
     }
-    /* FIX: Moves the circle back on screen for tablet view */
+
+    /* FIX: Repositions the circle and logo correctly for the tablet view */
     .large-red-ellipse {
-      left: -60px;
+      left: -180px;
     }
+    .header-left {
+      gap: 0;
+    }
+    .logo {
+      margin-left: 90px;
+    }
+
     .mobile-nav-toggle {
       display: block;
       background: none;
@@ -431,6 +439,9 @@
     .header-center {
       display: none;
     }
+    .logo {
+      margin-left: 0;
+    } /* Reset logo margin when circle is hidden */
     .mobile-nav-content .search-form {
       display: flex; /* Make sure form is visible inside panel */
       width: 100%;
@@ -483,20 +494,20 @@
 
       if (screenWidth > TABLET_BREAKPOINT) {
         // --- DESKTOP STATE ---
-        // Ensure elements are in the header, not the mobile panel
-        if (!header.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
-        if (!header.contains(rightEl)) header.insertBefore(rightEl, mobileNavToggle);
+        // Force both elements back into the header
+        header.insertBefore(centerEl, mobileNavToggle);
+        header.insertBefore(rightEl, mobileNavToggle);
         toggleMenu(false); // Always close menu when resizing to desktop
       } else if (screenWidth > MOBILE_BREAKPOINT) {
         // --- TABLET STATE ---
-        // Center stays in header, Right moves to mobile panel
-        if (!header.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
-        if (header.contains(rightEl)) mobileNavContent.appendChild(rightEl);
+        // Force center into the header and right into the mobile panel
+        header.insertBefore(centerEl, mobileNavToggle);
+        mobileNavContent.appendChild(rightEl);
       } else {
         // --- MOBILE STATE ---
-        // Both Center and Right move to mobile panel
-        if (header.contains(centerEl)) mobileNavContent.prepend(centerEl);
-        if (header.contains(rightEl)) mobileNavContent.appendChild(rightEl);
+        // Force both elements into the mobile panel
+        mobileNavContent.prepend(centerEl);
+        mobileNavContent.appendChild(rightEl);
       }
     };
 
