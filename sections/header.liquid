@@ -136,8 +136,8 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    left: 170px;
-    top: 150px;
+    left: 118px;
+    top: 135px;
     z-index: 2;
     width: auto;
     height: auto;
@@ -180,7 +180,6 @@
     font-weight: bold;
     color: #333;
   }
-
   .header-center {
     flex: 1;
     display: flex;
@@ -218,7 +217,6 @@
     background: #eaeaea;
     color: #a10f16;
   }
-
   .header-right {
     display: flex;
     align-items: center;
@@ -324,31 +322,29 @@
     border: 2px solid #fff;
   }
 
-  /* --- MOBILE NAVIGATION STYLES --- */
-  .mobile-nav-toggle {
-    display: none;
-  } /* Hidden on desktop */
+  /* --- MOBILE NAVIGATION STYLES (SHARED) --- */
+  .mobile-nav-toggle,
   .mobile-nav-panel,
   .mobile-nav-overlay {
     display: none;
-  } /* Hidden on desktop */
+  }
 
-  /* --- BREAKPOINT: Tablet and Mobile Styles --- */
-  @media screen and (max-width: 1200px) {
+  /* --- "OPEN" STATE STYLES (toggled by JS) --- */
+  body.mobile-menu-open .mobile-nav-panel {
+    right: 0;
+  }
+  body.mobile-menu-open .mobile-nav-overlay {
+    display: block;
+  }
+
+  /* === BREAKPOINT 1: TABLET STYLES (1300px and below) === */
+  @media screen and (max-width: 1300px) {
     .custom-header {
       padding: 0 20px;
     }
-    .header-left {
-      gap: 15px; /* Reduce gap on smaller screens */
-    }
-    .large-red-ellipse {
-      /* Hide the decorative circle on mobile */
-      display: none;
-    }
-    .header-center,
     .header-right {
-      display: none; /* Hide original nav items */
-    }
+      display: none;
+    } /* Hide only the right-side links */
     .mobile-nav-toggle {
       display: block;
       background: none;
@@ -356,19 +352,16 @@
       cursor: pointer;
       padding: 5px;
     }
-
-    /* Off-canvas panel styles */
     .mobile-nav-panel {
       display: block;
       position: fixed;
       top: 0;
-      right: -100%; /* Start off-screen */
+      right: -100%;
       width: 300px;
       height: 100%;
       background: #fff;
       z-index: 102;
       transition: right 0.3s ease-in-out;
-      padding: 20px;
       box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
       overflow-y: auto;
     }
@@ -383,12 +376,18 @@
     .mobile-nav-content {
       margin-top: 50px;
     }
-
-    /* Styles for nav items when they are INSIDE the mobile panel */
-    .mobile-nav-content .search-form {
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      margin-bottom: 20px;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 101;
     }
+
+    /* Styles for items inside the mobile panel */
     .mobile-nav-content .header-right {
       display: flex;
       flex-direction: column;
@@ -398,47 +397,62 @@
     }
     .mobile-nav-content .header-btn {
       justify-content: space-between;
-      padding: 15px 0;
       border-bottom: 1px solid #eee;
+      /* FIX: Added padding to main menu items */
+      padding: 15px 20px;
     }
+    /* FIX: Improved submenu styling */
     .mobile-nav-content .dropdown-content {
-      position: static; /* No longer absolute */
-      display: none; /* Keep hidden by default */
+      position: static;
+      display: none;
       box-shadow: none;
       border: none;
-      padding-left: 15px;
+      background: #f9f9f9; /* Added subtle background */
+      padding-left: 0; /* Remove old padding */
+      margin: 10px 0 0;
     }
-    /* Simple JS toggle for mobile submenus */
+    .mobile-nav-content .dropdown-content a {
+      padding: 12px 20px 12px 35px; /* Added indentation */
+    }
     .mobile-nav-content .dropdown.is-open > .dropdown-content {
       display: flex;
     }
-    .mobile-nav-content .cart-btn {
-      margin-top: 20px;
-    }
+
+    /* FIX: Correctly style the "Contact Us" red button */
     .mobile-nav-content .red-btn {
-      /* Make red button stand out */
-      background: #f1f1f1;
-      color: #c1151b;
+      background: #c1151b;
+      color: #fff;
+      border-radius: 0;
+    }
+    .mobile-nav-content .red-btn:hover {
+      background: #a10f16;
+      color: #fff;
     }
 
-    /* Overlay for darkening the page */
-    .mobile-nav-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .mobile-nav-content .cart-btn {
+      margin: 20px;
+      border: 1px solid #eee;
+      justify-content: center;
+    }
+  }
+
+  /* === BREAKPOINT 2: MOBILE STYLES (990px and below) === */
+  @media screen and (max-width: 990px) {
+    .header-left {
+      gap: 15px;
+    }
+    .large-red-ellipse {
+      display: none;
+    }
+    .header-center {
+      display: none;
+    } /* Hide the search bar on small mobile */
+
+    .mobile-nav-content .search-form {
       width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 101;
-      display: none; /* Hidden by default */
-    }
-
-    /* --- "OPEN" STATE STYLES (toggled by JS) --- */
-    body.mobile-menu-open .mobile-nav-panel {
-      right: 0; /* Slide panel into view */
-    }
-    body.mobile-menu-open .mobile-nav-overlay {
-      display: block; /* Show the overlay */
+      padding: 0 20px 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
     }
   }
 </style>
@@ -457,7 +471,6 @@
 {% endschema %}
 
 <script>
-  // Self-contained script for the header. No need for external files.
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
     if (!header) return;
@@ -466,55 +479,166 @@
     const mobileNavClose = header.querySelector('.mobile-nav-close');
     const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
     const mobileNavContent = header.querySelector('.mobile-nav-content');
-    const desktopCenterContainer = header.querySelector('[data-desktop-container="center"]');
-    const desktopRightContainer = header.querySelector('[data-desktop-container="right"]');
 
-    const BREAKPOINT = 1200;
+    // Original containers
+    const desktopCenterContainer = document.createElement('div');
+    desktopCenterContainer.className = 'header-center';
+    desktopCenterContainer.dataset.desktopContainer = 'center';
 
-    // --- Toggle Menu Open/Close ---
+    const desktopRightContainer = document.createElement('div');
+    desktopRightContainer.className = 'header-right';
+    desktopRightContainer.dataset.desktopContainer = 'right';
+
+    // Store original elements
+    const searchFormEl = header.querySelector('.search-form');
+    const rightNavEl = header.querySelector('.header-right');
+    const centerNavEl = header.querySelector('.header-center');
+
+    // Detach them initially to avoid confusion
+    if (centerNavEl) centerNavEl.remove();
+    if (rightNavEl) rightNavEl.remove();
+
+    const TABLET_BREAKPOINT = 1300;
+    const MOBILE_BREAKPOINT = 990;
+
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
     };
+
     mobileNavToggle.addEventListener('click', () => toggleMenu(true));
     mobileNavClose.addEventListener('click', () => toggleMenu(false));
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
 
-    // --- Move Nav Elements Between Desktop/Mobile ---
     const manageNavElements = () => {
-      const isMobile = window.innerWidth <= BREAKPOINT;
-      if (isMobile) {
-        // If elements are not already in the mobile container, move them
-        if (desktopCenterContainer.children.length > 0) {
-          mobileNavContent.appendChild(desktopCenterContainer);
-        }
-        if (desktopRightContainer.children.length > 0) {
-          mobileNavContent.appendChild(desktopRightContainer);
-        }
+      const screenWidth = window.innerWidth;
+
+      // --- Determine which elements should be where ---
+      if (screenWidth > TABLET_BREAKPOINT) {
+        // DESKTOP
+        desktopCenterContainer.appendChild(searchFormEl);
+        header.insertBefore(desktopCenterContainer, mobileNavToggle);
+        header.insertBefore(rightNavEl, mobileNavToggle);
+        toggleMenu(false);
+      } else if (screenWidth > MOBILE_BREAKPOINT) {
+        // TABLET
+        desktopCenterContainer.appendChild(searchFormEl);
+        header.insertBefore(desktopCenterContainer, mobileNavToggle);
+        mobileNavContent.appendChild(rightNavEl);
       } else {
-        // If elements are not in their desktop containers, move them back
-        if (mobileNavContent.contains(desktopCenterContainer)) {
-          header.insertBefore(desktopCenterContainer, header.querySelector('.mobile-nav-toggle'));
-        }
-        if (mobileNavContent.contains(desktopRightContainer)) {
-          header.insertBefore(desktopRightContainer, header.querySelector('.mobile-nav-toggle'));
-        }
-        toggleMenu(false); // Always close menu on resize to desktop
+        // MOBILE
+        mobileNavContent.appendChild(searchFormEl.parentNode); // move the whole .header-center div
+        mobileNavContent.appendChild(rightNavEl);
       }
     };
 
-    // --- Handle Mobile Submenu Toggles ---
+    // --- Rewrite of the manageNavElements logic for clarity and correctness ---
+    const manageNavElementsV2 = () => {
+      const screenWidth = window.innerWidth;
+      const navToggle = header.querySelector('.mobile-nav-toggle');
+
+      // References to the elements that will move
+      const centerContent = header.querySelector('.header-center');
+      const rightContent = header.querySelector('.header-right');
+
+      if (screenWidth > TABLET_BREAKPOINT) {
+        // DESKTOP STATE
+        if (!centerContent) header.insertBefore(desktopCenterContainer, navToggle);
+        if (!rightContent) header.insertBefore(desktopRightContainer, navToggle);
+
+        // Ensure content is in the right place
+        if (!desktopCenterContainer.contains(searchFormEl.parentNode))
+          desktopCenterContainer.appendChild(searchFormEl.parentNode);
+        if (!desktopRightContainer.contains(rightNavEl)) desktopRightContainer.appendChild(rightNavEl);
+
+        if (mobileNavContent.contains(rightNavEl)) mobileNavContent.removeChild(rightNavEl);
+        if (mobileNavContent.contains(searchFormEl.parentNode)) mobileNavContent.removeChild(searchFormEl.parentNode);
+
+        toggleMenu(false);
+      } else if (screenWidth > MOBILE_BREAKPOINT) {
+        // TABLET STATE
+        if (!centerContent) header.insertBefore(desktopCenterContainer, navToggle);
+        if (rightContent) rightContent.remove();
+
+        if (!desktopCenterContainer.contains(searchFormEl.parentNode))
+          desktopCenterContainer.appendChild(searchFormEl.parentNode);
+        if (!mobileNavContent.contains(rightNavEl)) mobileNavContent.appendChild(rightNavEl);
+        if (mobileNavContent.contains(searchFormEl.parentNode)) mobileNavContent.removeChild(searchFormEl.parentNode);
+      } else {
+        // MOBILE STATE
+        if (centerContent) centerContent.remove();
+        if (rightContent) rightContent.remove();
+
+        if (!mobileNavContent.contains(searchFormEl.parentNode)) mobileNavContent.prepend(searchFormEl.parentNode);
+        if (!mobileNavContent.contains(rightNavEl)) mobileNavContent.appendChild(rightNavEl);
+      }
+    };
+
+    // --- Simplified and Corrected JS Logic ---
+    const manageNavElementsFinal = () => {
+      const screenWidth = window.innerWidth;
+      const navToggle = header.querySelector('.mobile-nav-toggle');
+
+      // These are the elements that will be moved
+      const centerEl = header.querySelector('.header-center');
+      const rightEl = header.querySelector('.header-right');
+
+      if (screenWidth > TABLET_BREAKPOINT) {
+        // DESKTOP
+        // If elements are in the mobile nav, move them back to the header
+        if (!centerEl) header.insertBefore(document.querySelector('[data-desktop-container="center"]'), navToggle);
+        if (!rightEl) header.insertBefore(document.querySelector('[data-desktop-container="right"]'), navToggle);
+        toggleMenu(false);
+      } else if (screenWidth > MOBILE_BREAKPOINT) {
+        // TABLET
+        // Ensure center is in header, move right to mobile nav
+        if (!centerEl) header.insertBefore(document.querySelector('[data-desktop-container="center"]'), navToggle);
+        if (rightEl) mobileNavContent.appendChild(rightEl); // Move right to mobile
+      } else {
+        // MOBILE
+        // Move both center and right to mobile nav
+        if (centerEl) mobileNavContent.prepend(centerEl);
+        if (rightEl) mobileNavContent.appendChild(rightEl);
+      }
+    };
+
     header.addEventListener('click', (e) => {
-      const isMobile = window.innerWidth <= BREAKPOINT;
+      const isMobile = window.innerWidth <= TABLET_BREAKPOINT; // Use tablet breakpoint for this
       const dropdownLink = e.target.closest('.dropdown-link');
       if (isMobile && dropdownLink) {
-        e.preventDefault(); // Prevent link from navigating
+        e.preventDefault();
         const parentDropdown = dropdownLink.closest('.dropdown');
         parentDropdown.classList.toggle('is-open');
       }
     });
 
-    // --- Initial Check and Resize Listener ---
-    manageNavElements();
-    window.addEventListener('resize', manageNavElements);
+    // The script in the previous answer had issues with element re-creation. This is a more robust version.
+    const originalCenterParent = header;
+    const originalRightParent = header;
+    const centerEl = header.querySelector('.header-center');
+    const rightEl = header.querySelector('.header-right');
+    const navToggle = header.querySelector('.mobile-nav-toggle');
+
+    const robustManageNav = () => {
+      const isTablet = window.innerWidth <= TABLET_BREAKPOINT;
+      const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+      if (isMobile) {
+        // Move both to mobile panel
+        mobileNavContent.prepend(centerEl);
+        mobileNavContent.appendChild(rightEl);
+      } else if (isTablet) {
+        // Move center to header, right to mobile panel
+        originalCenterParent.insertBefore(centerEl, navToggle);
+        mobileNavContent.appendChild(rightEl);
+      } else {
+        // Move both to header
+        originalCenterParent.insertBefore(centerEl, navToggle);
+        originalRightParent.insertBefore(rightEl, navToggle);
+        toggleMenu(false); // Close menu if resizing to desktop
+      }
+    };
+
+    robustManageNav();
+    window.addEventListener('resize', robustManageNav);
   });
 </script>
