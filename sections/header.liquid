@@ -94,6 +94,7 @@
     z-index: 100;
   }
   .header-shape-clipper {
+    display: block;
     position: absolute;
     top: 0;
     left: 0;
@@ -146,15 +147,14 @@
   .circle-dropdown-content {
     display: flex; /* Always use flex so height doesn't collapse */
     position: absolute;
-    left: 120px;
-    top: 210px;
+    top: 75px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     min-width: 160px;
     z-index: 10;
     flex-direction: column;
     background: #c1151b;
     border: none;
-    border-radius: 20px;
+    border-radius: 0px 20px 20px 20px;
     /* Initial state for animation */
     opacity: 0;
     visibility: hidden;
