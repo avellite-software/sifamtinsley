@@ -98,7 +98,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    width: 250px; /* Increased width to fully contain the animation */
+    width: 130px;
     overflow: hidden;
     z-index: 0;
     pointer-events: none;
@@ -112,6 +112,7 @@
     height: 250px;
     background: #c1151b;
     border-radius: 125px;
+    /* Animation transition for the circle */
     transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   }
   .header-left {
@@ -123,14 +124,15 @@
     z-index: 1;
   }
 
-  /* --- FIX: Corrected Positioning & Hover Area --- */
+  /* --- FIX: Dropdown Hover Area --- */
   .circle-dropdown-container {
     position: absolute;
     left: 0;
     top: 0;
     z-index: 2;
-    width: 130px; /* Define a specific hover area on the left */
-    height: 100%;
+    /* Give the container a size to bridge the gap between button and menu */
+    width: 300px;
+    height: 300px;
   }
   .circle-dropdown-trigger {
     background: none;
@@ -140,37 +142,31 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    /* Correctly positioned over the visible part of the circle */
-    left: 25px;
-    top: 30px;
+    left: 130px;
+    top: 125px;
     z-index: 2;
-    /* Animation for the trigger text */
-    opacity: 1;
-    transition: opacity 0.2s ease-in-out;
   }
+
+  /* --- FIX: Expanding Circle & Smooth Animation --- */
   .circle-dropdown-content {
     display: flex;
     position: absolute;
-    /* Correctly positioned to appear below the header */
-    left: 20px;
-    top: 106px; /* Positioned just below the header line */
-    min-width: 200px;
+    left: 120px;
+    top: 75px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-width: 160px;
     z-index: 10;
     flex-direction: column;
-    background: transparent;
-    border-radius: 12px;
+    background: transparent; /* Background is now the circle */
+    border-radius: 0px 20px 20px 20px;
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
     pointer-events: none;
-    transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+    transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s; /* Delay text animation slightly */
   }
 
-  /* --- FIX: Synchronized Animation States --- */
-  .custom-header.is-circle-menu-active .circle-dropdown-trigger {
-    opacity: 0; /* Fade out the trigger text on hover */
-    pointer-events: none;
-  }
+  /* These styles are now triggered by a JS class for synchronization */
   .custom-header.is-circle-menu-active .circle-dropdown-content {
     opacity: 1;
     visibility: visible;
@@ -178,12 +174,11 @@
     pointer-events: auto;
   }
   .custom-header.is-circle-menu-active .header-shape-clipper::before {
-    /* Expand the circle to become the menu background */
-    left: 20px;
-    top: 106px;
-    width: 200px;
-    height: 130px; /* Adjust height to fit content */
-    border-radius: 12px;
+    left: 120px;
+    top: 75px;
+    width: 160px;
+    height: 120px;
+    border-radius: 0px 20px 20px 20px;
   }
   /* --- End of Fix --- */
 
@@ -367,8 +362,12 @@
     .header-left {
       padding-left: 20px;
     }
-    .header-shape-clipper,
-    .circle-dropdown-container,
+    .header-shape-clipper {
+      display: none;
+    }
+    .circle-dropdown-container {
+      display: none;
+    }
     .header-center,
     .header-right {
       display: none;
