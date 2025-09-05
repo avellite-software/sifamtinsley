@@ -7,8 +7,10 @@
         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
       </svg>
     </button>
+
     <div class="mobile-nav-content"></div>
   </div>
+
   <div class="mobile-nav-overlay"></div>
 
   <div class="header-left">
@@ -16,14 +18,18 @@
       <button class="circle-dropdown-trigger">
         <span class="circle-dropdown-text">Our Brands</span>
       </button>
+
       <div class="circle-dropdown-content">
         <a href="#">Dropdown Link 1</a>
+
         <a href="#">Dropdown Link 2</a>
       </div>
     </div>
+
     <a href="{{ routes.root_url }}" class="logo">
       {% if settings.logo %}
         <img src="{{ settings.logo | image_url: width: 512 }}" alt="{{ shop.name }}" width="512" height="auto">
+
       {% else %}
         <span>{{ shop.name }}</span>
       {% endif %}
@@ -33,6 +39,7 @@
   <div class="header-center">
     <form action="{{ routes.search_url }}" method="get" class="search-form">
       <input id="SearchBarInput" type="search" name="q" placeholder="Search..." class="search-input">
+
       <button type="submit" class="search-btn">Search</button>
     </form>
   </div>
@@ -40,32 +47,44 @@
   <div class="header-right">
     <div class="dropdown header-btn">
       <a href="#" class="dropdown-link">About</a>
+
       <div class="dropdown-content"><a href="#">About Us</a><a href="#">Our Story</a></div>
     </div>
+
     <div class="dropdown header-btn">
       <a href="#" class="dropdown-link">Products</a>
+
       <div class="dropdown-content"><a href="#">All Products</a><a href="#">New Arrivals</a></div>
     </div>
+
     <div class="dropdown header-btn">
       <a href="#" class="dropdown-link">Resources</a>
+
       <div class="dropdown-content"><a href="#">Resource Center</a><a href="#">Blog</a></div>
     </div>
+
     <div class="dropdown header-btn red-btn">
       <a href="#" class="dropdown-link">Contact Us</a>
+
       <div class="dropdown-content"><a href="#">Contact Form</a><a href="#">Email Us</a></div>
     </div>
+
     <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
       {% if cart == empty -%}
         <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
+
       {%- else -%}
         <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
       {%- endif %}
+
       <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+
       {%- if cart != empty -%}
         <div class="cart-count-bubble">
           {%- if cart.item_count < 100 -%}
             <span aria-hidden="true">{{ cart.item_count }}</span>
           {%- endif -%}
+
           <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
         </div>
       {%- endif -%}
@@ -83,262 +102,447 @@
   :root {
     --header-height: 96px;
   }
+
   .custom-header {
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
     background: #fff;
+
     height: var(--header-height);
+
     font-family: inherit;
+
     position: relative;
+
     z-index: 100;
   }
+
   .header-shape-clipper {
     display: block;
+
     position: absolute;
+
     top: 0;
+
     left: 0;
+
     height: 100%;
+
     width: 130px;
+
     overflow: hidden;
+
     z-index: 0;
   }
+
   /* FIX: The red circle is now a pseudo-element, which is more reliable than an empty div */
+
   .header-shape-clipper::before {
     content: '';
+
     position: absolute;
+
     left: -130px;
+
     top: -110px;
+
     width: 250px;
+
     height: 250px;
+
     background: #c1151b;
+
     border-radius: 125px;
   }
+
   .header-left {
     display: flex;
+
     align-items: center;
+
     gap: 32px;
+
     padding-left: 130px;
+
     position: relative;
+
     z-index: 1;
   }
+
   .circle-dropdown-container {
     position: absolute;
+
     left: 0;
+
     top: 0;
+
     z-index: 2;
   }
+
   .circle-dropdown-trigger {
     background: none;
+
     border: none;
+
     color: #fff;
+
     font-size: 22px;
+
     font-weight: bold;
+
     cursor: pointer;
+
     position: absolute;
+
     z-index: 2;
+
     width: auto;
+
     height: auto;
   }
 
   /* --- FIX: Smooth Animation & Visibility --- */
+
   .circle-dropdown-content {
     display: flex; /* Always use flex so height doesn't collapse */
+
     position: absolute;
+
     top: 75px;
+
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
     min-width: 160px;
+
     z-index: 10;
+
     flex-direction: column;
+
     background: #c1151b;
+
     border: none;
+
     border-radius: 0px 20px 20px 20px;
+
     /* Initial state for animation */
+
     opacity: 0;
+
     visibility: hidden;
+
     transform: translateY(10px);
+
     pointer-events: none; /* Prevent interaction when hidden */
+
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
   }
+
   .circle-dropdown-container:hover .circle-dropdown-content {
     opacity: 1;
+
     visibility: visible;
+
     transform: translateY(0);
+
     pointer-events: auto; /* Allow interaction when visible */
   }
+
   /* --- End of Fix --- */
 
   .circle-dropdown-content a {
     padding: 12px 20px;
+
     text-decoration: none;
+
     font-size: 15px;
+
     transition: background 0.2s;
+
     color: #fff;
   }
+
   .circle-dropdown-content a:hover {
     background: #a10f16;
   }
+
   .logo img {
     height: 56px;
+
     width: auto;
+
     display: block;
   }
+
   .logo span {
     font-size: 28px;
+
     font-weight: bold;
+
     color: #333;
   }
+
   .header-center {
     flex: 1;
+
     display: flex;
+
     justify-content: center;
+
     padding: 0 20px;
   }
+
   .search-form {
     display: flex;
+
     align-items: center;
+
     width: 100%;
+
     max-width: 600px;
   }
+
   .search-input {
     flex: 1;
+
     padding: 12px 20px;
+
     background: #f3f3f3;
+
     border: none;
+
     border-radius: 4px 0 0 4px;
+
     font-size: 16px;
+
     color: #333;
+
     outline: none;
   }
+
   .search-btn {
     background: white;
+
     border: none;
+
     border-radius: 0 4px 4px 0;
+
     font-size: 16px;
+
     color: #c1151b;
+
     font-weight: 600;
+
     padding: 12px 24px;
+
     cursor: pointer;
+
     margin-left: -4px;
+
     transition: background 0.2s, color 0.2s;
   }
+
   .search-btn:hover {
     background: #eaeaea;
+
     color: #a10f16;
   }
+
   .header-right {
     display: flex;
+
     align-items: center;
+
     gap: 16px;
+
     padding-right: 20px;
   }
+
   .header-btn {
     position: relative;
+
     padding: 10px 22px;
+
     border-radius: 4px;
+
     background: none;
+
     color: black;
+
     font-weight: 500;
+
     text-decoration: none;
+
     font-size: 16px;
+
     transition: background 0.2s, color 0.2s;
+
     cursor: pointer;
+
     display: flex;
+
     align-items: center;
   }
+
   .header-btn:hover,
   .header-btn:focus {
     background: #c1151b;
+
     color: #fff;
   }
+
   .red-btn {
     background: #c1151b;
+
     color: #fff;
+
     border: 1px solid #c1151b;
   }
+
   .dropdown-link {
     color: inherit;
+
     text-decoration: none;
+
     cursor: pointer;
+
     font-size: 16px;
+
     font-weight: 900;
+
     background: none;
+
     border: none;
+
     padding: 0;
+
     display: flex;
+
     align-items: center;
+
     text-wrap: nowrap;
   }
+
   .dropdown-content {
     display: none;
+
     position: absolute;
+
     top: 48px;
+
     left: 0;
+
     background: #fff;
+
     border: 1px solid #eee;
+
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
     min-width: 140px;
+
     z-index: 10;
+
     flex-direction: column;
   }
+
   .dropdown:hover .dropdown-content,
   .dropdown-link:focus + .dropdown-content {
     display: flex;
   }
+
   .dropdown-content a {
     padding: 10px 16px;
+
     text-decoration: none;
+
     color: #333;
+
     font-size: 15px;
+
     transition: background 0.2s;
   }
+
   .dropdown-content a:hover {
     background: #f5f5f5;
   }
+
   .cart-btn {
     display: flex;
+
     align-items: center;
+
     position: relative;
+
     background: #fff;
+
     color: #c1151b;
+
     padding: 10px 22px;
+
     border-radius: 4px;
+
     transition: background 0.2s, color 0.2s;
   }
+
   .cart-btn:hover {
     background: #c1151b;
+
     color: #fff;
   }
+
   .svg-wrapper {
     width: 24px;
+
     height: 24px;
+
     display: inline-block;
+
     margin-right: 8px;
   }
+
   .cart-count-bubble {
     position: absolute;
+
     top: -8px;
+
     right: -8px;
+
     background: #c1151b;
+
     color: #fff;
+
     border-radius: 50%;
+
     width: 20px;
+
     height: 20px;
+
     font-size: 13px;
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     font-weight: bold;
+
     border: 2px solid #fff;
   }
+
   .mobile-nav-toggle,
   .mobile-nav-panel,
   .mobile-nav-overlay {
     display: none;
   }
+
   body.mobile-menu-open .mobile-nav-panel {
     right: 0;
   }
+
   body.mobile-menu-open .mobile-nav-overlay {
     display: block;
   }
@@ -348,103 +552,167 @@
     .header-left {
       padding-left: 20px;
     }
+
     .header-shape-clipper {
       display: none;
     }
+
     .header-center,
     .header-right {
       display: none;
     }
+
     .mobile-nav-toggle {
       display: block;
+
       background: none;
+
       border: none;
+
       cursor: pointer;
+
       padding: 5px;
     }
+
     .mobile-nav-panel {
       display: block;
+
       position: fixed;
+
       top: 0;
+
       right: -100%;
+
       width: 300px;
+
       height: 100%;
+
       background: #fff;
+
       z-index: 102;
+
       transition: right 0.3s ease-in-out;
+
       box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+
       overflow-y: auto;
     }
+
     .mobile-nav-close {
       display: block;
+
       position: absolute;
+
       top: 15px;
+
       right: 15px;
+
       background: none;
+
       border: none;
+
       cursor: pointer;
     }
+
     .mobile-nav-content {
       margin-top: 50px;
     }
+
     .mobile-nav-overlay {
       display: none;
+
       position: fixed;
+
       top: 0;
+
       left: 0;
+
       width: 100%;
+
       height: 100%;
+
       background: rgba(0, 0, 0, 0.5);
+
       z-index: 101;
     }
+
     .mobile-nav-content .header-center {
       display: block;
+
       padding: 0 20px 20px;
+
       border-bottom: 1px solid #eee;
     }
+
     .mobile-nav-content .search-form {
       width: 100%;
+
       margin-bottom: 0;
     }
+
     .mobile-nav-content .header-right {
       display: flex;
+
       flex-direction: column;
+
       align-items: stretch;
+
       gap: 0;
+
       padding: 0;
     }
+
     .mobile-nav-content .header-btn {
       justify-content: space-between;
+
       border-bottom: 1px solid #eee;
+
       padding: 15px 20px;
     }
+
     .mobile-nav-content .dropdown-content {
       position: static;
+
       display: none;
+
       box-shadow: none;
+
       border: none;
+
       background: #f9f9f9;
+
       padding-left: 0;
+
       margin: 10px 0 0;
     }
+
     .mobile-nav-content .dropdown-content a {
       padding: 12px 20px 12px 35px;
     }
+
     .mobile-nav-content .dropdown.is-open > .dropdown-content {
       display: flex;
     }
+
     .mobile-nav-content .red-btn {
       background: #c1151b;
+
       color: #fff;
+
       border-radius: 0;
     }
+
     .mobile-nav-content .red-btn:hover {
       background: #a10f16;
+
       color: #fff;
     }
+
     .mobile-nav-content .cart-btn {
       margin: 20px;
+
       border: 1px solid #eee;
+
       justify-content: center;
     }
   }
@@ -453,21 +721,31 @@
 {% schema %}
 {
   "name": "Custom Header",
+
   "settings": [{ "type": "image_picker", "id": "logo", "label": "Logo" }]
 }
 {% endschema %}
 
 <script>
   // This script does not need to be changed.
+
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
+
     if (!header) return;
+
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
+
     const mobileNavClose = header.querySelector('.mobile-nav-close');
+
     const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
+
     const mobileNavContent = header.querySelector('.mobile-nav-content');
+
     const centerEl = header.querySelector('.header-center');
+
     const rightEl = header.querySelector('.header-right');
+
     const BREAKPOINT = 1400;
 
     const toggleMenu = (isOpen) => {
@@ -476,28 +754,42 @@
 
     const manageNavElements = () => {
       const isMobile = window.innerWidth <= BREAKPOINT;
+
       if (isMobile) {
         if (header.contains(centerEl)) mobileNavContent.prepend(centerEl);
+
         if (header.contains(rightEl)) mobileNavContent.appendChild(rightEl);
       } else {
         if (mobileNavContent.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
+
         if (mobileNavContent.contains(rightEl)) header.insertBefore(rightEl, mobileNavToggle);
+
         toggleMenu(false);
       }
     };
+
     mobileNavToggle.addEventListener('click', () => toggleMenu(true));
+
     mobileNavClose.addEventListener('click', () => toggleMenu(false));
+
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
+
     header.addEventListener('click', (e) => {
       const isMobile = window.innerWidth <= BREAKPOINT;
+
       const dropdownLink = e.target.closest('.dropdown-link');
+
       if (isMobile && dropdownLink) {
         e.preventDefault();
+
         const parentDropdown = dropdownLink.closest('.dropdown');
+
         parentDropdown.classList.toggle('is-open');
       }
     });
+
     manageNavElements();
+
     window.addEventListener('resize', manageNavElements);
   });
 </script>
