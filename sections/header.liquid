@@ -1,5 +1,5 @@
 <header class="custom-header">
-  <div class="header-shape-clipper"><div></div></div>
+  <div class="header-shape-clipper"></div>
 
   <div class="mobile-nav-panel">
     <button type="button" class="mobile-nav-close" aria-label="Close menu">
@@ -94,7 +94,6 @@
     z-index: 100;
   }
   .header-shape-clipper {
-    display: block;
     position: absolute;
     top: 0;
     left: 0;
@@ -102,8 +101,8 @@
     width: 130px;
     overflow: hidden;
     z-index: 0;
+    pointer-events: none;
   }
-  /* FIX: The red circle is now a pseudo-element, which is more reliable than an empty div */
   .header-shape-clipper::before {
     content: '';
     position: absolute;
@@ -113,6 +112,8 @@
     height: 250px;
     background: #c1151b;
     border-radius: 125px;
+    /* Animation transition for the circle */
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   }
   .header-left {
     display: flex;
@@ -122,11 +123,16 @@
     position: relative;
     z-index: 1;
   }
+
+  /* --- FIX: Dropdown Hover Area --- */
   .circle-dropdown-container {
     position: absolute;
     left: 0;
     top: 0;
     z-index: 2;
+    /* Give the container a size to bridge the gap between button and menu */
+    width: 300px;
+    height: 300px;
   }
   .circle-dropdown-trigger {
     background: none;
@@ -136,35 +142,43 @@
     font-weight: bold;
     cursor: pointer;
     position: absolute;
+    left: 130px;
+    top: 125px;
     z-index: 2;
-    width: auto;
-    height: auto;
   }
 
-  /* --- FIX: Smooth Animation & Visibility --- */
+  /* --- FIX: Expanding Circle & Smooth Animation --- */
   .circle-dropdown-content {
-    display: flex; /* Always use flex so height doesn't collapse */
+    display: flex;
     position: absolute;
+    left: 120px;
     top: 75px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     min-width: 160px;
     z-index: 10;
     flex-direction: column;
-    background: #c1151b;
-    border: none;
+    background: transparent; /* Background is now the circle */
     border-radius: 0px 20px 20px 20px;
-    /* Initial state for animation */
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
-    pointer-events: none; /* Prevent interaction when hidden */
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    pointer-events: none;
+    transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s; /* Delay text animation slightly */
   }
-  .circle-dropdown-container:hover .circle-dropdown-content {
+
+  /* These styles are now triggered by a JS class for synchronization */
+  .custom-header.is-circle-menu-active .circle-dropdown-content {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
-    pointer-events: auto; /* Allow interaction when visible */
+    pointer-events: auto;
+  }
+  .custom-header.is-circle-menu-active .header-shape-clipper::before {
+    left: 120px;
+    top: 75px;
+    width: 160px;
+    height: 120px;
+    border-radius: 0px 20px 20px 20px;
   }
   /* --- End of Fix --- */
 
@@ -176,7 +190,7 @@
     color: #fff;
   }
   .circle-dropdown-content a:hover {
-    background: #a10f16;
+    background: rgba(0, 0, 0, 0.1);
   }
   .logo img {
     height: 56px;
@@ -351,6 +365,9 @@
     .header-shape-clipper {
       display: none;
     }
+    .circle-dropdown-container {
+      display: none;
+    }
     .header-center,
     .header-right {
       display: none;
@@ -451,17 +468,26 @@
 </style>
 
 {% schema %}
-{
-  "name": "Custom Header",
-  "settings": [{ "type": "image_picker", "id": "logo", "label": "Logo" }]
-}
+{ "name": "Custom Header", "settings": [{ "type": "image_picker", "id": "logo", "label": "Logo" }] }
 {% endschema %}
 
 <script>
-  // This script does not need to be changed.
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
     if (!header) return;
+
+    // --- Circle Menu Animation Logic ---
+    const circleDropdownContainer = header.querySelector('.circle-dropdown-container');
+    if (circleDropdownContainer) {
+      circleDropdownContainer.addEventListener('mouseenter', () => {
+        header.classList.add('is-circle-menu-active');
+      });
+      circleDropdownContainer.addEventListener('mouseleave', () => {
+        header.classList.remove('is-circle-menu-active');
+      });
+    }
+
+    // --- Mobile Menu Logic ---
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
     const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
@@ -469,11 +495,9 @@
     const centerEl = header.querySelector('.header-center');
     const rightEl = header.querySelector('.header-right');
     const BREAKPOINT = 1400;
-
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
     };
-
     const manageNavElements = () => {
       const isMobile = window.innerWidth <= BREAKPOINT;
       if (isMobile) {
