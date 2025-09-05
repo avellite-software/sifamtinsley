@@ -1,0 +1,169 @@
+{% comment %}
+  Section: Why Us
+  - A three-column layout featuring two content boxes and a large number highlight.
+  - Uses Flexbox to stack responsively on smaller screens.
+  - All content is editable via section settings and blocks.
+{% endcomment %}
+
+<style>
+  .why-us-section-container {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .why-us-main-heading {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin: 0 0 40px;
+  }
+
+  .why-us-flex-wrapper {
+    display: flex;
+    gap: 30px;
+    align-items: stretch; /* Makes columns equal height */
+  }
+
+  /* Shared styles for all three columns */
+  .why-us-box,
+  .why-us-number-column {
+    flex: 1; /* Each column takes up equal space */
+    min-width: 280px; /* Prevents columns from getting too squished */
+  }
+
+  /* Styles for the two boxes with shadows */
+  .why-us-box {
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+  }
+
+  .why-us-box .rte {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #1c1c1c;
+  }
+  .why-us-box .rte p {
+    margin: 0;
+  }
+
+  /* Styles for the third column (no box) */
+  .why-us-number-column {
+    padding: 40px; /* Add padding to align text with the boxes */
+  }
+
+  .why-us-number-column .number-highlight {
+    font-size: 120px;
+    font-weight: 800;
+    line-height: 1;
+    color: #1c1c1c;
+    margin: 0 0 10px;
+  }
+
+  .why-us-number-column .number-text .rte {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555;
+  }
+  .why-us-number-column .number-text .rte p {
+    margin: 0;
+  }
+
+  /* Responsive stacking for smaller screens */
+  @media (max-width: 990px) {
+    .why-us-flex-wrapper {
+      flex-direction: column; /* Stacks the columns vertically */
+      align-items: stretch; /* Makes columns full width */
+      gap: 30px;
+    }
+    .why-us-number-column {
+      padding: 20px; /* Reduce padding on mobile */
+    }
+  }
+</style>
+
+<div class="why-us-section-container">
+  {% if section.settings.main_heading != blank %}
+    <h2 class="why-us-main-heading">{{ section.settings.main_heading | escape }}</h2>
+  {% endif %}
+
+  <div class="why-us-flex-wrapper">
+    {%- for block in section.blocks -%}
+      <div {{ block.shopify_attributes }}>
+        {%- case block.type -%}
+          {%- when 'feature_box' -%}
+            <div class="why-us-box">
+              <div class="rte">{{ block.settings.content }}</div>
+            </div>
+
+          {%- when 'large_number' -%}
+            <div class="why-us-number-column">
+              <div class="number-highlight">{{ block.settings.number | escape }}</div>
+              <div class="number-text">
+                <div class="rte">{{ block.settings.text }}</div>
+              </div>
+            </div>
+        {%- endcase -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Why Us",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Main Heading",
+      "default": "Why Sifam Tinsley"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature_box",
+      "name": "Feature Box",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p><strong>A Global Presence</strong> and Trusted Clients</p>"
+        }
+      ]
+    },
+    {
+      "type": "large_number",
+      "name": "Large Number Column",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Large Number",
+          "default": "75"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p><strong>years</strong> of industry presence and experience an unrivalled pedigree in the industry.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Why Us",
+      "blocks": [{ "type": "feature_box" }, { "type": "feature_box" }, { "type": "large_number" }]
+    }
+  ]
+}
+{% endschema %}
