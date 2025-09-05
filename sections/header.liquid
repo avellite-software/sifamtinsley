@@ -92,20 +92,23 @@
     font-family: inherit;
     position: relative;
     z-index: 100;
+    /* FIX: Explicitly remove any rogue borders or outlines */
+    outline: none;
+    border-bottom: 1px solid #eee;
   }
-
-  /* --- FIX: Overflow is now managed dynamically --- */
   .header-shape-clipper {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
     width: 250px;
+    overflow: hidden;
     z-index: 0;
     pointer-events: none;
-    /* 1. By default, the overflow is hidden to clip the circle */
-    overflow: hidden;
   }
+
+  /* --- FIX: New Two-Layer Animation Logic --- */
+  /* 1. This is the STATIC circle that always stays behind "Our Brands" */
   .header-shape-clipper::before {
     content: '';
     position: absolute;
@@ -115,7 +118,21 @@
     height: 250px;
     background: #c1151b;
     border-radius: 125px;
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  /* 2. This is a NEW, hidden rectangle that EXPANDS to become the menu background */
+  .header-shape-clipper::after {
+    content: '';
+    position: absolute;
+    background: #c1151b;
+    left: 20px;
+    top: 96px;
+    width: 200px;
+    height: 130px;
+    border-radius: 12px;
+    transform: scale(0.2);
+    transform-origin: 35px -65px; /* Sets the expansion origin point */
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .header-left {
     display: flex;
@@ -149,7 +166,7 @@
     display: flex;
     position: absolute;
     left: 20px;
-    top: 106px;
+    top: 96px;
     min-width: 200px;
     z-index: 10;
     flex-direction: column;
@@ -159,26 +176,20 @@
     visibility: hidden;
     transform: translateY(10px);
     pointer-events: none;
-    transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s, visibility 0s linear 0.4s;
+    transition: opacity 0.3s ease 0.15s, transform 0.3s ease 0.15s, visibility 0s linear 0.5s;
   }
 
-  /* 2. When the menu is active, overflow becomes visible, allowing the dropdown to appear */
-  .custom-header.is-circle-menu-active .header-shape-clipper {
-    overflow: visible;
+  /* On click, the hidden rectangle expands and the text fades in */
+  .custom-header.is-circle-menu-active .header-shape-clipper::after {
+    transform: scale(1);
+    opacity: 1;
   }
   .custom-header.is-circle-menu-active .circle-dropdown-content {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
     pointer-events: auto;
-    transition-delay: 0s;
-  }
-  .custom-header.is-circle-menu-active .header-shape-clipper::before {
-    left: 20px;
-    top: 106px;
-    width: 200px;
-    height: 130px;
-    border-radius: 12px;
+    transition-delay: 0.1s;
   }
   /* --- End of Fix --- */
 
