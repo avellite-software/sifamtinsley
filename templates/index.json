@@ -22,15 +22,46 @@
         "show_text_below": false
       }
     },
-    "text_with_box": {
-      "type": "text-with-box",
+    "presenter_text_and_box_jFHKEL": {
+      "type": "presenter-text-and-box",
+      "name": "Text with Box",
       "settings": {
-        "main_text": "<p>Use this space to talk about your brand, your products, or any announcements. You can share details about your company history, your mission, or what makes your products unique.</p><p>This content is fully editable in the theme customizer, allowing you to update it anytime.</p>",
+        "main_text": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec ex quam. Etiam non commodo magna. In egestas nisi at dignissim ultricies. Morbi vehicula eu arcu ut finibus.</p><p>Suspendisse nulla mauris, tempor eget vulputate at, egestas ac elit. Aenean enim mi, tristique sed sollicitudin eget, venenatis a metus.</p>",
         "box_heading": "Sales & Support",
         "box_subheading": "A dedicated support team to support new purchases, technical queries, troubleshooting, and delivery information.",
         "box_phone": "Call 01376 335271",
         "button_label": "Email Support",
-        "button_link": "mailto:sales@example.com"
+        "button_link": ""
+      }
+    },
+    "rich_text": {
+      "type": "rich-text",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "Talk about your brand",
+            "heading_size": "h1"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text"
+      ],
+      "settings": {
+        "desktop_content_position": "center",
+        "content_alignment": "center",
+        "color_scheme": "scheme-1",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 0
       }
     },
     "featured_collection": {
@@ -170,6 +201,7 @@
   },
   "order": [
     "image_banner",
+    "presenter_text_and_box_jFHKEL",
     "rich_text",
     "featured_collection",
     "collage",
