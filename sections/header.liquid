@@ -1,7 +1,5 @@
 <header class="custom-header">
-  <div class="header-shape-clipper">
-    <div class="large-red-ellipse"></div>
-  </div>
+  <div class="header-shape-clipper"></div>
 
   <div class="mobile-nav-panel">
     <button type="button" class="mobile-nav-close" aria-label="Close menu">
@@ -104,15 +102,9 @@
     overflow: hidden;
     z-index: 0;
   }
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    padding-left: 130px;
-    position: relative;
-    z-index: 1;
-  }
-  .large-red-ellipse {
+  /* FIX: The red circle is now a pseudo-element, which is more reliable than an empty div */
+  .header-shape-clipper::before {
+    content: '';
     position: absolute;
     left: -130px;
     top: -110px;
@@ -120,6 +112,14 @@
     height: 250px;
     background: #c1151b;
     border-radius: 125px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding-left: 130px;
+    position: relative;
+    z-index: 1;
   }
   .circle-dropdown-container {
     position: absolute;
@@ -142,11 +142,12 @@
     height: auto;
   }
 
-  /* --- FIX: Dropdown Animation & Visibility --- */
+  /* --- FIX: Smooth Animation & Visibility --- */
   .circle-dropdown-content {
+    display: flex; /* Always use flex so height doesn't collapse */
     position: absolute;
     left: 120px;
-    top: 210px; /* Kept your positioning */
+    top: 210px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     min-width: 160px;
     z-index: 10;
@@ -154,18 +155,18 @@
     background: #c1151b;
     border: none;
     border-radius: 20px;
-    /* 1. Initial state for animation */
+    /* Initial state for animation */
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
+    pointer-events: none; /* Prevent interaction when hidden */
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
   }
-  /* 2. Updated hover logic to trigger visibility and animation */
   .circle-dropdown-container:hover .circle-dropdown-content {
-    display: flex;
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: auto; /* Allow interaction when visible */
   }
   /* --- End of Fix --- */
 
