@@ -1,16 +1,9 @@
-{% comment %}
-  A simplified version of the Image Banner.
-  - "Buttons" block has been removed from the schema and liquid.
-  - Custom CSS has been added for a rounded bottom-right corner.
-{% endcomment %}
-
 {{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
 
 <style>
-  /* Custom styles for the presenter banner */
   #Banner-{{ section.id }} {
-    border-bottom-right-radius: 30px;
-    overflow: hidden; /* Ensures the image inside respects the rounded corner */
+    border-bottom-right-radius: 50px;
+    overflow: hidden;
   }
 </style>
 
