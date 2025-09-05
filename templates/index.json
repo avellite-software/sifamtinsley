@@ -22,34 +22,15 @@
         "show_text_below": false
       }
     },
-    "rich_text": {
-      "type": "rich-text",
-      "blocks": {
-        "heading": {
-          "type": "heading",
-          "settings": {
-            "heading": "Talk about your brand",
-            "heading_size": "h1"
-          }
-        },
-        "text": {
-          "type": "text",
-          "settings": {
-            "text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
-          }
-        }
-      },
-      "block_order": [
-        "heading",
-        "text"
-      ],
+    "text_with_box": {
+      "type": "text-with-box",
       "settings": {
-        "desktop_content_position": "center",
-        "content_alignment": "center",
-        "color_scheme": "scheme-1",
-        "full_width": true,
-        "padding_top": 40,
-        "padding_bottom": 0
+        "main_text": "<p>Use this space to talk about your brand, your products, or any announcements. You can share details about your company history, your mission, or what makes your products unique.</p><p>This content is fully editable in the theme customizer, allowing you to update it anytime.</p>",
+        "box_heading": "Sales & Support",
+        "box_subheading": "A dedicated support team to support new purchases, technical queries, troubleshooting, and delivery information.",
+        "box_phone": "Call 01376 335271",
+        "button_label": "Email Support",
+        "button_link": "mailto:sales@example.com"
       }
     },
     "featured_collection": {
