@@ -1,6 +1,6 @@
 <header class="custom-header">
-  <div class="header-shape-clipper--default"></div>
-  <div class="header-shape-clipper--animated"></div>
+  <div class="header-shape-clipper--default"><div></div></div>
+  <div class="header-shape-clipper--animated"><div></div></div>
 
   <div class="mobile-nav-panel">
     <button type="button" class="mobile-nav-close" aria-label="Close menu">
@@ -125,7 +125,6 @@
 
   /* 2. The animated container is HIDDEN and NEVER CLIPS */
   .header-shape-clipper--animated {
-    visibility: hidden;
     overflow: visible;
     transition: visibility 0s linear 0.5s; /* Show instantly on hover */
   }
@@ -143,9 +142,6 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .custom-header.is-circle-menu-active .header-shape-clipper--animated {
-    visibility: visible;
-  }
   .custom-header.is-circle-menu-active .header-shape-clipper--animated::before {
     transform: scale(1);
     opacity: 1;
