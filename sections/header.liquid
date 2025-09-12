@@ -98,8 +98,7 @@
   }
 
   /* --- Two-Container Clipping Solution --- */
-  .header-shape-clipper--default,
-  .header-shape-clipper--animated {
+  .header-shape-clipper--default {
     position: absolute;
     top: 0;
     left: 0;
@@ -128,7 +127,13 @@
   .header-shape-clipper--animated {
     overflow: visible;
     visibility: hidden;
-    transition: visibility 0s linear 0.5s;
+    position: absolute;
+    top: 0;
+    left: -20px;
+    height: 100%;
+    width: 250px;
+    z-index: 0;
+    pointer-events: none;
   }
   .header-shape-clipper--animated::before {
     content: '';
@@ -138,7 +143,7 @@
     top: 96px;
     width: 200px;
     height: 130px;
-    border-radius: 12px;
+    border-radius: 0px 0px 12px 0px;
     transform: scale(0.2);
     transform-origin: 35px -65px;
     opacity: 0;
@@ -185,7 +190,6 @@
   .circle-dropdown-content {
     display: flex;
     position: absolute;
-    left: 20px;
     top: 96px;
     min-width: 200px;
     z-index: 10;
