@@ -1,7 +1,14 @@
 <header class="custom-header">
   <div class="header-shape-clipper--default"><div></div></div>
 
-  <div class="header-shape-clipper--animated"><div></div></div>
+  {%- liquid
+    assign link_height_in_px = 45
+    assign number_of_links = section.settings.brands_menu.links.size
+    assign calculated_height = number_of_links | times: link_height_in_px
+  -%}
+  <div class="header-shape-clipper--animated" style="--menu-height: {{ calculated_height }}px;">
+    <div></div>
+  </div>
 
   <div class="mobile-nav-panel">
     <button type="button" class="mobile-nav-close" aria-label="Close menu">
@@ -163,7 +170,7 @@
     left: 20px;
     top: 96px;
     width: 200px;
-    height: 130px;
+    height: var(--menu-height, 130px);
     border-radius: 0px 0px 12px 0px;
     transform: scale(0.2);
     transform-origin: 35px -65px;
@@ -240,6 +247,7 @@
     text-decoration: none;
     font-size: 15px;
     transition: background 0.2s;
+    line-height: 1.4;
     color: #fff;
   }
 
