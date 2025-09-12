@@ -22,7 +22,7 @@
       "settings": {
         "logo": "shopify://shop_images/sifam_tinsley_logo_large_5201674e-3f75-407a-858d-e88e686c568c.png",
         "brands_menu": "brand-menu",
-        "main_menu": "",
+        "main_menu": "main-menu",
         "contact_button_text": "Contact Us",
         "contact_button_link": "shopify://pages/contact"
       }
