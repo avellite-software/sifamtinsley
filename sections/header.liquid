@@ -3,8 +3,9 @@
 
   {%- liquid
     assign link_height_in_px = 45
+    assign extra_padding_in_px = 40
     assign number_of_links = section.settings.brands_menu.links.size
-    assign calculated_height = number_of_links | times: link_height_in_px
+    assign calculated_height = number_of_links | times: link_height_in_px | plus: extra_padding_in_px
   -%}
   <div class="header-shape-clipper--animated" style="--menu-height: {{ calculated_height }}px;">
     <div></div>
