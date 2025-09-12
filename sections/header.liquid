@@ -40,22 +40,13 @@
   </div>
 
   <div class="header-right">
+    {%- comment -%}
+      Loop for the main navigation links (About, Products, etc.)
+    {%- endcomment -%}
     {%- for link in section.settings.main_menu.links -%}
-      {%- liquid
-        assign has_dropdown = false
-        if link.links != empty
-          assign has_dropdown = true
-        endif
-
-        assign btn_class = 'header-btn'
-        if forloop.last
-          assign btn_class = 'header-btn red-btn'
-        endif
-      -%}
-
-      <div class="dropdown {{ btn_class }}">
+      <div class="dropdown header-btn">
         <a href="{{ link.url }}" class="dropdown-link">{{ link.title }}</a>
-        {%- if has_dropdown -%}
+        {%- if link.links != empty -%}
           <div class="dropdown-content">
             {%- for child_link in link.links -%}
               <a href="{{ child_link.url }}">{{ child_link.title }}</a>
@@ -65,6 +56,18 @@
       </div>
     {%- endfor -%}
 
+    {%- comment -%}
+      Dedicated 'Contact Us' button (now a simple link)
+    {%- endcomment -%}
+    {%- if section.settings.contact_button_link != blank and section.settings.contact_button_text != blank -%}
+      <a href="{{ section.settings.contact_button_link }}" class="header-btn red-btn">
+        {{ section.settings.contact_button_text }}
+      </a>
+    {%- endif -%}
+
+    {%- comment -%}
+      Cart button
+    {%- endcomment -%}
     <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
       {% if cart == empty -%}
         <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
@@ -152,7 +155,6 @@
     left: 20px;
     top: 96px;
     width: 200px;
-    height: 130px;
     border-radius: 0px 0px 12px 0px;
     transform: scale(0.2);
     transform-origin: 35px -65px;
@@ -160,7 +162,6 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: 0s;
   }
-
 
   .custom-header.is-circle-menu-active .header-shape-clipper--animated {
     visibility: visible;
@@ -536,11 +537,24 @@
     if (circleDropdownContainer) {
       const circleTrigger = circleDropdownContainer.querySelector('.circle-dropdown-trigger');
 
+      // --- GRAB THE ELEMENTS NEEDED FOR DYNAMIC HEIGHT ---
+      const animatedClipper = header.querySelector('.header-shape-clipper--animated');
+      const circleDropdownContent = header.querySelector('.circle-dropdown-content');
+
       circleTrigger.addEventListener('click', (event) => {
         // Stop the click from bubbling up to the document and immediately closing the menu
         event.stopPropagation();
         // Toggle the active class on the header
         header.classList.toggle('is-circle-menu-active');
+
+        // --- NEW: LOGIC TO SET DYNAMIC HEIGHT ---
+        // If the menu is now open, calculate its height
+        if (header.classList.contains('is-circle-menu-active')) {
+          // Get the height of the content div
+          const menuHeight = circleDropdownContent.offsetHeight;
+          // Set the CSS variable on the animated element
+          animatedClipper.style.setProperty('--menu-height', menuHeight + 'px');
+        }
       });
     }
     // Listener to close the menu when clicking anywhere else on the page
