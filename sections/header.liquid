@@ -47,46 +47,46 @@
   </div>
 
   <div class="header-right">
-    <div class="dropdown header-btn">
-      <a href="#" class="dropdown-link">About</a>
+    {%- comment -%}
+      Loop for the main navigation links (About, Products, etc.)
+    {%- endcomment -%}
+    {%- for link in section.settings.main_menu.links -%}
+      <div class="dropdown header-btn">
+        <a href="{{ link.url }}" class="dropdown-link">{{ link.title }}</a>
+        {%- if link.links != empty -%}
+          <div class="dropdown-content">
+            {%- for child_link in link.links -%}
+              <a href="{{ child_link.url }}">{{ child_link.title }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
 
-      <div class="dropdown-content"><a href="#">About Us</a><a href="#">Our Story</a></div>
-    </div>
+    {%- comment -%}
+      Dedicated 'Contact Us' button (now a simple link)
+    {%- endcomment -%}
+    {%- if section.settings.contact_button_link != blank and section.settings.contact_button_text != blank -%}
+      <a href="{{ section.settings.contact_button_link }}" class="header-btn red-btn">
+        {{ section.settings.contact_button_text }}
+      </a>
+    {%- endif -%}
 
-    <div class="dropdown header-btn">
-      <a href="#" class="dropdown-link">Products</a>
-
-      <div class="dropdown-content"><a href="#">All Products</a><a href="#">New Arrivals</a></div>
-    </div>
-
-    <div class="dropdown header-btn">
-      <a href="#" class="dropdown-link">Resources</a>
-
-      <div class="dropdown-content"><a href="#">Resource Center</a><a href="#">Blog</a></div>
-    </div>
-
-    <div class="dropdown header-btn red-btn">
-      <a href="#" class="dropdown-link">Contact Us</a>
-
-      <div class="dropdown-content"><a href="#">Contact Form</a><a href="#">Email Us</a></div>
-    </div>
-
+    {%- comment -%}
+      Cart button
+    {%- endcomment -%}
     <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
       {% if cart == empty -%}
         <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
-
       {%- else -%}
         <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
       {%- endif %}
-
       <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-
       {%- if cart != empty -%}
         <div class="cart-count-bubble">
           {%- if cart.item_count < 100 -%}
             <span aria-hidden="true">{{ cart.item_count }}</span>
           {%- endif -%}
-
           <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
         </div>
       {%- endif -%}
@@ -558,7 +558,39 @@
 </style>
 
 {% schema %}
-{ "name": "Custom Header", "settings": [{ "type": "image_picker", "id": "logo", "label": "Logo" }] }
+{
+  "name": "Custom Header",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "link_list",
+      "id": "brands_menu",
+      "label": "Brands Menu",
+      "info": "Select the menu for the 'Our Brands' dropdown."
+    },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main Menu",
+      "info": "Select the main navigation menu for the header."
+    },
+    {
+      "type": "text",
+      "id": "contact_button_text",
+      "label": "Contact Button Text",
+      "default": "Contact Us"
+    },
+    {
+      "type": "url",
+      "id": "contact_button_link",
+      "label": "Contact Button Link"
+    }
+  ]
+}
 {% endschema %}
 
 <script>
