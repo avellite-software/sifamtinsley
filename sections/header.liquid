@@ -95,7 +95,6 @@
     z-index: 100;
     /* FIX: Explicitly remove any rogue borders or outlines */
     outline: none !important;
-    border-bottom: 1px solid #eee;
   }
 
   /* --- Two-Container Clipping Solution --- */
@@ -144,6 +143,7 @@
     transform-origin: 35px -65px;
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: 0s;
   }
 
 
@@ -153,6 +153,7 @@
   .custom-header.is-circle-menu-active .header-shape-clipper--animated::before {
     transform: scale(1);
     opacity: 1;
+    transition-delay: 0s;
   }
 
   .header-left {
@@ -195,7 +196,7 @@
     visibility: hidden;
     transform: translateY(10px);
     pointer-events: none;
-    transition: opacity 0.3s ease 0.15s, transform 0.3s ease 0.15s, visibility 0s linear 0.5s;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.5s;
   }
   .custom-header.is-circle-menu-active .circle-dropdown-content {
     opacity: 1;
