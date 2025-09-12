@@ -596,48 +596,24 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
-    if (!header) return;
-
-    // --- Circle Dropdown Logic ---
+    if (!header) return; // --- FIX: New Click-to-Open and Click-Away Logic ---
     const circleDropdownContainer = header.querySelector('.circle-dropdown-container');
     if (circleDropdownContainer) {
       const circleTrigger = circleDropdownContainer.querySelector('.circle-dropdown-trigger');
-
-      // --- Grab elements for dynamic height ---
-      const animatedClipper = header.querySelector('.header-shape-clipper--animated');
-      const circleDropdownContent = header.querySelector('.circle-dropdown-content');
-
       circleTrigger.addEventListener('click', (event) => {
-        // Stop the click from bubbling up to the document
-        event.stopPropagation();
-
-        // Toggle the active class on the header
+        // Stop the click from bubbling up to the document and immediately closing the menu
+        event.stopPropagation(); // Toggle the active class on the header
         header.classList.toggle('is-circle-menu-active');
-
-        // --- NEW: Calculate and set dynamic height ---
-        // If the menu is now open, calculate its height
-        if (header.classList.contains('is-circle-menu-active')) {
-          // Get the height of the content div (this works because it's now visible)
-          const menuHeight = circleDropdownContent.offsetHeight;
-
-          // Set the CSS variable on the animated element's container
-          animatedClipper.style.setProperty('--menu-height', `${menuHeight}px`);
-        }
       });
-    }
+    } // Listener to close the menu when clicking anywhere else on the page
 
-    // Listener to close the menu when clicking anywhere else
     document.addEventListener('click', (event) => {
-      if (
-        circleDropdownContainer &&
-        !circleDropdownContainer.contains(event.target) &&
-        header.classList.contains('is-circle-menu-active')
-      ) {
+      // If the click is outside the dropdown container and the menu is active, close it.
+      if (!circleDropdownContainer.contains(event.target) && header.classList.contains('is-circle-menu-active')) {
         header.classList.remove('is-circle-menu-active');
       }
-    });
+    }); // --- Mobile Menu Logic (No changes needed here) ---
 
-    // --- Mobile Menu Logic ---
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
     const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
@@ -645,11 +621,9 @@
     const centerEl = header.querySelector('.header-center');
     const rightEl = header.querySelector('.header-right');
     const BREAKPOINT = 1400;
-
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
     };
-
     const manageNavElements = () => {
       const isMobile = window.innerWidth <= BREAKPOINT;
       if (isMobile) {
@@ -665,7 +639,6 @@
     mobileNavToggle.addEventListener('click', () => toggleMenu(true));
     mobileNavClose.addEventListener('click', () => toggleMenu(false));
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
-
     header.addEventListener('click', (e) => {
       const isMobile = window.innerWidth <= BREAKPOINT;
       const dropdownLink = e.target.closest('.dropdown-link');
@@ -677,6 +650,7 @@
     });
 
     manageNavElements();
+
     window.addEventListener('resize', manageNavElements);
   });
 </script>
