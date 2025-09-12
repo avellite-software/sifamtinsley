@@ -29,9 +29,9 @@
       </button>
 
       <div class="circle-dropdown-content">
-        <a href="#">Dropdown Link 1</a>
-
-        <a href="#">Dropdown Link 2</a>
+        {%- for link in section.settings.brands_menu.links -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endfor -%}
       </div>
     </div>
 
