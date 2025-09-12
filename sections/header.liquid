@@ -541,42 +541,23 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
-    if (!header) return;
-
-    // --- FIX: New Click-to-Open and Click-Away Logic ---
+    if (!header) return; // --- FIX: New Click-to-Open and Click-Away Logic ---
     const circleDropdownContainer = header.querySelector('.circle-dropdown-container');
     if (circleDropdownContainer) {
       const circleTrigger = circleDropdownContainer.querySelector('.circle-dropdown-trigger');
-
-      // --- GRAB THE ELEMENTS NEEDED FOR DYNAMIC HEIGHT ---
-      const animatedClipper = header.querySelector('.header-shape-clipper--animated');
-      const circleDropdownContent = header.querySelector('.circle-dropdown-content');
-
       circleTrigger.addEventListener('click', (event) => {
         // Stop the click from bubbling up to the document and immediately closing the menu
-        event.stopPropagation();
-        // Toggle the active class on the header
+        event.stopPropagation(); // Toggle the active class on the header
         header.classList.toggle('is-circle-menu-active');
-
-        // --- NEW: LOGIC TO SET DYNAMIC HEIGHT ---
-        // If the menu is now open, calculate its height
-        if (header.classList.contains('is-circle-menu-active')) {
-          // Get the height of the content div
-          const menuHeight = circleDropdownContent.offsetHeight;
-          // Set the CSS variable on the animated element
-          animatedClipper.style.setProperty('--menu-height', menuHeight + 'px');
-        }
       });
-    }
-    // Listener to close the menu when clicking anywhere else on the page
+    } // Listener to close the menu when clicking anywhere else on the page
     document.addEventListener('click', (event) => {
       // If the click is outside the dropdown container and the menu is active, close it.
       if (!circleDropdownContainer.contains(event.target) && header.classList.contains('is-circle-menu-active')) {
         header.classList.remove('is-circle-menu-active');
       }
-    });
+    }); // --- Mobile Menu Logic (No changes needed here) ---
 
-    // --- Mobile Menu Logic (No changes needed here) ---
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
     const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
@@ -606,7 +587,9 @@
       const dropdownLink = e.target.closest('.dropdown-link');
       if (isMobile && dropdownLink) {
         e.preventDefault();
+
         const parentDropdown = dropdownLink.closest('.dropdown');
+
         parentDropdown.classList.toggle('is-open');
       }
     });
