@@ -172,6 +172,17 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "news_scroller_Petjzp": {
+      "type": "news-scroller",
+      "name": "News Scroller",
+      "settings": {
+        "heading": "Latest News",
+        "blog": "news",
+        "posts_to_show": 5,
+        "show_date": true,
+        "show_author": false
+      }
     }
   },
   "order": [
@@ -180,6 +191,7 @@
     "why_us_kQQ9H4",
     "collage",
     "video",
-    "multicolumn"
+    "multicolumn",
+    "news_scroller_Petjzp"
   ]
 }
