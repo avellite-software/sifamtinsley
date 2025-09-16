@@ -2,7 +2,7 @@
   Section: News Scroller
   - Displays a full-width, horizontal scrolling list of blog posts.
   - Cards are automatically populated from a selected blog.
-  - Uses CSS scroll-snap for a smooth, native scrolling experience.
+  - NEW: Includes an optional JavaScript-powered auto-scroll feature.
 {% endcomment %}
 
 <style>
@@ -28,6 +28,8 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding: 20px;
+    /* Add smooth scrolling behavior for the JS to use */
+    scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -109,13 +111,11 @@
     {% endif %}
   </div>
 
-  <div class="news-scroller-container">
+  <div class="news-scroller-container" data-section-id="{{ section.id }}">
     {%- liquid
       assign blog = blogs[section.settings.blog]
     -%}
-
-    {% # Then use that simple variable in the loop # %}
-    {%- for article in blog.articles %}
+    {%- for article in blog.articles -%}
       <a href="{{ article.url }}" class="news-card">
         {%- if article.image -%}
           {{
@@ -126,7 +126,6 @@
         {%- else -%}
           {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
         {%- endif -%}
-
         <div class="news-card-content">
           <div class="news-card-meta">
             {%- if section.settings.show_date -%}
@@ -138,9 +137,7 @@
             {%- endif -%}
           </div>
           <h3 class="news-card-title">{{ article.title }}</h3>
-          <p class="news-card-excerpt">
-            {{ article.excerpt_or_content | strip_html | truncate: 120 }}
-          </p>
+          <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
           <span class="news-card-read-more">Read More &rarr;</span>
         </div>
       </a>
@@ -197,6 +194,26 @@
       "id": "show_author",
       "label": "Show author",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Auto-scroll Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoscroll",
+      "label": "Enable auto-scroll",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoscroll_speed",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Autoscroll speed",
+      "default": 5
     }
   ],
   "presets": [
@@ -206,3 +223,55 @@
   ]
 }
 {% endschema %}
+
+{% if section.settings.autoscroll %}
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
+  if (!scroller) return;
+
+  const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
+  let scrollerIntervalId;
+
+  const scrollNext = () => {
+    const firstCard = scroller.querySelector('.news-card');
+    if (!firstCard) return;
+
+    // Calculate the distance to scroll (width of one card + gap)
+    const scrollAmount = firstCard.offsetWidth + parseInt(window.getComputedStyle(scroller).gap);
+    
+    // Check if we are near the end of the scroll
+    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
+
+    if (isAtEnd) {
+      // If at the end, smoothly scroll back to the start
+      scroller.scrollTo({ left: 0 });
+    } else {
+      // Otherwise, scroll by one card width
+      scroller.scrollLeft += scrollAmount;
+    }
+  };
+
+  const startScrolling = () => {
+    // Clear any existing interval before starting a new one
+    clearInterval(scrollerIntervalId);
+    scrollerIntervalId = setInterval(scrollNext, scrollInterval);
+  };
+
+  const stopScrolling = () => {
+    clearInterval(scrollerIntervalId);
+  };
+
+  // Start the scroller
+  startScrolling();
+
+  // Pause on hover
+  scroller.addEventListener('mouseenter', stopScrolling);
+  // Resume on mouse leave
+  scroller.addEventListener('mouseleave', startScrolling);
+  // Also pause when the user is trying to manually scroll
+  scroller.addEventListener('wheel', stopScrolling, { passive: true });
+  scroller.addEventListener('touchstart', stopScrolling, { passive: true });
+});
+  </script>
+{% endif %}
