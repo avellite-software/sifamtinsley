@@ -1,0 +1,205 @@
+{% comment %}
+  Section: News Scroller
+  - Displays a full-width, horizontal scrolling list of blog posts.
+  - Cards are automatically populated from a selected blog.
+  - Uses CSS scroll-snap for a smooth, native scrolling experience.
+{% endcomment %}
+
+<style>
+  .news-scroller-section {
+    padding: 60px 0;
+    background-color: #f9f9f9;
+  }
+  .news-scroller-header {
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+    padding: 0 20px;
+  }
+  .news-scroller-heading {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1c1c1c;
+    margin: 0;
+    font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
+  }
+  .news-scroller-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 20px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .news-scroller-container::-webkit-scrollbar {
+    display: none;
+  }
+  .news-card {
+    flex: 0 0 320px;
+    scroll-snap-align: start;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  .news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  }
+  .news-card-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  .news-card-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  .news-card-meta {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 10px;
+    font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+  }
+  .news-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: #1c1c1c;
+    line-height: 1.4;
+    font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
+  }
+  .news-card-excerpt {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+    flex-grow: 1;
+    font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+  }
+  .news-card-read-more {
+    margin-top: 20px;
+    font-weight: 600;
+    color: #c1151b;
+    text-decoration: none;
+    font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+  }
+
+  @media (max-width: 768px) {
+    .news-card {
+      flex-basis: 280px;
+    }
+    .news-scroller-container {
+      padding: 20px 15px;
+      gap: 15px;
+    }
+  }
+</style>
+
+<div class="news-scroller-section">
+  <div class="news-scroller-header">
+    {% if section.settings.heading != blank %}
+      <h2 class="news-scroller-heading">{{ section.settings.heading | escape }}</h2>
+    {% endif %}
+  </div>
+
+  <div class="news-scroller-container">
+    {%- liquid
+      assign blog = blogs[section.settings.blog]
+      
+      // FIX: Assign the setting to a simple variable with a unique name first
+      assign posts_limit = section.settings.posts_to_show
+    -%}
+
+    {%# Then use that simple variable in the loop #%}
+    {%- for article in blog.articles limit: posts_limit -%}
+      <a href="{{ article.url }}" class="news-card">
+        {%- if article.image -%}
+          {{ article.image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'news-card-image', widths: '400, 600, 800' }}
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+        {%- endif -%}
+
+        <div class="news-card-content">
+          <div class="news-card-meta">
+            {%- if section.settings.show_date -%}
+              <span>{{ article.published_at | time_tag: format: 'date' }}</span>
+            {%- endif -%}
+            {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
+            {%- if section.settings.show_author -%}
+              <span>by {{ article.author }}</span>
+            {%- endif -%}
+          </div>
+          <h3 class="news-card-title">{{ article.title }}</h3>
+          <p class="news-card-excerpt">
+            {{ article.excerpt_or_content | strip_html | truncate: 120 }}
+          </p>
+          <span class="news-card-read-more">Read More &rarr;</span>
+        </div>
+      </a>
+    {%- else -%}
+      {%- for i in (1..4) -%}
+        <div class="news-card">
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+          <div class="news-card-content">
+            <h3 class="news-card-title">Example News Article</h3>
+            <p class="news-card-excerpt">This is where the article excerpt will appear. Select a blog in the theme editor to show your posts.</p>
+            <span class="news-card-read-more">Read More &rarr;</span>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "News Scroller",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Latest News"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog"
+    },
+    {
+      "type": "range",
+      "id": "posts_to_show",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "label": "Number of posts to show",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "News Scroller"
+    }
+  ]
+}
+{% endschema %}
