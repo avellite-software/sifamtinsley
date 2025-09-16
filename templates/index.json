@@ -178,7 +178,7 @@
       "name": "News Scroller",
       "settings": {
         "heading": "Latest News",
-        "blog": "",
+        "blog": "news",
         "posts_to_show": 5,
         "show_date": true,
         "show_author": false
