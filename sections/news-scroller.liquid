@@ -3,6 +3,7 @@
   - Displays a full-width, horizontal scrolling list of blog posts.
   - Cards are automatically populated from a selected blog.
   - NEW: Includes an optional JavaScript-powered auto-scroll feature.
+  - MODIFIED: Scrollbar is now visible and scroll is an infinite loop.
 {% endcomment %}
 
 <style>
@@ -26,19 +27,11 @@
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
     padding: 20px;
-    /* Add smooth scrolling behavior for the JS to use */
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .news-scroller-container::-webkit-scrollbar {
-    display: none;
+    /* REMOVED scroll-snap and hidden scrollbar properties to allow for smooth scrolling and user control */
   }
   .news-card {
     flex: 0 0 320px;
-    scroll-snap-align: start;
     background-color: #fff;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
@@ -115,7 +108,7 @@
     {%- liquid
       assign blog = blogs[section.settings.blog]
     -%}
-    {%- for article in blog.articles -%}
+    {%- for article in blog.articles limit: section.settings.posts_to_show -%}
       <a href="{{ article.url }}" class="news-card">
         {%- if article.image -%}
           {{
@@ -137,7 +130,7 @@
             {%- endif -%}
           </div>
           <h3 class="news-card-title">{{ article.title }}</h3>
-          <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
+          <p class="news-card-excerpt">{{ article['excerpt_or-content'] | strip_html | truncate: 120 }}</p>
           <span class="news-card-read-more">Read More &rarr;</span>
         </div>
       </a>
@@ -228,33 +221,50 @@
   <script>
 document.addEventListener('DOMContentLoaded', () => {
   const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
-  if (!scroller) return;
+  if (!scroller || scroller.children.length <= 1) return;
+
+  // --- 1. CLONE ITEMS FOR INFINITE LOOP ---
+  // We take all the original news cards and duplicate them.
+  // This creates a seamless transition when the scroller reaches the end.
+  const scrollerItems = Array.from(scroller.children);
+  scrollerItems.forEach(item => {
+    const clonedItem = item.cloneNode(true);
+    clonedItem.setAttribute('aria-hidden', 'true');
+    scroller.appendChild(clonedItem);
+  });
 
   const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
   let scrollerIntervalId;
 
+  // --- 2. THE SCROLLING FUNCTION ---
   const scrollNext = () => {
     const firstCard = scroller.querySelector('.news-card');
     if (!firstCard) return;
 
-    // Calculate the distance to scroll (width of one card + gap)
-    const scrollAmount = firstCard.offsetWidth + parseInt(window.getComputedStyle(scroller).gap);
+    // Calculate the distance to scroll (width of one card + the gap between cards)
+    const scrollAmount = firstCard.offsetWidth + parseInt(window.getComputedStyle(scroller).gap, 10);
     
-    // Check if we are near the end of the scroll
-    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
-
-    if (isAtEnd) {
-      // If at the end, smoothly scroll back to the start
-      scroller.scrollTo({ left: 0 });
-    } else {
-      // Otherwise, scroll by one card width
-      scroller.scrollLeft += scrollAmount;
+    // Smoothly scroll the container by one card
+    scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
+  
+  // --- 3. THE INFINITE LOOP LOGIC ---
+  // This function checks the scroll position. When it reaches the cloned items,
+  // it silently jumps back to the beginning to create the infinite effect.
+  const handleScroll = () => {
+    const originalContentWidth = scroller.scrollWidth / 2;
+    if (scroller.scrollLeft >= originalContentWidth) {
+      // Temporarily disable smooth scrolling for an instant jump
+      scroller.style.scrollBehavior = 'auto';
+      scroller.scrollLeft -= originalContentWidth;
+      // Re-enable smooth scrolling for the next animation
+      scroller.style.scrollBehavior = 'smooth';
     }
   };
 
+  // --- 4. START/STOP AND EVENT LISTENERS ---
   const startScrolling = () => {
-    // Clear any existing interval before starting a new one
-    clearInterval(scrollerIntervalId);
+    clearInterval(scrollerIntervalId); // Clear any existing interval
     scrollerIntervalId = setInterval(scrollNext, scrollInterval);
   };
 
@@ -262,16 +272,28 @@ document.addEventListener('DOMContentLoaded', () => {
     clearInterval(scrollerIntervalId);
   };
 
-  // Start the scroller
-  startScrolling();
-
   // Pause on hover
   scroller.addEventListener('mouseenter', stopScrolling);
-  // Resume on mouse leave
   scroller.addEventListener('mouseleave', startScrolling);
-  // Also pause when the user is trying to manually scroll
-  scroller.addEventListener('wheel', stopScrolling, { passive: true });
-  scroller.addEventListener('touchstart', stopScrolling, { passive: true });
+  
+  // Listen for the scroll event to handle the infinite loop reset
+  scroller.addEventListener('scroll', handleScroll);
+
+  // Improved: Pause on manual interaction and resume automatically
+  let interactionTimeout;
+  const onInteraction = () => {
+    stopScrolling();
+    clearTimeout(interactionTimeout);
+    // Resume scrolling after 5 seconds of inactivity
+    interactionTimeout = setTimeout(startScrolling, 5000);
+  };
+
+  scroller.addEventListener('wheel', onInteraction, { passive: true });
+  scroller.addEventListener('touchstart', onInteraction, { passive: true });
+  scroller.addEventListener('mousedown', onInteraction, { passive: true }); // For click-and-drag
+
+  // Start the scroller!
+  startScrolling();
 });
   </script>
 {% endif %}
