@@ -183,7 +183,7 @@
         "show_date": true,
         "show_author": false,
         "autoscroll": true,
-        "autoscroll_speed": 50
+        "autoscroll_duration": 90
       }
     }
   },
