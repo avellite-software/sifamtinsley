@@ -27,20 +27,14 @@
     gap: 20px;
     overflow-x: auto;
     padding: 20px;
-    cursor: grab; /* Indicates the area is draggable */
-    user-select: none; /* Prevents text selection while dragging */
-
-    /* REMOVED scroll-snap for smooth, free scrolling */
-
-    /* HIDE the scrollbar */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
+    cursor: grab;
+    user-select: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-
   .news-scroller-container::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
+    display: none;
   }
-
   .news-card {
     flex: 0 0 320px;
     background-color: #fff;
@@ -212,12 +206,12 @@
     {
       "type": "range",
       "id": "autoscroll_speed",
-      "min": 10,
-      "max": 50,
-      "step": 5,
+      "min": 20,
+      "max": 120,
+      "step": 10,
       "unit": "s",
-      "label": "Scroll duration (slower is longer)",
-      "default": 30
+      "label": "Scroll duration (longer is slower)",
+      "default": 60
     }
   ],
   "presets": [
@@ -234,25 +228,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
   if (!scroller) return;
 
-  // --- 1. Infinite Scroll Setup: Clone items for a seamless loop ---
-  const scrollerItems = Array.from(scroller.children);
-  scrollerItems.forEach(item => {
+  const originalItems = Array.from(scroller.children);
+  if (originalItems.length === 0 || scroller.scrollWidth <= scroller.clientWidth) {
+    return; // Not enough content to scroll
+  }
+
+  // --- 1. Infinite Scroll Setup ---
+  originalItems.forEach(item => {
     const clonedItem = item.cloneNode(true);
     clonedItem.setAttribute('aria-hidden', 'true');
     scroller.appendChild(clonedItem);
   });
 
-  // --- 2. Auto-Scroll Logic: Smooth marquee animation ---
+  // --- 2. Auto-Scroll Logic ---
   let animation;
   const startAutoScroll = () => {
-    // Cancel any existing animation
     if (animation) animation.cancel();
 
-    // Use Web Animations API for smooth, performant scrolling
+    // FIX: Precisely calculate the width of the original items for a perfect loop
+    const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
+    let originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + ((originalItems.length - 1) * gap);
+
     animation = scroller.animate(
       [
         { transform: 'translateX(0)' },
-        { transform: `translateX(-${scroller.scrollWidth / 2}px)` }
+        { transform: `translateX(-${originalContentWidth}px)` }
       ],
       {
         duration: {{ section.settings.autoscroll_speed | times: 1000 }},
@@ -269,35 +269,29 @@ document.addEventListener('DOMContentLoaded', () => {
   scroller.addEventListener('mousedown', (e) => {
     isDown = true;
     scroller.style.cursor = 'grabbing';
-    if (animation) animation.pause(); // Pause auto-scroll on click
+    if (animation) animation.pause();
     startX = e.pageX - scroller.offsetLeft;
     scrollLeft = scroller.scrollLeft;
   });
 
-  scroller.addEventListener('mouseleave', () => {
+  const resumeAnimation = () => {
     isDown = false;
     scroller.style.cursor = 'grab';
-    if (animation) animation.play(); // Resume auto-scroll on leave
-  });
+    if (animation) animation.play();
+  };
 
-  scroller.addEventListener('mouseup', () => {
-    isDown = false;
-    scroller.style.cursor = 'grab';
-    if (animation) animation.play(); // Resume auto-scroll on release
-  });
+  scroller.addEventListener('mouseleave', resumeAnimation);
+  scroller.addEventListener('mouseup', resumeAnimation);
 
   scroller.addEventListener('mousemove', (e) => {
     if (!isDown) return;
     e.preventDefault();
     const x = e.pageX - scroller.offsetLeft;
-    const walk = (x - startX) * 2; // The multiplier '2' makes dragging feel faster
+    const walk = (x - startX) * 2;
     scroller.scrollLeft = scrollLeft - walk;
   });
 
-  // Start the auto-scroll if enabled
-  if (scroller.scrollWidth > scroller.clientWidth) {
-    startAutoScroll();
-  }
+  startAutoScroll();
 });
   </script>
 {% endif %}
