@@ -111,6 +111,12 @@
 <style>
   :root {
     --header-height: 96px;
+    --header-mobile-height: 70px; /* Added a variable for mobile header height */
+  }
+
+  body {
+    /* This padding-top is the key fix. The JS will set the correct value. */
+    padding-top: var(--header-height);
   }
 
   .custom-header {
@@ -447,6 +453,14 @@
   }
 
   @media screen and (max-width: 1400px) {
+    body {
+      padding-top: var(--header-mobile-height);
+    }
+
+    .custom-header {
+      height: var(--header-mobile-height);
+    }
+
     .custom-header,
     .header-left {
       padding-left: 20px;
@@ -606,25 +620,29 @@
 {% endschema %}
 
 <script>
+  // Main script for header functionality (dropdowns, mobile nav, etc.)
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.custom-header');
-    if (!header) return; // --- FIX: New Click-to-Open and Click-Away Logic ---
+    if (!header) return;
+
     const circleDropdownContainer = header.querySelector('.circle-dropdown-container');
     if (circleDropdownContainer) {
       const circleTrigger = circleDropdownContainer.querySelector('.circle-dropdown-trigger');
       circleTrigger.addEventListener('click', (event) => {
-        // Stop the click from bubbling up to the document and immediately closing the menu
-        event.stopPropagation(); // Toggle the active class on the header
+        event.stopPropagation();
         header.classList.toggle('is-circle-menu-active');
       });
-    } // Listener to close the menu when clicking anywhere else on the page
+    }
 
     document.addEventListener('click', (event) => {
-      // If the click is outside the dropdown container and the menu is active, close it.
-      if (!circleDropdownContainer.contains(event.target) && header.classList.contains('is-circle-menu-active')) {
+      if (
+        circleDropdownContainer &&
+        !circleDropdownContainer.contains(event.target) &&
+        header.classList.contains('is-circle-menu-active')
+      ) {
         header.classList.remove('is-circle-menu-active');
       }
-    }); // --- Mobile Menu Logic (No changes needed here) ---
+    });
 
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
@@ -633,17 +651,19 @@
     const centerEl = header.querySelector('.header-center');
     const rightEl = header.querySelector('.header-right');
     const BREAKPOINT = 1400;
+
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
     };
+
     const manageNavElements = () => {
       const isMobile = window.innerWidth <= BREAKPOINT;
       if (isMobile) {
-        if (header.contains(centerEl)) mobileNavContent.prepend(centerEl);
-        if (header.contains(rightEl)) mobileNavContent.appendChild(rightEl);
+        if (centerEl && header.contains(centerEl)) mobileNavContent.prepend(centerEl);
+        if (rightEl && header.contains(rightEl)) mobileNavContent.appendChild(rightEl);
       } else {
-        if (mobileNavContent.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
-        if (mobileNavContent.contains(rightEl)) header.insertBefore(rightEl, mobileNavToggle);
+        if (centerEl && mobileNavContent.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
+        if (rightEl && mobileNavContent.contains(rightEl)) header.insertBefore(rightEl, mobileNavToggle);
         toggleMenu(false);
       }
     };
@@ -657,12 +677,35 @@
       if (isMobile && dropdownLink) {
         e.preventDefault();
         const parentDropdown = dropdownLink.closest('.dropdown');
-        parentDropdown.classList.toggle('is-open');
+        if (parentDropdown) {
+          parentDropdown.classList.toggle('is-open');
+        }
       }
     });
 
     manageNavElements();
-
     window.addEventListener('resize', manageNavElements);
+  });
+</script>
+
+{% comment %}
+  NEW SCRIPT: This separate script handles the fixed header spacing issue.
+{% endcomment %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const header = document.querySelector('.custom-header');
+    if (!header) return;
+
+    const setBodyPadding = () => {
+      const headerHeight = header.offsetHeight;
+      document.body.style.paddingTop = `${headerHeight}px`;
+    };
+
+    // Set the padding initially when the page loads
+    setBodyPadding();
+
+    // Re-calculate and set the padding if the window is resized
+    // (This helps account for changes in header height at different screen sizes)
+    window.addEventListener('resize', setBodyPadding);
   });
 </script>
