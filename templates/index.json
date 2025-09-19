@@ -179,9 +179,11 @@
       "settings": {
         "heading": "Latest News",
         "blog": "news",
-        "posts_to_show": 5,
+        "posts_to_show": 12,
         "show_date": true,
-        "show_author": false
+        "show_author": false,
+        "autoscroll": false,
+        "autoscroll_speed": 5
       }
     }
   },
