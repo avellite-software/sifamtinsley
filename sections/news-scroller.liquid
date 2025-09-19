@@ -28,13 +28,7 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding: 20px;
-    scroll-behavior: smooth;
-    /* Hide the scrollbar for a cleaner look, user can still scroll with mouse/touch */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .news-scroller-container::-webkit-scrollbar {
-    display: none;
+    /* NOTE: scroll-behavior is now controlled by the JavaScript for better reliability */
   }
   .news-card {
     flex: 0 0 320px;
@@ -213,7 +207,7 @@
       "step": 1,
       "unit": "s",
       "label": "Autoscroll speed",
-      "default": 5
+      "default": 4
     }
   ],
   "presets": [
@@ -226,50 +220,54 @@
 
 {% if section.settings.autoscroll %}
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
-      if (!scroller) return;
+document.addEventListener('DOMContentLoaded', () => {
+  const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
+  if (!scroller) return;
 
-      // IMPROVEMENT: Check if the content is actually wider than the container.
-      // If not, there's no need to run the auto-scroll logic at all.
-      const isOverflowing = scroller.scrollWidth > scroller.clientWidth;
-      if (!isOverflowing) {
-        console.log('News Scroller: Not enough content to enable auto-scroll.');
-        return;
-      }
+  // Only run the script if the content is actually scrollable
+  const isOverflowing = scroller.scrollWidth > scroller.clientWidth;
+  if (!isOverflowing) return;
 
-      const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
-      let autoScrollInterval;
-      let scrollDirection = 1; // 1 scrolls forward, -1 scrolls backward
+  const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
+  let autoScrollInterval;
+  let scrollDirection = 1; // 1 for forward, -1 for backward
 
-      const performScrollStep = () => {
-        const card = scroller.querySelector('.news-card');
-        if (!card) return;
-        const scrollAmount = card.offsetWidth + parseInt(window.getComputedStyle(scroller).gap);
-        const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
-        const isAtStart = scroller.scrollLeft <= 0;
+  const performScrollStep = () => {
+    // Check boundaries before scrolling
+    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
+    const isAtStart = scroller.scrollLeft <= 0;
 
-        if (isAtEnd && scrollDirection === 1) {
-          scrollDirection = -1;
-        } else if (isAtStart && scrollDirection === -1) {
-          scrollDirection = 1;
-        }
-        scroller.scrollLeft += scrollAmount * scrollDirection;
-      };
+    if (isAtEnd && scrollDirection === 1) {
+      scrollDirection = -1; // Change direction to backward
+    } else if (isAtStart && scrollDirection === -1) {
+      scrollDirection = 1; // Change direction to forward
+    }
 
-      const startAutoScroll = () => {
-        clearInterval(autoScrollInterval);
-        autoScrollInterval = setInterval(performScrollStep, scrollInterval);
-      };
+    // Calculate the distance to scroll (one card + gap)
+    const card = scroller.querySelector('.news-card');
+    if (!card) return;
+    const scrollAmount = card.offsetWidth + (parseInt(window.getComputedStyle(scroller).gap) || 20);
 
-      const stopAutoScroll = () => {
-        clearInterval(autoScrollInterval);
-      };
-
-      startAutoScroll();
-      scroller.addEventListener('mouseenter', stopAutoScroll);
-      scroller.addEventListener('mouseleave', startAutoScroll);
-      scroller.addEventListener('touchstart', stopAutoScroll, { passive: true });
+    // FIX: Use scrollBy() for a smoother animation that respects scroll-snap
+    scroller.scrollBy({
+      left: scrollAmount * scrollDirection,
+      behavior: 'smooth'
     });
+  };
+
+  const startAutoScroll = () => {
+    clearInterval(autoScrollInterval);
+    autoScrollInterval = setInterval(performScrollStep, scrollInterval);
+  };
+
+  const stopAutoScroll = () => {
+    clearInterval(autoScrollInterval);
+  };
+
+  startAutoScroll();
+  scroller.addEventListener('mouseenter', stopAutoScroll);
+  scroller.addEventListener('mouseleave', startAutoScroll);
+  scroller.addEventListener('touchstart', stopAutoScroll, { passive: true });
+});
   </script>
 {% endif %}
