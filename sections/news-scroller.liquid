@@ -26,13 +26,14 @@
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
     padding: 20px;
-    /* NOTE: scroll-behavior is now controlled by the JavaScript for better reliability */
+    /* REMOVED: scroll-snap-type and scroll-behavior.
+      This prevents conflicts and gives the JavaScript full control over the animation.
+    */
   }
   .news-card {
     flex: 0 0 320px;
-    scroll-snap-align: start;
+    /* REMOVED: scroll-snap-align */
     background-color: #fff;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
@@ -224,40 +225,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
   if (!scroller) return;
 
-  // Only run the script if the content is actually scrollable
-  const isOverflowing = scroller.scrollWidth > scroller.clientWidth;
-  if (!isOverflowing) return;
+  // Only run if there's enough content to scroll
+  if (scroller.scrollWidth <= scroller.clientWidth) return;
 
   const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
   let autoScrollInterval;
-  let scrollDirection = 1; // 1 for forward, -1 for backward
 
-  const performScrollStep = () => {
-    // Check boundaries before scrolling
-    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
-    const isAtStart = scroller.scrollLeft <= 0;
-
-    if (isAtEnd && scrollDirection === 1) {
-      scrollDirection = -1; // Change direction to backward
-    } else if (isAtStart && scrollDirection === -1) {
-      scrollDirection = 1; // Change direction to forward
+  const scrollNext = () => {
+    // Check if we're near the end of the scroller
+    if (scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1) {
+      // If at the end, jump instantly back to the beginning
+      scroller.scrollTo({ left: 0, behavior: 'auto' });
+    } else {
+      // Otherwise, scroll smoothly to the right
+      scroller.scrollBy({ left: 300, behavior: 'smooth' }); // Scrolls by a fixed 300px
     }
-
-    // Calculate the distance to scroll (one card + gap)
-    const card = scroller.querySelector('.news-card');
-    if (!card) return;
-    const scrollAmount = card.offsetWidth + (parseInt(window.getComputedStyle(scroller).gap) || 20);
-
-    // FIX: Use scrollBy() for a smoother animation that respects scroll-snap
-    scroller.scrollBy({
-      left: scrollAmount * scrollDirection,
-      behavior: 'smooth'
-    });
   };
 
   const startAutoScroll = () => {
     clearInterval(autoScrollInterval);
-    autoScrollInterval = setInterval(performScrollStep, scrollInterval);
+    autoScrollInterval = setInterval(scrollNext, scrollInterval);
   };
 
   const stopAutoScroll = () => {
@@ -267,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
   startAutoScroll();
   scroller.addEventListener('mouseenter', stopAutoScroll);
   scroller.addEventListener('mouseleave', startAutoScroll);
-  scroller.addEventListener('touchstart', stopAutoScroll, { passive: true });
 });
   </script>
 {% endif %}
