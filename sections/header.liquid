@@ -13,6 +13,7 @@
   -%}
 
   <div class="announcement-bar {{ bar_modifier_class }}">
+    <div></div>
     {%- if announcement_text != blank -%}
       {{ announcement_text }}
     {%- endif -%}
@@ -152,11 +153,6 @@
     font-size: 16px;
     font-weight: 500;
     transition: all 0.3s ease; /* Smooth transition for height changes */
-  }
-
-  .announcement-bar--has-content {
-    padding: 10px 15px; /* Flexible padding instead of fixed height */
-    min-height: 40px; /* Ensures a minimum height when there is text */
   }
 
   .announcement-bar--no-content {
