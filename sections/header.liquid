@@ -1,3 +1,6 @@
+{% comment %} The header-spacer div now creates the needed space for the fixed header below it. {% endcomment %}
+<div class="header-spacer"></div>
+
 <header class="custom-header">
   <div class="header-shape-clipper--default"><div></div></div>
 
@@ -111,13 +114,24 @@
 <style>
   :root {
     --header-height: 96px;
-    --header-mobile-height: 70px; /* Added a variable for mobile header height */
+    --header-mobile-height: 70px;
   }
 
-  body {
-    /* This padding-top is the key fix. The JS will set the correct value. */
-    padding-top: var(--header-height);
+  /* ==============================================
+     START: This is the new CSS for the fix 
+     ============================================== */
+  .header-spacer {
+    height: var(--header-height);
   }
+
+  @media screen and (max-width: 1400px) {
+    .header-spacer {
+      height: var(--header-mobile-height);
+    }
+  }
+  /* ==============================================
+     END: Fix CSS
+     ============================================== */
 
   .custom-header {
     display: flex;
@@ -134,6 +148,8 @@
     outline: none !important;
   }
 
+  /* ... all other styles ... */
+
   .header-shape-clipper--default {
     position: absolute;
     top: 0;
@@ -142,9 +158,6 @@
     width: 250px;
     z-index: 0;
     pointer-events: none;
-  }
-
-  .header-shape-clipper--default {
     overflow: hidden;
     visibility: visible;
     transition: visibility 0s linear 0.5s;
@@ -453,10 +466,6 @@
   }
 
   @media screen and (max-width: 1400px) {
-    body {
-      padding-top: var(--header-mobile-height);
-    }
-
     .custom-header {
       height: var(--header-mobile-height);
     }
@@ -685,27 +694,5 @@
 
     manageNavElements();
     window.addEventListener('resize', manageNavElements);
-  });
-</script>
-
-{% comment %}
-  NEW SCRIPT: This separate script handles the fixed header spacing issue.
-{% endcomment %}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const header = document.querySelector('.custom-header');
-    if (!header) return;
-
-    const setBodyPadding = () => {
-      const headerHeight = header.offsetHeight;
-      document.body.style.paddingTop = `${headerHeight}px`;
-    };
-
-    // Set the padding initially when the page loads
-    setBodyPadding();
-
-    // Re-calculate and set the padding if the window is resized
-    // (This helps account for changes in header height at different screen sizes)
-    window.addEventListener('resize', setBodyPadding);
   });
 </script>
