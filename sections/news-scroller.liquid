@@ -30,8 +30,12 @@
     padding: 20px;
     /* Add smooth scrolling behavior for the JS to use */
     scroll-behavior: smooth;
+    /* Hide the scrollbar for a cleaner look, user can still scroll with mouse/touch */
     scrollbar-width: none;
     -ms-overflow-style: none;
+  }
+  .news-scroller-container::-webkit-scrollbar {
+    display: none;
   }
   .news-card {
     flex: 0 0 320px;
@@ -112,7 +116,7 @@
     {%- liquid
       assign blog = blogs[section.settings.blog]
     -%}
-    {%- for article in blog.articles -%}
+    {%- for article in blog.articles limit: section.settings.posts_to_show -%}
       <a href="{{ article.url }}" class="news-card">
         {%- if article.image -%}
           {{
@@ -220,3 +224,66 @@
   ]
 }
 {% endschema %}
+
+{% comment %}
+  NEW: JavaScript for auto-scrolling
+{% endcomment %}
+{% if section.settings.autoscroll %}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
+      if (!scroller) return;
+
+      const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
+      let autoScrollInterval;
+      let scrollDirection = 1; // 1 scrolls forward, -1 scrolls backward
+
+      const performScrollStep = () => {
+        const card = scroller.querySelector('.news-card');
+        if (!card) return;
+
+        // Calculate how far to scroll (the width of one card plus the gap)
+        const scrollAmount = card.offsetWidth + parseInt(window.getComputedStyle(scroller).gap);
+
+        // Check if we're at the very end of the scroller
+        // We use a small 1px buffer to account for rounding issues
+        const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
+
+        // Check if we're at the very beginning
+        const isAtStart = scroller.scrollLeft <= 0;
+
+        if (isAtEnd && scrollDirection === 1) {
+          scrollDirection = -1; // If at the end, change direction to go backward
+        } else if (isAtStart && scrollDirection === -1) {
+          scrollDirection = 1; // If at the start, change direction to go forward
+        }
+
+        // Apply the scroll. The `scroll-behavior: smooth` in the CSS will animate it.
+        scroller.scrollLeft += scrollAmount * scrollDirection;
+      };
+
+      const startAutoScroll = () => {
+        clearInterval(autoScrollInterval); // Clear any existing timers
+        autoScrollInterval = setInterval(performScrollStep, scrollInterval);
+      };
+
+      const stopAutoScroll = () => {
+        clearInterval(autoScrollInterval);
+      };
+
+      // --- Event Listeners ---
+      
+      // Start the scrolling automatically
+      startAutoScroll();
+
+      // Pause the scrolling when the user's mouse is over the scroller
+      scroller.addEventListener('mouseenter', stopAutoScroll);
+
+      // Resume scrolling when the user's mouse leaves
+      scroller.addEventListener('mouseleave', startAutoScroll);
+
+      // Also pause if the user touches the scroller on a mobile device
+      scroller.addEventListener('touchstart', stopAutoScroll, { passive: true });
+    });
+  </script>
+{% endif %}
