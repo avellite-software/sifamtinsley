@@ -182,7 +182,7 @@
         "posts_to_show": 12,
         "show_date": true,
         "show_author": false,
-        "autoscroll": false,
+        "autoscroll": true,
         "autoscroll_speed": 5
       }
     }
