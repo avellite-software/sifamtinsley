@@ -150,6 +150,9 @@
     transform: rotate(-90deg);
   }
 
+  .blog-page-section {
+    padding: 5rem 0px 5rem 50px;
+  }
   /* Responsive Grid */
   @media (max-width: 990px) {
     .blog-post-grid {
@@ -170,7 +173,7 @@
   }
 </style>
 
-<div class="blog-page-section page-width">
+<div class="blog-page-section">
   <div class="blog-page-header">
     <h1 class="blog-page-title{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
       {{ blog.title | escape }}
