@@ -3,7 +3,6 @@
   - Displays a full-width, horizontal scrolling list of blog posts.
   - Cards are automatically populated from a selected blog.
   - NEW: Includes an optional JavaScript-powered auto-scroll feature.
-  - MODIFIED: Scrollbar is now visible and scroll is an infinite loop.
 {% endcomment %}
 
 <style>
@@ -25,15 +24,21 @@
   }
   .news-scroller-container {
     display: flex;
-    /* ADDED: This is crucial to prevent items from wrapping to a new line */
-    flex-wrap: nowrap;
     gap: 20px;
     overflow-x: auto;
+    scroll-snap-type: x mandatory;
     padding: 20px;
-    /* Removed scroll-snap and hidden scrollbar properties to allow for smooth scrolling and user control */
+    /* Add smooth scrolling behavior for the JS to use */
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .news-scroller-container::-webkit-scrollbar {
+    display: none;
   }
   .news-card {
     flex: 0 0 320px;
+    scroll-snap-align: start;
     background-color: #fff;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
@@ -109,9 +114,8 @@
   <div class="news-scroller-container" data-section-id="{{ section.id }}">
     {%- liquid
       assign blog = blogs[section.settings.blog]
-      assign posts_limit = section.settings.posts_to_show
     -%}
-    {%- for article in blog.articles limit: posts_limit -%}
+    {%- for article in blog.articles -%}
       <a href="{{ article.url }}" class="news-card">
         {%- if article.image -%}
           {{
@@ -133,12 +137,7 @@
             {%- endif -%}
           </div>
           <h3 class="news-card-title">{{ article.title }}</h3>
-
-          {% comment %}
-            FIX: Corrected 'article.excerpt_or-content' to 'article.excerpt_or_content' (underscore instead of dash)
-          {% endcomment %}
           <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
-
           <span class="news-card-read-more">Read More &rarr;</span>
         </div>
       </a>
@@ -182,7 +181,7 @@
       "max": 12,
       "step": 1,
       "label": "Number of posts to show",
-      "default": 8
+      "default": 6
     },
     {
       "type": "checkbox",
@@ -231,19 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
   if (!scroller) return;
 
-  // FIX: Make sure we have enough items to scroll before running the script.
-  // The number of original items must be greater than what fits on the screen.
-  const originalItems = scroller.children;
-  if (originalItems.length <= 1) return;
-
-  // --- CLONE ITEMS FOR INFINITE LOOP ---
-  const scrollerItems = Array.from(originalItems);
-  scrollerItems.forEach(item => {
-    const clonedItem = item.cloneNode(true);
-    clonedItem.setAttribute('aria-hidden', 'true');
-    scroller.appendChild(clonedItem);
-  });
-
   const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
   let scrollerIntervalId;
 
@@ -251,22 +237,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstCard = scroller.querySelector('.news-card');
     if (!firstCard) return;
 
-    const scrollAmount = firstCard.offsetWidth + (parseInt(window.getComputedStyle(scroller).gap) || 20);
-    scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-  };
-  
-  const handleScroll = () => {
-    // This is the total width of the *original* set of items
-    const originalContentWidth = scroller.scrollWidth / 2;
-    // When the scroll position goes past the original items, jump back
-    if (scroller.scrollLeft >= originalContentWidth) {
-      scroller.style.scrollBehavior = 'auto'; // Disable smooth scroll for instant jump
-      scroller.scrollLeft -= originalContentWidth;
-      scroller.style.scrollBehavior = 'smooth'; // Re-enable for the next scroll
+    // Calculate the distance to scroll (width of one card + gap)
+    const scrollAmount = firstCard.offsetWidth + parseInt(window.getComputedStyle(scroller).gap);
+    
+    // Check if we are near the end of the scroll
+    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
+
+    if (isAtEnd) {
+      // If at the end, smoothly scroll back to the start
+      scroller.scrollTo({ left: 0 });
+    } else {
+      // Otherwise, scroll by one card width
+      scroller.scrollLeft += scrollAmount;
     }
   };
 
   const startScrolling = () => {
+    // Clear any existing interval before starting a new one
     clearInterval(scrollerIntervalId);
     scrollerIntervalId = setInterval(scrollNext, scrollInterval);
   };
@@ -275,22 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
     clearInterval(scrollerIntervalId);
   };
 
-  scroller.addEventListener('mouseenter', stopScrolling);
-  scroller.addEventListener('mouseleave', startScrolling);
-  scroller.addEventListener('scroll', handleScroll, { passive: true });
-
-  let interactionTimeout;
-  const onInteraction = () => {
-    stopScrolling();
-    clearTimeout(interactionTimeout);
-    interactionTimeout = setTimeout(startScrolling, 5000);
-  };
-
-  scroller.addEventListener('wheel', onInteraction, { passive: true });
-  scroller.addEventListener('touchstart', onInteraction, { passive: true });
-  scroller.addEventListener('mousedown', onInteraction, { passive: true });
-
+  // Start the scroller
   startScrolling();
+
+  // Pause on hover
+  scroller.addEventListener('mouseenter', stopScrolling);
+  // Resume on mouse leave
+  scroller.addEventListener('mouseleave', startScrolling);
+  // Also pause when the user is trying to manually scroll
+  scroller.addEventListener('wheel', stopScrolling, { passive: true });
+  scroller.addEventListener('touchstart', stopScrolling, { passive: true });
 });
   </script>
 {% endif %}
