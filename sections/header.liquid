@@ -1,137 +1,149 @@
-{% comment %} The header-spacer div now creates the needed space for the fixed header below it. {% endcomment %}
-<div class="header-spacer"></div>
+{% comment %}
+  NEW: Announcement Bar is now part of the header.
+  The header-wrapper now contains both the announcement bar and the main header.
+{% endcomment %}
+<div class="header-wrapper">
+  {%- if section.settings.announcement_text != blank -%}
+    <div class="announcement-bar">
+      {{ section.settings.announcement_text }}
+    </div>
+  {%- endif -%}
 
-<header class="custom-header">
-  <div class="header-shape-clipper--default"><div></div></div>
+  <header class="custom-header">
+    <div class="header-shape-clipper--default"><div></div></div>
 
-  {%- liquid
-    assign link_height_in_px = 45
-    assign extra_padding_in_px = 40
-    assign number_of_links = section.settings.brands_menu.links.size
-    assign calculated_height = number_of_links | times: link_height_in_px | plus: extra_padding_in_px
-  -%}
-  <div class="header-shape-clipper--animated" style="--menu-height: {{ calculated_height }}px;">
-    <div></div>
-  </div>
-
-  <div class="mobile-nav-panel">
-    <button type="button" class="mobile-nav-close" aria-label="Close menu">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-      </svg>
-    </button>
-
-    <div class="mobile-nav-content"></div>
-  </div>
-
-  <div class="mobile-nav-overlay"></div>
-
-  <div class="header-left">
-    <div class="circle-dropdown-container">
-      <button class="circle-dropdown-trigger">
-        <span class="circle-dropdown-text">Our Brands</span>
-      </button>
-
-      <div class="circle-dropdown-content">
-        {%- for link in section.settings.brands_menu.links -%}
-          <a href="{{ link.url }}">{{ link.title }}</a>
-        {%- endfor -%}
-      </div>
+    {%- liquid
+      assign link_height_in_px = 45
+      assign extra_padding_in_px = 40
+      assign number_of_links = section.settings.brands_menu.links.size
+      assign calculated_height = number_of_links | times: link_height_in_px | plus: extra_padding_in_px
+    -%}
+    <div class="header-shape-clipper--animated" style="--menu-height: {{ calculated_height }}px;">
+      <div></div>
     </div>
 
-    <a href="{{ routes.root_url }}" class="logo">
-      {% if settings.logo %}
-        <img src="{{ settings.logo | image_url: width: 512 }}" alt="{{ shop.name }}" width="512" height="auto">
+    <div class="mobile-nav-panel">
+      <button type="button" class="mobile-nav-close" aria-label="Close menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+      <div class="mobile-nav-content"></div>
+    </div>
 
-      {% else %}
-        <span>{{ shop.name }}</span>
-      {% endif %}
-    </a>
-  </div>
+    <div class="mobile-nav-overlay"></div>
 
-  <div class="header-center">
-    <form action="{{ routes.search_url }}" method="get" class="search-form">
-      <input id="SearchBarInput" type="search" name="q" placeholder="Search..." class="search-input">
+    <div class="header-left">
+      <div class="circle-dropdown-container">
+        <button class="circle-dropdown-trigger">
+          <span class="circle-dropdown-text">Our Brands</span>
+        </button>
+        <div class="circle-dropdown-content">
+          {%- for link in section.settings.brands_menu.links -%}
+            <a href="{{ link.url }}">{{ link.title }}</a>
+          {%- endfor -%}
+        </div>
+      </div>
+      <a href="{{ routes.root_url }}" class="logo">
+        {% if settings.logo %}
+          <img src="{{ settings.logo | image_url: width: 512 }}" alt="{{ shop.name }}" width="512" height="auto">
+        {% else %}
+          <span>{{ shop.name }}</span>
+        {% endif %}
+      </a>
+    </div>
 
-      <button type="submit" class="search-btn">Search</button>
-    </form>
-  </div>
+    <div class="header-center">
+      <form action="{{ routes.search_url }}" method="get" class="search-form">
+        <input id="SearchBarInput" type="search" name="q" placeholder="Search..." class="search-input">
+        <button type="submit" class="search-btn">Search</button>
+      </form>
+    </div>
 
-  <div class="header-right">
-    {%- comment -%}
-      Loop for the main navigation links (About, Products, etc.)
-    {%- endcomment -%}
-    {%- for link in section.settings.main_menu.links -%}
-      <div class="dropdown header-btn">
-        <a href="{{ link.url }}" class="dropdown-link">{{ link.title }}</a>
-        {%- if link.links != empty -%}
-          <div class="dropdown-content">
-            {%- for child_link in link.links -%}
-              <a href="{{ child_link.url }}">{{ child_link.title }}</a>
-            {%- endfor -%}
+    <div class="header-right">
+      {%- for link in section.settings.main_menu.links -%}
+        <div class="dropdown header-btn">
+          <a href="{{ link.url }}" class="dropdown-link">{{ link.title }}</a>
+          {%- if link.links != empty -%}
+            <div class="dropdown-content">
+              {%- for child_link in link.links -%}
+                <a href="{{ child_link.url }}">{{ child_link.title }}</a>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+
+      {%- if section.settings.contact_button_link != blank and section.settings.contact_button_text != blank -%}
+        <a href="{{ section.settings.contact_button_link }}" class="header-btn red-btn">
+          {{ section.settings.contact_button_text }}
+        </a>
+      {%- endif -%}
+
+      <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
+        {% if cart == empty -%}
+          <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
+        {%- else -%}
+          <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
+        {%- endif %}
+        <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+        {%- if cart != empty -%}
+          <div class="cart-count-bubble">
+            {%- if cart.item_count < 100 -%}
+              <span aria-hidden="true">{{ cart.item_count }}</span>
+            {%- endif -%}
+            <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
           </div>
         {%- endif -%}
-      </div>
-    {%- endfor -%}
-
-    {%- comment -%}
-      Dedicated 'Contact Us' button (now a simple link)
-    {%- endcomment -%}
-    {%- if section.settings.contact_button_link != blank and section.settings.contact_button_text != blank -%}
-      <a href="{{ section.settings.contact_button_link }}" class="header-btn red-btn">
-        {{ section.settings.contact_button_text }}
       </a>
-    {%- endif -%}
+    </div>
 
-    {%- comment -%}
-      Cart button
-    {%- endcomment -%}
-    <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
-      {% if cart == empty -%}
-        <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
-      {%- else -%}
-        <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
-      {%- endif %}
-      <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-      {%- if cart != empty -%}
-        <div class="cart-count-bubble">
-          {%- if cart.item_count < 100 -%}
-            <span aria-hidden="true">{{ cart.item_count }}</span>
-          {%- endif -%}
-          <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
-        </div>
-      {%- endif -%}
-    </a>
-  </div>
+    <button type="button" class="mobile-nav-toggle" aria-label="Open menu">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/>
+      </svg>
+    </button>
+  </header>
+</div>
 
-  <button type="button" class="mobile-nav-toggle" aria-label="Open menu">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-      <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/>
-    </svg>
-  </button>
-</header>
+<div class="header-spacer"></div>
 
 <style>
   :root {
     --header-height: 96px;
     --header-mobile-height: 70px;
+    --announcement-bar-height: 40px; /* Control announcement bar height */
   }
 
   /* ==============================================
-     START: This is the new CSS for the fix 
+     Wrapper and Spacer Logic
      ============================================== */
+  .header-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+  }
+
   .header-spacer {
-    height: var(--header-height);
+    /* Height is now set dynamically by JavaScript */
   }
 
-  @media screen and (max-width: 1400px) {
-    .header-spacer {
-      height: var(--header-mobile-height);
-    }
-  }
   /* ==============================================
-     END: Fix CSS
+     Announcement Bar Styles (Now part of header)
      ============================================== */
+  .announcement-bar {
+    width: 100%;
+    height: var(--announcement-bar-height);
+    background-color: #c1151b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+  }
 
   .custom-header {
     display: flex;
@@ -140,15 +152,12 @@
     background: #fff;
     height: var(--header-height);
     font-family: inherit;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 100;
+    position: relative; /* Changed from fixed to relative */
+    z-index: 1; /* Sits on top of announcement bar if needed */
     outline: none !important;
   }
 
-  /* ... all other styles ... */
+  /* ... all of your other header styles remain unchanged below ... */
 
   .header-shape-clipper--default {
     position: absolute;
@@ -623,14 +632,36 @@
       "type": "url",
       "id": "contact_button_link",
       "label": "Contact Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Announcement Bar"
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Text",
+      "default": "Announce something here"
     }
   ]
 }
 {% endschema %}
 
 <script>
-  // Main script for header functionality (dropdowns, mobile nav, etc.)
+  // Main script for header functionality
   document.addEventListener('DOMContentLoaded', () => {
+    // This script now also handles the spacer div height
+    const headerWrapper = document.querySelector('.header-wrapper');
+    const headerSpacer = document.querySelector('.header-spacer');
+    if (headerWrapper && headerSpacer) {
+      const setSpacerHeight = () => {
+        const headerHeight = headerWrapper.offsetHeight;
+        headerSpacer.style.height = `${headerHeight}px`;
+      };
+      setSpacerHeight();
+      window.addEventListener('resize', setSpacerHeight);
+    }
+
     const header = document.querySelector('.custom-header');
     if (!header) return;
 
