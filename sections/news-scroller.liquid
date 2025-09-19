@@ -36,7 +36,6 @@
   .news-scroller-container.is-dragging {
     cursor: grabbing;
   }
-  /* MODIFICATION: Changed from an 'a' tag to a 'div' */
   .news-card {
     flex: 0 0 320px;
     background-color: #fff;
@@ -46,7 +45,6 @@
     display: flex;
     flex-direction: column;
     color: #333;
-    /* REMOVED hover transform to prevent interference with dragging */
   }
   .news-card-image {
     width: 100%;
@@ -81,8 +79,6 @@
     flex-grow: 1;
     font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
   }
-
-  /* MODIFICATION: New styles for the 'Read More' button */
   .news-card-read-more {
     display: inline-block;
     margin-top: 20px;
@@ -96,23 +92,18 @@
     font-size: 16px;
     text-align: center;
     transition: background-color 0.2s, color 0.2s;
-    align-self: flex-start; /* Aligns button to the left */
+    align-self: flex-start;
   }
-
   .news-card-read-more:hover {
     background: #a10f16;
     color: #fff;
   }
-
-  /* NEW: Styles for the 'See All' button container */
   .news-scroller-footer {
     max-width: 1200px;
     margin: 30px auto 0 auto;
     padding: 0 20px;
     text-align: center;
   }
-
-  /* Re-using header button styles for consistency */
   .news-scroller-see-all {
     display: inline-block;
     padding: 12px 28px;
@@ -125,14 +116,11 @@
     font-size: 16px;
     transition: background 0.2s, color 0.2s, border-color 0.2s;
   }
-
   .news-scroller-see-all:hover {
     background: #c1151b;
     border-color: #c1151b;
     color: #fff;
   }
-
-
   @media (max-width: 768px) {
     .news-card {
       flex-basis: 280px;
@@ -156,7 +144,6 @@
       assign blog = blogs[section.settings.blog]
     -%}
     {%- for article in blog.articles limit: section.settings.posts_to_show -%}
-      {% comment %} Card is now a DIV, not a link. Only the button is clickable. {% endcomment %}
       <div class="news-card">
         {%- if article.image -%}
           {{ article.image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'news-card-image' }}
@@ -287,92 +274,92 @@
 
 {% if section.settings.autoscroll %}
   <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
-  if (!scroller) return;
+    document.addEventListener('DOMContentLoaded', () => {
+      const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
+      if (!scroller) return;
 
-  const originalItems = Array.from(scroller.children);
-  if (originalItems.length === 0 || scroller.scrollWidth <= scroller.clientWidth) {
-    return;
-  }
-  
-  // --- 1. Infinite Scroll Setup ---
-  originalItems.forEach(item => {
-    const clonedItem = item.cloneNode(true);
-    clonedItem.setAttribute('aria-hidden', 'true');
-    scroller.appendChild(clonedItem);
-  });
-  
-  const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
-  // FIX: More precise calculation including the last gap for a perfect reset point
-  const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + (originalItems.length * gap);
-
-  // --- 2. Auto-Scroll Logic ---
-  let animationFrameId;
-  let isPaused = false;
-  const durationInSeconds = {{ section.settings.autoscroll_duration }};
-  const totalFrames = durationInSeconds * 60;
-  const speed = originalContentWidth / totalFrames;
-
-  function scrollStep() {
-    if (isPaused) return;
-    
-    // FIX: Use a modulo operator for a perfectly seamless reset with no lag
-    scroller.scrollLeft = (scroller.scrollLeft + speed) % originalContentWidth;
-    
-    animationFrameId = requestAnimationFrame(scrollStep);
-  }
-  
-  // --- 3. Click-and-Drag Scrolling Logic ---
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-  let hasDragged = false;
-
-  scroller.addEventListener('mousedown', (e) => {
-    // Only drag if the target is not the 'Read More' button
-    if (e.target.classList.contains('news-card-read-more')) return;
-    
-    e.preventDefault();
-    isDown = true;
-    isPaused = true;
-    hasDragged = false;
-    scroller.classList.add('is-dragging');
-    startX = e.pageX - scroller.offsetLeft;
-    scrollLeft = scroller.scrollLeft;
-  });
-
-  const stopDragging = () => {
-    if (!isDown) return;
-    isDown = false;
-    isPaused = false;
-    scroller.classList.remove('is-dragging');
-    requestAnimationFrame(scrollStep); 
-  };
-
-  scroller.addEventListener('mouseleave', stopDragging);
-  scroller.addEventListener('mouseup', stopDragging);
-
-  scroller.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    hasDragged = true;
-    const x = e.pageX - scroller.offsetLeft;
-    const walk = (x - startX) * 2;
-    scroller.scrollLeft = scrollLeft - walk;
-  });
-  
-  // Prevent clicks on cards after dragging
-  scroller.querySelectorAll('.news-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      if (hasDragged) {
-        e.preventDefault();
+      const originalItems = Array.from(scroller.children);
+      if (originalItems.length === 0 || scroller.scrollWidth <= scroller.clientWidth) {
+        return;
       }
-    });
-  });
 
-  // Start the animation
-  requestAnimationFrame(scrollStep);
-});
+      // --- 1. Infinite Scroll Setup ---
+      originalItems.forEach(item => {
+        const clonedItem = item.cloneNode(true);
+        clonedItem.setAttribute('aria-hidden', 'true');
+        
+        // FIX: Find the link inside the cloned item and disable it
+        const clonedLink = clonedItem.querySelector('a.news-card-read-more');
+        if (clonedLink) {
+          clonedLink.setAttribute('tabindex', '-1');
+        }
+
+        scroller.appendChild(clonedItem);
+      });
+
+      const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
+      const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + (originalItems.length * gap);
+
+      // --- 2. Auto-Scroll Logic ---
+      let animationFrameId;
+      let isPaused = false;
+      const durationInSeconds = {{ section.settings.autoscroll_duration }};
+      const totalFrames = durationInSeconds * 60;
+      const speed = originalContentWidth / totalFrames;
+
+      function scrollStep() {
+        if (isPaused) return;
+        scroller.scrollLeft = (scroller.scrollLeft + speed) % originalContentWidth;
+        animationFrameId = requestAnimationFrame(scrollStep);
+      }
+
+      // --- 3. Click-and-Drag Scrolling Logic ---
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+      let hasDragged = false;
+
+      scroller.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('news-card-read-more')) return;
+        
+        e.preventDefault();
+        isDown = true;
+        isPaused = true;
+        hasDragged = false;
+        scroller.classList.add('is-dragging');
+        startX = e.pageX - scroller.offsetLeft;
+        scrollLeft = scroller.scrollLeft;
+      });
+
+      const stopDragging = () => {
+        if (!isDown) return;
+        isDown = false;
+        isPaused = false;
+        scroller.classList.remove('is-dragging');
+        requestAnimationFrame(scrollStep);
+      };
+
+      scroller.addEventListener('mouseleave', stopDragging);
+      scroller.addEventListener('mouseup', stopDragging);
+
+      scroller.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        hasDragged = true;
+        const x = e.pageX - scroller.offsetLeft;
+        const walk = (x - startX) * 2;
+        scroller.scrollLeft = scrollLeft - walk;
+      });
+
+      // --- 4. Link Click Logic ---
+      // This ensures that a click only registers if the mouse hasn't dragged.
+      scroller.addEventListener('click', (e) => {
+        if (hasDragged && !e.target.classList.contains('news-card-read-more')) {
+           e.preventDefault();
+        }
+      }, true); // Use capture phase to catch the click early
+
+      requestAnimationFrame(scrollStep);
+    });
   </script>
 {% endif %}
