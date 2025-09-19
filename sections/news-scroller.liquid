@@ -222,36 +222,62 @@
 {% if section.settings.autoscroll %}
   <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
-  if (!scroller) return;
+  console.log('✅ News Scroller: Script initiated (DOMContentLoaded event fired).');
 
-  // Only run if there's enough content to scroll
-  if (scroller.scrollWidth <= scroller.clientWidth) return;
+  const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
+
+  // Check if the scroller element was found
+  if (!scroller) {
+    console.error('🛑 News Scroller: ERROR! Could not find the scroller container element on the page.');
+    return;
+  }
+  console.log('👍 News Scroller: Found scroller container element:', scroller);
+
+  // Check if there's enough content to scroll
+  console.log('🤔 News Scroller: Checking if content is overflowing...');
+  console.log(`   - Total content width (scrollWidth): ${scroller.scrollWidth}px`);
+  console.log(`   - Visible container width (clientWidth): ${scroller.clientWidth}px`);
+
+  if (scroller.scrollWidth <= scroller.clientWidth) {
+    console.warn('🟡 News Scroller: Halting script. Content does not overflow, so no auto-scrolling is needed.');
+    return;
+  }
+
+  console.log('✅ News Scroller: Overflow detected. Proceeding to set up auto-scroll.');
 
   const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
+  console.log(`   - Scroll interval set to: ${scrollInterval}ms`);
   let autoScrollInterval;
 
   const scrollNext = () => {
+    console.log('➡️ News Scroller: scrollNext() function called.');
     // Check if we're near the end of the scroller
     if (scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1) {
+      console.log('   - At the end. Jumping back to start.');
       // If at the end, jump instantly back to the beginning
       scroller.scrollTo({ left: 0, behavior: 'auto' });
     } else {
+      console.log('   - Scrolling forward.');
       // Otherwise, scroll smoothly to the right
-      scroller.scrollBy({ left: 300, behavior: 'smooth' }); // Scrolls by a fixed 300px
+      scroller.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
 
   const startAutoScroll = () => {
-    clearInterval(autoScrollInterval);
+    console.log('▶️ News Scroller: startAutoScroll() called.');
+    clearInterval(autoScrollInterval); // Clear any old intervals
     autoScrollInterval = setInterval(scrollNext, scrollInterval);
   };
 
   const stopAutoScroll = () => {
+    console.log('⏸️ News Scroller: stopAutoScroll() called.');
     clearInterval(autoScrollInterval);
   };
 
+  // Start the animation
   startAutoScroll();
+
+  // Set up event listeners to pause on interaction
   scroller.addEventListener('mouseenter', stopAutoScroll);
   scroller.addEventListener('mouseleave', startAutoScroll);
 });
