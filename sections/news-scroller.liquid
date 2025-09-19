@@ -26,12 +26,23 @@
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
     padding: 20px;
+    cursor: grab; /* Indicates the area is draggable */
+    user-select: none; /* Prevents text selection while dragging */
+
+    /* REMOVED scroll-snap for smooth, free scrolling */
+
+    /* HIDE the scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
   }
+
+  .news-scroller-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+
   .news-card {
     flex: 0 0 320px;
-    scroll-snap-align: start;
     background-color: #fff;
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
@@ -201,12 +212,12 @@
     {
       "type": "range",
       "id": "autoscroll_speed",
-      "min": 2,
-      "max": 10,
-      "step": 1,
+      "min": 10,
+      "max": 50,
+      "step": 5,
       "unit": "s",
-      "label": "Autoscroll speed",
-      "default": 4
+      "label": "Scroll duration (slower is longer)",
+      "default": 30
     }
   ],
   "presets": [
@@ -220,61 +231,73 @@
 {% if section.settings.autoscroll %}
   <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /*
-    FIX: The selector was the problem.
-    It was looking for '.news-scroller-container' *inside* '[data-section-id]',
-    but they are the same element. The corrected selector below targets
-    the single element with BOTH the class and the data-attribute.
-  */
   const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
+  if (!scroller) return;
 
-  if (!scroller) {
-    console.error('🛑 News Scroller: ERROR! Could not find the scroller container element on the page.');
-    return;
-  }
+  // --- 1. Infinite Scroll Setup: Clone items for a seamless loop ---
+  const scrollerItems = Array.from(scroller.children);
+  scrollerItems.forEach(item => {
+    const clonedItem = item.cloneNode(true);
+    clonedItem.setAttribute('aria-hidden', 'true');
+    scroller.appendChild(clonedItem);
+  });
 
-  // Only run if there's enough content to scroll
-  if (scroller.scrollWidth <= scroller.clientWidth) {
-    return;
-  }
-
-  const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
-  let autoScrollInterval;
-  let scrollDirection = 1;
-
-  const performScrollStep = () => {
-    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
-    const isAtStart = scroller.scrollLeft <= 0;
-
-    if (isAtEnd && scrollDirection === 1) {
-      scrollDirection = -1;
-    } else if (isAtStart && scrollDirection === -1) {
-      scrollDirection = 1;
-    }
-
-    const card = scroller.querySelector('.news-card');
-    if (!card) return;
-    const scrollAmount = card.offsetWidth + (parseInt(window.getComputedStyle(scroller).gap) || 20);
-
-    scroller.scrollBy({
-      left: scrollAmount * scrollDirection,
-      behavior: 'smooth'
-    });
-  };
-
+  // --- 2. Auto-Scroll Logic: Smooth marquee animation ---
+  let animation;
   const startAutoScroll = () => {
-    clearInterval(autoScrollInterval);
-    autoScrollInterval = setInterval(performScrollStep, scrollInterval);
+    // Cancel any existing animation
+    if (animation) animation.cancel();
+
+    // Use Web Animations API for smooth, performant scrolling
+    animation = scroller.animate(
+      [
+        { transform: 'translateX(0)' },
+        { transform: `translateX(-${scroller.scrollWidth / 2}px)` }
+      ],
+      {
+        duration: {{ section.settings.autoscroll_speed | times: 1000 }},
+        iterations: Infinity
+      }
+    );
   };
 
-  const stopAutoScroll = () => {
-    clearInterval(autoScrollInterval);
-  };
+  // --- 3. Click-and-Drag Scrolling Logic ---
+  let isDown = false;
+  let startX;
+  let scrollLeft;
 
-  startAutoScroll();
-  scroller.addEventListener('mouseenter', stopAutoScroll);
-  scroller.addEventListener('mouseleave', startAutoScroll);
-  scroller.addEventListener('touchstart', stopAutoScroll, { passive: true });
+  scroller.addEventListener('mousedown', (e) => {
+    isDown = true;
+    scroller.style.cursor = 'grabbing';
+    if (animation) animation.pause(); // Pause auto-scroll on click
+    startX = e.pageX - scroller.offsetLeft;
+    scrollLeft = scroller.scrollLeft;
+  });
+
+  scroller.addEventListener('mouseleave', () => {
+    isDown = false;
+    scroller.style.cursor = 'grab';
+    if (animation) animation.play(); // Resume auto-scroll on leave
+  });
+
+  scroller.addEventListener('mouseup', () => {
+    isDown = false;
+    scroller.style.cursor = 'grab';
+    if (animation) animation.play(); // Resume auto-scroll on release
+  });
+
+  scroller.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - scroller.offsetLeft;
+    const walk = (x - startX) * 2; // The multiplier '2' makes dragging feel faster
+    scroller.scrollLeft = scrollLeft - walk;
+  });
+
+  // Start the auto-scroll if enabled
+  if (scroller.scrollWidth > scroller.clientWidth) {
+    startAutoScroll();
+  }
 });
   </script>
 {% endif %}
