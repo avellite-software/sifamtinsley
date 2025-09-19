@@ -1,18 +1,15 @@
-{%- comment -%}
-  The main styling for this section is now included in the <style> tag below.
-{%- endcomment -%}
 <style>
-  .main-blog-section {
+  .blog-page-section {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
 
-  .main-blog-header {
+  .blog-page-header {
     margin-bottom: 40px;
     text-align: center;
   }
 
-  .main-blog-header .title--primary {
+  .blog-page-title {
     font-size: 36px;
     font-weight: 700;
     color: #1c1c1c;
@@ -20,87 +17,99 @@
     font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
   }
 
-  .main-blog-articles {
+  .blog-post-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
   }
 
-  /* Re-using the .news-card class for consistency with your other sections */
-  .main-blog-article .news-card {
-    height: 100%;
+  .blog-post-card {
+    background-color: #fff;
+    border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   }
 
-  .main-blog-article .news-card:hover {
+  .blog-post-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .main-blog-article .news-card-image {
+  .blog-post-card__image-link {
+    display: block;
+    line-height: 0;
+  }
+
+  .blog-post-card__image {
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
   }
 
-  .main-blog-article .news-card-content {
+  .blog-post-card__content {
     padding: 25px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
   }
 
-  .main-blog-article .news-card-meta {
+  .blog-post-card__meta {
     font-size: 13px;
     color: #777;
     margin-bottom: 10px;
     font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
   }
 
-  .main-blog-article .news-card-title {
+  .blog-post-card__title {
     font-size: 20px;
     font-weight: 700;
     margin: 0 0 10px;
-    color: #1c1c1c;
     line-height: 1.4;
+  }
+
+  .blog-post-card__title a {
+    text-decoration: none;
+    color: #1c1c1c;
     font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
   }
 
-  .main-blog-article .news-card-excerpt {
+  .blog-post-card__excerpt {
     font-size: 15px;
     line-height: 1.6;
     margin: 0;
+    color: #333;
     flex-grow: 1;
     font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
   }
 
-  .main-blog-article .news-card-read-more {
+  .blog-post-card__read-more {
     display: inline-block;
     margin-top: 20px;
     padding: 10px 22px;
     background: #c1151b;
-    color: #fff;
+    color: #fff !important; /* Use important to override theme link colors */
     border: 1px solid #c1151b;
     border-radius: 4px;
     text-decoration: none;
     font-weight: 500;
     font-size: 16px;
     text-align: center;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s;
     align-self: flex-start;
   }
 
-  .main-blog-article .news-card-read-more:hover {
+  .blog-post-card__read-more:hover {
     background: #a10f16;
-    color: #fff;
   }
 
   /* Pagination Styles */
   .pagination-wrapper {
     margin-top: 50px;
   }
-
   .pagination__list {
     display: flex;
     justify-content: center;
@@ -109,7 +118,6 @@
     list-style: none;
     padding-left: 0;
   }
-
   .pagination__item {
     display: flex;
     align-items: center;
@@ -125,73 +133,69 @@
     height: 40px;
     transition: all 0.2s ease;
   }
-
   .pagination__item:hover {
     background-color: #f5f5f5;
     border-color: #ccc;
   }
-
   .pagination__item--current {
     background-color: #c1151b;
     border-color: #c1151b;
     color: #fff;
     pointer-events: none;
   }
-
-  .pagination__item-arrow .icon-caret {
+  .pagination__item-arrow .icon {
     transform: rotate(-90deg);
   }
 
   /* Responsive Grid */
   @media (max-width: 990px) {
-    .main-blog-articles {
+    .blog-post-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
-
   @media (max-width: 750px) {
-    .main-blog-section {
+    .blog-page-section {
       padding-top: {{ section.settings.padding_top }}px;
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
-    .main-blog-articles {
+    .blog-post-grid {
       grid-template-columns: 1fr;
     }
-    .main-blog-header .title--primary {
+    .blog-page-header .blog-page-title {
       font-size: 28px;
     }
   }
 </style>
 
-<div class="main-blog-section page-width">
-  <div class="main-blog-header">
-    <h1 class="title--primary{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+<div class="blog-page-section page-width">
+  <div class="blog-page-header">
+    <h1 class="blog-page-title{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
       {{ blog.title | escape }}
     </h1>
   </div>
 
   {%- paginate blog.articles by 6 -%}
-    <div class="main-blog-articles">
+    <div class="blog-post-grid">
       {%- for article in blog.articles -%}
         <div
-          class="main-blog-article{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+          class="blog-post-grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
           {% if settings.animations_reveal_on_scroll %}
             data-cascade
             style="--animation-order: {{ forloop.index }};"
           {% endif %}
         >
-          <div class="news-card">
+          <div class="blog-post-card">
             {%- if article.image and section.settings.show_image -%}
-              <a href="{{ article.url }}">
+              <a href="{{ article.url }}" class="blog-post-card__image-link">
                 {{
                   article.image
                   | image_url: width: 800
-                  | image_tag: loading: 'lazy', class: 'news-card-image', widths: '400, 600, 800'
+                  | image_tag: loading: 'lazy', class: 'blog-post-card__image', widths: '400, 600, 800'
                 }}
               </a>
             {%- endif -%}
-            <div class="news-card-content">
-              <div class="news-card-meta">
+            <div class="blog-post-card__content">
+              <div class="blog-post-card__meta">
                 {%- if section.settings.show_date -%}
                   <span>{{ article.published_at | time_tag: format: 'date' }}</span>
                 {%- endif -%}
@@ -200,11 +204,11 @@
                   <span>by {{ article.author }}</span>
                 {%- endif -%}
               </div>
-              <h3 class="news-card-title">
-                <a href="{{ article.url }}" style="text-decoration: none; color: inherit;">{{ article.title }}</a>
+              <h3 class="blog-post-card__title">
+                <a href="{{ article.url }}">{{ article.title }}</a>
               </h3>
-              <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
-              <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
+              <p class="blog-post-card__excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
+              <a href="{{ article.url }}" class="blog-post-card__read-more">Read More</a>
             </div>
           </div>
         </div>
