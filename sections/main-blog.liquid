@@ -1,15 +1,15 @@
 <style>
-  .blog-page-section {
+  .main-blog-section {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
 
-  .blog-page-header {
+  .main-blog-header {
     margin-bottom: 40px;
     text-align: center;
   }
 
-  .blog-page-title {
+  .main-blog-header .title--primary {
     font-size: 36px;
     font-weight: 700;
     color: #1c1c1c;
@@ -91,7 +91,7 @@
     margin-top: 20px;
     padding: 10px 22px;
     background: #c1151b;
-    color: #fff !important; /* Use important to override theme link colors */
+    color: #fff !important;
     border: 1px solid #c1151b;
     border-radius: 4px;
     text-decoration: none;
@@ -125,23 +125,26 @@
     text-decoration: none;
     font-size: 16px;
     font-weight: 600;
-    color: #333;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    color: #fff;
+    background-color: #c1151b;
+    border: 1px solid #c1151b;
     border-radius: 4px;
     min-width: 40px;
     height: 40px;
     transition: all 0.2s ease;
   }
   .pagination__item:hover {
-    background-color: #f5f5f5;
-    border-color: #ccc;
+    background-color: #a10f16;
+    border-color: #a10f16;
+    cursor: pointer;
   }
   .pagination__item--current {
     background-color: #c1151b;
     border-color: #c1151b;
     color: #fff;
     pointer-events: none;
+    opacity: 0.75;
+    cursor: default;
   }
   .pagination__item-arrow .icon {
     transform: rotate(-90deg);
@@ -174,7 +177,7 @@
     </h1>
   </div>
 
-  {%- paginate blog.articles by 6 -%}
+  {%- paginate blog.articles by section.settings.posts_per_page -%}
     <div class="blog-post-grid">
       {%- for article in blog.articles -%}
         <div
@@ -227,6 +230,15 @@
   "tag": "section",
   "class": "section",
   "settings": [
+    {
+      "type": "range",
+      "id": "posts_per_page",
+      "min": 3,
+      "max": 15,
+      "step": 1,
+      "label": "Posts per page",
+      "default": 6
+    },
     {
       "type": "checkbox",
       "id": "show_image",
