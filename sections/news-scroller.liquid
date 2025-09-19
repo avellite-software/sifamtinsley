@@ -27,8 +27,6 @@
     padding: 20px;
     cursor: grab;
     user-select: none;
-
-    /* Hide the scrollbar */
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -38,6 +36,7 @@
   .news-scroller-container.is-dragging {
     cursor: grabbing;
   }
+  /* MODIFICATION: Changed from an 'a' tag to a 'div' */
   .news-card {
     flex: 0 0 320px;
     background-color: #fff;
@@ -46,13 +45,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    text-decoration: none;
     color: #333;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
-  .news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    /* REMOVED hover transform to prevent interference with dragging */
   }
   .news-card-image {
     width: 100%;
@@ -87,13 +81,57 @@
     flex-grow: 1;
     font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
   }
+
+  /* MODIFICATION: New styles for the 'Read More' button */
   .news-card-read-more {
+    display: inline-block;
     margin-top: 20px;
-    font-weight: 600;
-    color: #c1151b;
+    padding: 10px 22px;
+    background: #c1151b;
+    color: #fff;
+    border: 1px solid #c1151b;
+    border-radius: 4px;
     text-decoration: none;
-    font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+    font-weight: 500;
+    font-size: 16px;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+    align-self: flex-start; /* Aligns button to the left */
   }
+
+  .news-card-read-more:hover {
+    background: #a10f16;
+    color: #fff;
+  }
+
+  /* NEW: Styles for the 'See All' button container */
+  .news-scroller-footer {
+    max-width: 1200px;
+    margin: 30px auto 0 auto;
+    padding: 0 20px;
+    text-align: center;
+  }
+
+  /* Re-using header button styles for consistency */
+  .news-scroller-see-all {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 4px;
+    background: #fff;
+    color: #c1151b;
+    border: 1px solid #ddd;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .news-scroller-see-all:hover {
+    background: #c1151b;
+    border-color: #c1151b;
+    color: #fff;
+  }
+
 
   @media (max-width: 768px) {
     .news-card {
@@ -118,13 +156,10 @@
       assign blog = blogs[section.settings.blog]
     -%}
     {%- for article in blog.articles limit: section.settings.posts_to_show -%}
-      <a href="{{ article.url }}" class="news-card" draggable="false">
+      {% comment %} Card is now a DIV, not a link. Only the button is clickable. {% endcomment %}
+      <div class="news-card">
         {%- if article.image -%}
-          {{
-            article.image
-            | image_url: width: 800
-            | image_tag: loading: 'lazy', class: 'news-card-image', widths: '400, 600, 800', draggable: 'false'
-          }}
+          {{ article.image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'news-card-image' }}
         {%- else -%}
           {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
         {%- endif -%}
@@ -140,9 +175,9 @@
           </div>
           <h3 class="news-card-title">{{ article.title }}</h3>
           <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
-          <span class="news-card-read-more">Read More &rarr;</span>
+          <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
         </div>
-      </a>
+      </div>
     {%- else -%}
       {%- for i in (1..4) -%}
         <div class="news-card">
@@ -152,12 +187,20 @@
             <p class="news-card-excerpt">
               This is where the article excerpt will appear. Select a blog in the theme editor to show your posts.
             </p>
-            <span class="news-card-read-more">Read More &rarr;</span>
+            <a href="#" class="news-card-read-more">Read More</a>
           </div>
         </div>
       {%- endfor -%}
     {%- endfor -%}
   </div>
+
+  {%- if blog != blank and section.settings.show_see_all_button -%}
+    <div class="news-scroller-footer">
+      <a href="{{ blog.url }}" class="news-scroller-see-all">
+        {{ section.settings.see_all_button_text }}
+      </a>
+    </div>
+  {%- endif -%}
 </div>
 
 {% schema %}
@@ -199,6 +242,22 @@
     },
     {
       "type": "header",
+      "content": "View All Button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_see_all_button",
+      "label": "Show 'See All' button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "see_all_button_text",
+      "label": "Button text",
+      "default": "See All News"
+    },
+    {
+      "type": "header",
       "content": "Auto-scroll Settings"
     },
     {
@@ -236,46 +295,48 @@ document.addEventListener('DOMContentLoaded', () => {
   if (originalItems.length === 0 || scroller.scrollWidth <= scroller.clientWidth) {
     return;
   }
-
+  
   // --- 1. Infinite Scroll Setup ---
   originalItems.forEach(item => {
     const clonedItem = item.cloneNode(true);
     clonedItem.setAttribute('aria-hidden', 'true');
     scroller.appendChild(clonedItem);
   });
-
-  // --- 2. Auto-Scroll Speed Calculation ---
-  const durationInSeconds = {{ section.settings.autoscroll_duration }};
-  const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
-  const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + ((originalItems.length) * gap);
   
-  // Calculate pixels-per-frame based on the desired total duration
-  // This assumes a standard 60 frames per second refresh rate
+  const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
+  // FIX: More precise calculation including the last gap for a perfect reset point
+  const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + (originalItems.length * gap);
+
+  // --- 2. Auto-Scroll Logic ---
+  let animationFrameId;
+  let isPaused = false;
+  const durationInSeconds = {{ section.settings.autoscroll_duration }};
   const totalFrames = durationInSeconds * 60;
   const speed = originalContentWidth / totalFrames;
 
-  // --- 3. Animation Logic using requestAnimationFrame ---
-  let animationFrameId;
-  let isPaused = false;
-
   function scrollStep() {
     if (isPaused) return;
-    scroller.scrollLeft += speed;
-    if (scroller.scrollLeft >= originalContentWidth) {
-      scroller.scrollLeft = 0;
-    }
+    
+    // FIX: Use a modulo operator for a perfectly seamless reset with no lag
+    scroller.scrollLeft = (scroller.scrollLeft + speed) % originalContentWidth;
+    
     animationFrameId = requestAnimationFrame(scrollStep);
   }
-
-  // --- 4. Click-and-Drag Scrolling Logic ---
+  
+  // --- 3. Click-and-Drag Scrolling Logic ---
   let isDown = false;
   let startX;
   let scrollLeft;
+  let hasDragged = false;
 
   scroller.addEventListener('mousedown', (e) => {
+    // Only drag if the target is not the 'Read More' button
+    if (e.target.classList.contains('news-card-read-more')) return;
+    
     e.preventDefault();
     isDown = true;
     isPaused = true;
+    hasDragged = false;
     scroller.classList.add('is-dragging');
     startX = e.pageX - scroller.offsetLeft;
     scrollLeft = scroller.scrollLeft;
@@ -286,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     isDown = false;
     isPaused = false;
     scroller.classList.remove('is-dragging');
-    requestAnimationFrame(scrollStep);
+    requestAnimationFrame(scrollStep); 
   };
 
   scroller.addEventListener('mouseleave', stopDragging);
@@ -295,9 +356,19 @@ document.addEventListener('DOMContentLoaded', () => {
   scroller.addEventListener('mousemove', (e) => {
     if (!isDown) return;
     e.preventDefault();
+    hasDragged = true;
     const x = e.pageX - scroller.offsetLeft;
     const walk = (x - startX) * 2;
     scroller.scrollLeft = scrollLeft - walk;
+  });
+  
+  // Prevent clicks on cards after dragging
+  scroller.querySelectorAll('.news-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (hasDragged) {
+        e.preventDefault();
+      }
+    });
   });
 
   // Start the animation
