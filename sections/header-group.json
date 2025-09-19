@@ -18,7 +18,8 @@
         "brands_menu": "brand-menu",
         "main_menu": "main-menu",
         "contact_button_text": "Contact Us",
-        "contact_button_link": "shopify://pages/contact"
+        "contact_button_link": "shopify://pages/contact",
+        "announcement_text": ""
       }
     }
   },
