@@ -1,13 +1,22 @@
 {% comment %}
-  NEW: Announcement Bar is now part of the header.
-  The header-wrapper now contains both the announcement bar and the main header.
+  - The header-wrapper contains both the announcement bar and the main header.
+  - The header-spacer div creates the needed space for the entire fixed header.
 {% endcomment %}
 <div class="header-wrapper">
-  {%- if section.settings.announcement_text != blank -%}
-    <div class="announcement-bar">
-      {{ section.settings.announcement_text }}
-    </div>
-  {%- endif -%}
+  {%- liquid
+    assign announcement_text = section.settings.announcement_text | strip
+    if announcement_text != blank
+      assign bar_modifier_class = 'announcement-bar--has-content'
+    else
+      assign bar_modifier_class = 'announcement-bar--no-content'
+    endif
+  -%}
+
+  <div class="announcement-bar {{ bar_modifier_class }}">
+    {%- if announcement_text != blank -%}
+      {{ announcement_text }}
+    {%- endif -%}
+  </div>
 
   <header class="custom-header">
     <div class="header-shape-clipper--default"><div></div></div>
@@ -106,13 +115,13 @@
   </header>
 </div>
 
-<div class="header-spacer"></div>
+<div class="header-spacer"><div></div></div>
 
 <style>
   :root {
     --header-height: 96px;
     --header-mobile-height: 70px;
-    --announcement-bar-height: 40px; /* Control announcement bar height */
+    /* Removed fixed announcement bar height */
   }
 
   /* ==============================================
@@ -131,11 +140,10 @@
   }
 
   /* ==============================================
-     Announcement Bar Styles (Now part of header)
+     Announcement Bar Styles
      ============================================== */
   .announcement-bar {
     width: 100%;
-    height: var(--announcement-bar-height);
     background-color: #c1151b;
     display: flex;
     align-items: center;
@@ -143,6 +151,17 @@
     color: #fff;
     font-size: 16px;
     font-weight: 500;
+    transition: all 0.3s ease; /* Smooth transition for height changes */
+  }
+
+  .announcement-bar--has-content {
+    padding: 10px 15px; /* Flexible padding instead of fixed height */
+    min-height: 40px; /* Ensures a minimum height when there is text */
+  }
+
+  .announcement-bar--no-content {
+    height: 5px; /* Sets a 5px height when there is no text */
+    padding: 0;
   }
 
   .custom-header {
@@ -152,12 +171,12 @@
     background: #fff;
     height: var(--header-height);
     font-family: inherit;
-    position: relative; /* Changed from fixed to relative */
-    z-index: 1; /* Sits on top of announcement bar if needed */
+    position: relative;
+    z-index: 1;
     outline: none !important;
   }
 
-  /* ... all of your other header styles remain unchanged below ... */
+  /* ... all of your other header styles ... */
 
   .header-shape-clipper--default {
     position: absolute;
