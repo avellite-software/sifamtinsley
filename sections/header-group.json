@@ -11,12 +11,6 @@
   "name": "t:sections.header.name",
   "type": "header",
   "sections": {
-    "announcement-bar": {
-      "type": "announcement-bar",
-      "settings": {
-        "announcement_text": ""
-      }
-    },
     "header": {
       "type": "header",
       "settings": {
@@ -29,7 +23,6 @@
     }
   },
   "order": [
-    "announcement-bar",
     "header"
   ]
 }
