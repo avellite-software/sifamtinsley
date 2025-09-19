@@ -1,8 +1,6 @@
 {% comment %}
   Section: News Scroller
-  - Displays a full-width, horizontal scrolling list of blog posts.
-  - Cards are automatically populated from a selected blog.
-  - Includes an optional JavaScript-powered auto-scroll feature.
+  - A draggable, auto-scrolling marquee of blog posts.
 {% endcomment %}
 
 <style>
@@ -28,12 +26,17 @@
     overflow-x: auto;
     padding: 20px;
     cursor: grab;
-    user-select: none;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    user-select: none; /* Prevents text selection while dragging */
+
+    /* Hide the scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
   }
   .news-scroller-container::-webkit-scrollbar {
-    display: none;
+    display: none; /* Chrome, Safari, and Opera */
+  }
+  .news-scroller-container.is-dragging {
+    cursor: grabbing;
   }
   .news-card {
     flex: 0 0 320px;
@@ -55,6 +58,7 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    pointer-events: none; /* Prevents image drag interference */
   }
   .news-card-content {
     padding: 25px;
@@ -114,12 +118,13 @@
       assign blog = blogs[section.settings.blog]
     -%}
     {%- for article in blog.articles limit: section.settings.posts_to_show -%}
-      <a href="{{ article.url }}" class="news-card">
+      {% comment %} Added draggable="false" to prevent default browser link dragging {% endcomment %}
+      <a href="{{ article.url }}" class="news-card" draggable="false">
         {%- if article.image -%}
           {{
             article.image
             | image_url: width: 800
-            | image_tag: loading: 'lazy', class: 'news-card-image', widths: '400, 600, 800'
+            | image_tag: loading: 'lazy', class: 'news-card-image', widths: '400, 600, 800', draggable: 'false'
           }}
         {%- else -%}
           {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
@@ -201,17 +206,16 @@
       "type": "checkbox",
       "id": "autoscroll",
       "label": "Enable auto-scroll",
-      "default": false
+      "default": true
     },
     {
       "type": "range",
       "id": "autoscroll_speed",
-      "min": 20,
-      "max": 120,
-      "step": 10,
-      "unit": "s",
-      "label": "Scroll duration (longer is slower)",
-      "default": 60
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Autoscroll speed",
+      "default": 1
     }
   ],
   "presets": [
@@ -230,58 +234,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const originalItems = Array.from(scroller.children);
   if (originalItems.length === 0 || scroller.scrollWidth <= scroller.clientWidth) {
-    return; // Not enough content to scroll
+    return;
   }
-
+  
   // --- 1. Infinite Scroll Setup ---
   originalItems.forEach(item => {
     const clonedItem = item.cloneNode(true);
     clonedItem.setAttribute('aria-hidden', 'true');
     scroller.appendChild(clonedItem);
   });
+  
+  const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
+  const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + ((originalItems.length) * gap);
 
-  // --- 2. Auto-Scroll Logic ---
-  let animation;
-  const startAutoScroll = () => {
-    if (animation) animation.cancel();
+  // --- 2. Auto-Scroll Logic using requestAnimationFrame ---
+  let animationFrameId;
+  let isPaused = false;
+  const speed = {{ section.settings.autoscroll_speed }};
 
-    // FIX: Precisely calculate the width of the original items for a perfect loop
-    const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
-    let originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + ((originalItems.length - 1) * gap);
-
-    animation = scroller.animate(
-      [
-        { transform: 'translateX(0)' },
-        { transform: `translateX(-${originalContentWidth}px)` }
-      ],
-      {
-        duration: {{ section.settings.autoscroll_speed | times: 1000 }},
-        iterations: Infinity
-      }
-    );
-  };
-
+  function scrollStep() {
+    if (isPaused) return;
+    scroller.scrollLeft += speed;
+    if (scroller.scrollLeft >= originalContentWidth) {
+      scroller.scrollLeft = 0;
+    }
+    animationFrameId = requestAnimationFrame(scrollStep);
+  }
+  
   // --- 3. Click-and-Drag Scrolling Logic ---
   let isDown = false;
   let startX;
   let scrollLeft;
 
   scroller.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // Prevents default link-drag behavior
     isDown = true;
-    scroller.style.cursor = 'grabbing';
-    if (animation) animation.pause();
+    isPaused = true; // Pause the animation
+    scroller.classList.add('is-dragging');
     startX = e.pageX - scroller.offsetLeft;
     scrollLeft = scroller.scrollLeft;
   });
 
-  const resumeAnimation = () => {
+  const stopDragging = () => {
     isDown = false;
-    scroller.style.cursor = 'grab';
-    if (animation) animation.play();
+    isPaused = false;
+    scroller.classList.remove('is-dragging');
+    requestAnimationFrame(scrollStep); // Resume animation
   };
 
-  scroller.addEventListener('mouseleave', resumeAnimation);
-  scroller.addEventListener('mouseup', resumeAnimation);
+  scroller.addEventListener('mouseleave', stopDragging);
+  scroller.addEventListener('mouseup', stopDragging);
 
   scroller.addEventListener('mousemove', (e) => {
     if (!isDown) return;
@@ -291,7 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
     scroller.scrollLeft = scrollLeft - walk;
   });
 
-  startAutoScroll();
+  // Start the animation
+  requestAnimationFrame(scrollStep);
 });
   </script>
 {% endif %}
