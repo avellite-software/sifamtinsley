@@ -33,9 +33,6 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  .news-scroller-container::-webkit-scrollbar {
-    display: none;
-  }
   .news-card {
     flex: 0 0 320px;
     scroll-snap-align: start;
@@ -223,55 +220,3 @@
   ]
 }
 {% endschema %}
-
-{% if section.settings.autoscroll %}
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const scroller = document.querySelector(`[data-section-id="{{ section.id }}"] .news-scroller-container`);
-  if (!scroller) return;
-
-  const scrollInterval = {{ section.settings.autoscroll_speed | times: 1000 }};
-  let scrollerIntervalId;
-
-  const scrollNext = () => {
-    const firstCard = scroller.querySelector('.news-card');
-    if (!firstCard) return;
-
-    // Calculate the distance to scroll (width of one card + gap)
-    const scrollAmount = firstCard.offsetWidth + parseInt(window.getComputedStyle(scroller).gap);
-    
-    // Check if we are near the end of the scroll
-    const isAtEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1;
-
-    if (isAtEnd) {
-      // If at the end, smoothly scroll back to the start
-      scroller.scrollTo({ left: 0 });
-    } else {
-      // Otherwise, scroll by one card width
-      scroller.scrollLeft += scrollAmount;
-    }
-  };
-
-  const startScrolling = () => {
-    // Clear any existing interval before starting a new one
-    clearInterval(scrollerIntervalId);
-    scrollerIntervalId = setInterval(scrollNext, scrollInterval);
-  };
-
-  const stopScrolling = () => {
-    clearInterval(scrollerIntervalId);
-  };
-
-  // Start the scroller
-  startScrolling();
-
-  // Pause on hover
-  scroller.addEventListener('mouseenter', stopScrolling);
-  // Resume on mouse leave
-  scroller.addEventListener('mouseleave', startScrolling);
-  // Also pause when the user is trying to manually scroll
-  scroller.addEventListener('wheel', stopScrolling, { passive: true });
-  scroller.addEventListener('touchstart', stopScrolling, { passive: true });
-});
-  </script>
-{% endif %}
