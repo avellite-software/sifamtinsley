@@ -2,17 +2,17 @@
   =====================================================================================
   UPDATED SECTION: All Collections with Sidebar
   -------------------------------------------------------------------------------------
-  - V4 Changes:
-    - Corrected main background color target to the page-width container.
-    - Removed forced uppercase on the section title.
-    - Isolated header padding from base.css using a unique class.
+  - V5 Changes:
+    - Added a dedicated Image Picker for the sidebar's featured page.
+    - No longer relies on the Page's featured image.
+    - Kept user's added padding for the title.
   =====================================================================================
 {% endcomment %}
 
 <style>
   .all-collections-section-{{ section.id }} {
     --header-bg-color: {{ section.settings.header_bg_color }};
-    --content-area-bg-color: {{ section.settings.content_area_bg_color }}; /* Renamed for clarity */
+    --content-area-bg-color: {{ section.settings.content_area_bg_color }};
     --sidebar-bg-color: {{ section.settings.sidebar_bg_color }};
     --title-font-size: {{ section.settings.title_font_size }}px;
     --title-font-weight: {{ section.settings.title_font_weight }};
@@ -28,9 +28,8 @@
     padding: 2rem 0;
   }
 
-  /* NEW class to isolate header padding from theme's .page-width */
   .all-collections-section-{{ section.id }} .section-header-container {
-    max-width: 1200px; /* Standard page width */
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
   }
@@ -40,19 +39,19 @@
     font-size: var(--title-font-size);
     font-weight: var(--title-font-weight);
     text-align: center;
-    /* text-transform removed to allow natural casing */
   }
 
   .section-header__title {
     padding: 30px 0;
   }
+
   /* ==============================================
      Main Page Layout & Background
      ============================================== */
   .all-collections-section-{{ section.id }} .page-width-padded {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
-    background-color: var(--content-area-bg-color); /* CORRECTED TARGET */
+    background-color: var(--content-area-bg-color);
   }
 
   .all-collections-section-{{ section.id }} .collections-page-layout {
@@ -120,7 +119,6 @@
      Main Content Grid Wrapper
      ============================================== */
   .all-collections-section-{{ section.id }} .main-content-wrapper {
-    /* This div no longer needs a background color, it's just a container now */
   }
 
   .all-collections-section-{{ section.id }} .collection-grid-new {
@@ -228,19 +226,20 @@
           {%- endfor -%}
         </ul>
 
-        {% comment %} Sidebar Featured Page {% endcomment %}
+        {% comment %} Sidebar Featured Page - Now uses image_picker setting {% endcomment %}
         {%- liquid
           assign featured_page = section.settings.featured_page
+          assign featured_image = section.settings.featured_image
         -%}
-        {%- if featured_page != blank and featured_page.featured_image != blank -%}
+        {%- if featured_page != blank and featured_image != blank -%}
           <div class="sidebar-featured-page">
             <a href="{{ featured_page.url }}" title="{{ featured_page.title | escape }}">
               <img
-                src="{{ featured_page.featured_image | image_url: width: 400 }}"
-                alt="{{ featured_page.featured_image.alt | escape }}"
+                src="{{ featured_image | image_url: width: 400 }}"
+                alt="{{ featured_image.alt | default: featured_page.title | escape }}"
                 loading="lazy"
-                width="200"
-                height="{{ 200 | divided_by: featured_page.featured_image.aspect_ratio | round }}"
+                width="{{ featured_image.width }}"
+                height="{{ featured_image.height }}"
               >
             </a>
           </div>
@@ -326,8 +325,14 @@
     {
       "type": "page",
       "id": "featured_page",
-      "label": "Featured page",
-      "info": "Select a page to feature at the bottom of the sidebar. The page must have a featured image assigned to it."
+      "label": "Featured page link",
+      "info": "Select a page to link to from the sidebar image."
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image",
+      "label": "Featured page image",
+      "info": "Upload an image to display at the bottom of the sidebar."
     },
     {
       "type": "header",
