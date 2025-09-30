@@ -14,7 +14,7 @@
       "settings": {
         "title": "Collections",
         "header_bg_color": "#ffffff",
-        "content_area_bg_color": "#878787",
+        "content_area_bg_color": "#f5f5f5",
         "sidebar_bg_color": "#ffffff",
         "card_box_shadow": "0 4px 15px rgba(0, 0, 0, 0.1)",
         "sidebar_box_shadow": "0 4px 15px rgba(0, 0, 0, 0.08)",
