@@ -2,22 +2,20 @@
   =====================================================================================
   UPDATED SECTION: All Collections with Sidebar
   -------------------------------------------------------------------------------------
-  - V3 Changes:
-    - Removed 'All Collections' H3 from sidebar.
-    - Fixed main content background color scope.
-    - Added Box Shadow settings for cards and sidebar.
-    - Added selectable 'Featured Page' image/link to sidebar.
+  - V4 Changes:
+    - Corrected main background color target to the page-width container.
+    - Removed forced uppercase on the section title.
+    - Isolated header padding from base.css using a unique class.
   =====================================================================================
 {% endcomment %}
 
 <style>
   .all-collections-section-{{ section.id }} {
     --header-bg-color: {{ section.settings.header_bg_color }};
+    --content-area-bg-color: {{ section.settings.content_area_bg_color }}; /* Renamed for clarity */
     --sidebar-bg-color: {{ section.settings.sidebar_bg_color }};
-    --main-bg-color: {{ section.settings.main_bg_color }};
     --title-font-size: {{ section.settings.title_font_size }}px;
     --title-font-weight: {{ section.settings.title_font_weight }};
-    --title-text-transform: {% if section.settings.title_uppercase %}uppercase{% else %}none{% endif %};
     --card-box-shadow: {{ section.settings.card_box_shadow }};
     --sidebar-box-shadow: {{ section.settings.sidebar_box_shadow }};
   }
@@ -30,20 +28,28 @@
     padding: 2rem 0;
   }
 
+  /* NEW class to isolate header padding from theme's .page-width */
+  .all-collections-section-{{ section.id }} .section-header-container {
+    max-width: 1200px; /* Standard page width */
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
   .all-collections-section-{{ section.id }} .section-header__title {
     margin: 0;
     font-size: var(--title-font-size);
     font-weight: var(--title-font-weight);
-    text-transform: var(--title-text-transform);
     text-align: center;
+    /* text-transform removed to allow natural casing */
   }
 
   /* ==============================================
-     Main Page Layout
+     Main Page Layout & Background
      ============================================== */
   .all-collections-section-{{ section.id }} .page-width-padded {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: var(--content-area-bg-color); /* CORRECTED TARGET */
   }
 
   .all-collections-section-{{ section.id }} .collections-page-layout {
@@ -107,14 +113,11 @@
     opacity: 0.85;
   }
 
-
   /* ==============================================
-     Main Content Wrapper & Grid
+     Main Content Grid Wrapper
      ============================================== */
   .all-collections-section-{{ section.id }} .main-content-wrapper {
-    background-color: var(--main-bg-color);
-    padding: 20px;
-    border-radius: 8px;
+    /* This div no longer needs a background color, it's just a container now */
   }
 
   .all-collections-section-{{ section.id }} .collection-grid-new {
@@ -128,7 +131,6 @@
       grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
     }
   }
-
 
   /* ==============================================
      Collection Card Style
@@ -191,13 +193,17 @@
     .all-collections-section-{{ section.id }} .collections-sidebar {
       display: none;
     }
+
+    .all-collections-section-{{ section.id }} .section-header-container {
+      padding: 0 1rem;
+    }
   }
 </style>
 
 <div class="all-collections-section-{{ section.id }}">
   {%- if section.settings.title != blank -%}
     <div class="section-header">
-      <div class="page-width">
+      <div class="section-header-container">
         <h2 class="section-header__title">
           {{ section.settings.title }}
         </h2>
@@ -281,14 +287,15 @@
     },
     {
       "type": "color",
-      "id": "sidebar_bg_color",
-      "label": "Sidebar Background Color",
-      "default": "#ffffff"
+      "id": "content_area_bg_color",
+      "label": "Content Area Background Color",
+      "default": "#ffffff",
+      "info": "This is the background for the entire area containing the sidebar and collection grid."
     },
     {
       "type": "color",
-      "id": "main_bg_color",
-      "label": "Main Content Background Color",
+      "id": "sidebar_bg_color",
+      "label": "Sidebar Background Color",
       "default": "#ffffff"
     },
     {
@@ -347,12 +354,6 @@
       "default": "700"
     },
     {
-      "type": "checkbox",
-      "id": "title_uppercase",
-      "label": "Make title uppercase",
-      "default": true
-    },
-    {
       "type": "header",
       "content": "Layout Settings"
     },
@@ -386,7 +387,7 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "Padding top",
+      "label": "Padding top (Content Area)",
       "default": 52
     },
     {
@@ -396,7 +397,7 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "Padding bottom",
+      "label": "Padding bottom (Content Area)",
       "default": 52
     }
   ],
