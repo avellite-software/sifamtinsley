@@ -1,11 +1,31 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
       "type": "main-list-collections",
       "settings": {
         "title": "Collections",
-        "sort": "alphabetical",
-        "image_ratio": "square"
+        "header_bg_color": "#ffffff",
+        "content_area_bg_color": "#878787",
+        "sidebar_bg_color": "#ffffff",
+        "card_box_shadow": "0 4px 15px rgba(0, 0, 0, 0.1)",
+        "sidebar_box_shadow": "0 4px 15px rgba(0, 0, 0, 0.08)",
+        "featured_page": "become-a-distributor",
+        "featured_image": "shopify://shop_images/distributor_image_square.jpg",
+        "title_font_size": 40,
+        "title_font_weight": "700",
+        "columns_desktop": 3,
+        "columns_mobile": "1",
+        "padding_top": 52,
+        "padding_bottom": 52
       }
     }
   },
