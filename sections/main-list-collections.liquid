@@ -2,10 +2,9 @@
   =====================================================================================
   UPDATED SECTION: All Collections with Sidebar
   -------------------------------------------------------------------------------------
-  - V5 Changes:
-    - Added a dedicated Image Picker for the sidebar's featured page.
-    - No longer relies on the Page's featured image.
-    - Kept user's added padding for the title.
+  - V6 Changes:
+    - Wrapped content in a new full-width div.
+    - Background colour now applies to the full screen width, behind the centered content.
   =====================================================================================
 {% endcomment %}
 
@@ -48,7 +47,8 @@
   /* ==============================================
      Main Page Layout & Background
      ============================================== */
-  .all-collections-section-{{ section.id }} .page-width-padded {
+  /* NEW: This wrapper is full-width and holds the background colour */
+  .all-collections-section-{{ section.id }} .content-area-full-width {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
     background-color: var(--content-area-bg-color);
@@ -118,9 +118,6 @@
   /* ==============================================
      Main Content Grid Wrapper
      ============================================== */
-  .all-collections-section-{{ section.id }} .main-content-wrapper {
-  }
-
   .all-collections-section-{{ section.id }} .collection-grid-new {
     display: grid;
     gap: 20px;
@@ -212,49 +209,50 @@
     </div>
   {%- endif -%}
 
-  <div class="page-width page-width-padded">
-    <div class="collections-page-layout">
-      <aside class="collections-sidebar">
-        <ul>
-          {%- for collection in collections -%}
-            {%- if collection.handle == 'all' %}{% continue %}{% endif -%}
-            <li>
-              <a href="{{ collection.url }}" title="View the {{ collection.title }} collection">
-                {{ collection.title }}
+  <div class="content-area-full-width">
+    <div class="page-width">
+      <div class="collections-page-layout">
+        <aside class="collections-sidebar">
+          <ul>
+            {%- for collection in collections -%}
+              {%- if collection.handle == 'all' %}{% continue %}{% endif -%}
+              <li>
+                <a href="{{ collection.url }}" title="View the {{ collection.title }} collection">
+                  {{ collection.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          {%- liquid
+            assign featured_page = section.settings.featured_page
+            assign featured_image = section.settings.featured_image
+          -%}
+          {%- if featured_page != blank and featured_image != blank -%}
+            <div class="sidebar-featured-page">
+              <a href="{{ featured_page.url }}" title="{{ featured_page.title | escape }}">
+                <img
+                  src="{{ featured_image | image_url: width: 400 }}"
+                  alt="{{ featured_image.alt | default: featured_page.title | escape }}"
+                  loading="lazy"
+                  width="{{ featured_image.width }}"
+                  height="{{ featured_image.height }}"
+                >
               </a>
-            </li>
-          {%- endfor -%}
-        </ul>
+            </div>
+          {%- endif -%}
+        </aside>
 
-        {% comment %} Sidebar Featured Page - Now uses image_picker setting {% endcomment %}
-        {%- liquid
-          assign featured_page = section.settings.featured_page
-          assign featured_image = section.settings.featured_image
-        -%}
-        {%- if featured_page != blank and featured_image != blank -%}
-          <div class="sidebar-featured-page">
-            <a href="{{ featured_page.url }}" title="{{ featured_page.title | escape }}">
-              <img
-                src="{{ featured_image | image_url: width: 400 }}"
-                alt="{{ featured_image.alt | default: featured_page.title | escape }}"
-                loading="lazy"
-                width="{{ featured_image.width }}"
-                height="{{ featured_image.height }}"
-              >
-            </a>
+        <div class="main-content-wrapper">
+          <div class="collection-grid-new">
+            {%- for collection in collections -%}
+              {%- if collection.handle == 'all' %}{% continue %}{% endif -%}
+              <a href="{{ collection.url }}" class="collection-card-new">
+                <span class="collection-card-new__title">{{ collection.title }}</span>
+                <span class="collection-card-new__button">MORE ></span>
+              </a>
+            {%- endfor -%}
           </div>
-        {%- endif -%}
-      </aside>
-
-      <div class="main-content-wrapper">
-        <div class="collection-grid-new">
-          {%- for collection in collections -%}
-            {%- if collection.handle == 'all' %}{% continue %}{% endif -%}
-            <a href="{{ collection.url }}" class="collection-card-new">
-              <span class="collection-card-new__title">{{ collection.title }}</span>
-              <span class="collection-card-new__button">MORE ></span>
-            </a>
-          {%- endfor -%}
         </div>
       </div>
     </div>
