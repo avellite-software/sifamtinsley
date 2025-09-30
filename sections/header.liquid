@@ -72,8 +72,21 @@
 
     <div class="header-right">
       {%- for link in section.settings.main_menu.links -%}
-        <div class="dropdown header-btn">
-          <a href="{{ link.url }}" class="dropdown-link">{{ link.title }}</a>
+        <div class="dropdown">
+          {% comment %}
+            MODIFICATION: The .header-btn class is now on the <a> tag itself
+            to make the entire button area clickable.
+          {% endcomment %}
+          <a href="{{ link.url }}" class="header-btn dropdown-link">
+            {{ link.title }}
+            {%- if link.links != empty -%}
+              <span class="dropdown-caret">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                  <path d="M7 10l5 5 5-5z"/>
+                </svg>
+              </span>
+            {%- endif -%}
+          </a>
           {%- if link.links != empty -%}
             <div class="dropdown-content">
               {%- for child_link in link.links -%}
@@ -91,11 +104,12 @@
       {%- endif -%}
 
       <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
-        {% if cart == empty -%}
+        {%- comment %} Cart icon content... {%- endcomment %}
+        {%- if cart == empty -%}
           <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
         {%- else -%}
           <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
-        {%- endif %}
+        {%- endif -%}
         <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
         {%- if cart != empty -%}
           <div class="cart-count-bubble">
@@ -122,7 +136,6 @@
   :root {
     --header-height: 96px;
     --header-mobile-height: 70px;
-    /* Removed fixed announcement bar height */
   }
 
   /* ==============================================
@@ -152,11 +165,11 @@
     color: #fff;
     font-size: 16px;
     font-weight: 500;
-    transition: all 0.3s ease; /* Smooth transition for height changes */
+    transition: all 0.3s ease;
   }
 
   .announcement-bar--no-content {
-    height: 5px; /* Sets a 5px height when there is no text */
+    height: 5px;
     padding: 0;
   }
 
@@ -172,7 +185,7 @@
     outline: none !important;
   }
 
-  /* ... all of your other header styles ... */
+  /* ... other header styles ... */
 
   .header-shape-clipper--default {
     position: absolute;
@@ -308,12 +321,6 @@
     display: block;
   }
 
-  .logo span {
-    font-size: 28px;
-    font-weight: bold;
-    color: #333;
-  }
-
   .header-center {
     flex: 1;
     display: flex;
@@ -352,16 +359,16 @@
     transition: background 0.2s, color 0.2s;
   }
 
-  .search-btn:hover {
-    background: #eaeaea;
-    color: #a10f16;
-  }
-
   .header-right {
     display: flex;
     align-items: center;
     gap: 16px;
     padding-right: 20px;
+  }
+
+  /* MODIFICATION: Parent dropdown div is now just for positioning */
+  .dropdown {
+    position: relative;
   }
 
   .header-btn {
@@ -377,10 +384,12 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    white-space: nowrap;
   }
 
   .header-btn:hover,
-  .header-btn:focus {
+  .header-btn:focus,
+  .dropdown:hover > .header-btn {
     background: #c1151b;
     color: #fff;
   }
@@ -392,34 +401,36 @@
   }
 
   .dropdown-link {
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 16px;
     font-weight: 900;
-    background: none;
-    border: none;
-    padding: 0;
+  }
+
+  .dropdown-caret {
+    margin-left: 6px;
     display: flex;
     align-items: center;
-    text-wrap: nowrap;
+    transition: transform 0.2s ease;
+  }
+
+  .dropdown:hover .dropdown-caret {
+    transform: rotate(180deg);
   }
 
   .dropdown-content {
     display: none;
     position: absolute;
-    top: 48px;
+    top: 100%; /* Position below the button */
     left: 0;
     background: #fff;
     border: 1px solid #eee;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    min-width: 140px;
+    min-width: 160px;
     z-index: 10;
     flex-direction: column;
+    padding: 5px 0;
+    border-radius: 0 0 4px 4px;
   }
 
-  .dropdown:hover .dropdown-content,
-  .dropdown-link:focus + .dropdown-content {
+  .dropdown:hover .dropdown-content {
     display: flex;
   }
 
@@ -436,14 +447,7 @@
   }
 
   .cart-btn {
-    display: flex;
-    align-items: center;
-    position: relative;
-    background: #fff;
     color: #c1151b;
-    padding: 10px 22px;
-    border-radius: 4px;
-    transition: background 0.2s, color 0.2s;
   }
 
   .cart-btn:hover {
@@ -484,11 +488,13 @@
   body.mobile-menu-open .mobile-nav-panel {
     right: 0;
   }
-
   body.mobile-menu-open .mobile-nav-overlay {
     display: block;
   }
 
+  /* ==============================================
+     MOBILE STYLES
+     ============================================== */
   @media screen and (max-width: 1400px) {
     .custom-header {
       height: var(--header-mobile-height);
@@ -544,7 +550,6 @@
     }
 
     .mobile-nav-overlay {
-      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -554,6 +559,7 @@
       z-index: 101;
     }
 
+    /* Mobile Nav Content Structure */
     .mobile-nav-content .header-center {
       display: block;
       padding: 0 20px 20px;
@@ -573,45 +579,50 @@
       padding: 0;
     }
 
+    .mobile-nav-content .dropdown {
+      border-bottom: 1px solid #eee;
+    }
+
     .mobile-nav-content .header-btn {
       justify-content: space-between;
-      border-bottom: 1px solid #eee;
+      width: 100%;
       padding: 15px 20px;
-    }
-
-    .mobile-nav-content .dropdown-content {
-      position: static;
-      display: none;
-      box-shadow: none;
-      border: none;
-      background: #f9f9f9;
-      padding-left: 0;
-      margin: 10px 0 0;
-    }
-
-    .mobile-nav-content .dropdown-content a {
-      padding: 12px 20px 12px 35px;
-    }
-
-    .mobile-nav-content .dropdown.is-open > .dropdown-content {
-      display: flex;
-    }
-
-    .mobile-nav-content .red-btn {
-      background: #c1151b;
-      color: #fff;
       border-radius: 0;
     }
 
-    .mobile-nav-content .red-btn:hover {
-      background: #a10f16;
-      color: #fff;
+    /* MODIFICATION: Mobile dropdown content styling */
+    .mobile-nav-content .dropdown-content {
+      position: static;
+      display: none; /* Hide by default */
+      box-shadow: none;
+      border: none;
+      background: #f9f9f9;
+      padding: 10px 0;
+      margin: 0;
+      border-top: 1px solid #eee;
     }
 
+    .mobile-nav-content .dropdown-content a {
+      padding: 12px 20px 12px 40px; /* Indented text */
+    }
+
+    /* MODIFICATION: Show dropdown when parent has .is-open class */
+    .mobile-nav-content .dropdown.is-open > .dropdown-content {
+      display: block; /* Change from flex to block */
+    }
+
+    .mobile-nav-content .dropdown-caret {
+      transition: transform 0.3s ease;
+    }
+
+    .mobile-nav-content .dropdown.is-open > .header-btn .dropdown-caret {
+      transform: rotate(180deg);
+    }
+
+    .mobile-nav-content .red-btn,
     .mobile-nav-content .cart-btn {
-      margin: 20px;
-      border: 1px solid #eee;
-      justify-content: center;
+      border-bottom: 1px solid #eee;
+      margin: 0;
     }
   }
 </style>
@@ -620,11 +631,7 @@
 {
   "name": "Custom Header",
   "settings": [
-    {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Logo"
-    },
+    { "type": "image_picker", "id": "logo", "label": "Logo" },
     {
       "type": "link_list",
       "id": "brands_menu",
@@ -637,27 +644,10 @@
       "label": "Main Menu",
       "info": "Select the main navigation menu for the header."
     },
-    {
-      "type": "text",
-      "id": "contact_button_text",
-      "label": "Contact Button Text",
-      "default": "Contact Us"
-    },
-    {
-      "type": "url",
-      "id": "contact_button_link",
-      "label": "Contact Button Link"
-    },
-    {
-      "type": "header",
-      "content": "Announcement Bar"
-    },
-    {
-      "type": "text",
-      "id": "announcement_text",
-      "label": "Text",
-      "default": "Announce something here"
-    }
+    { "type": "text", "id": "contact_button_text", "label": "Contact Button Text", "default": "Contact Us" },
+    { "type": "url", "id": "contact_button_link", "label": "Contact Button Link" },
+    { "type": "header", "content": "Announcement Bar" },
+    { "type": "text", "id": "announcement_text", "label": "Text", "default": "Announce something here" }
   ]
 }
 {% endschema %}
@@ -665,13 +655,12 @@
 <script>
   // Main script for header functionality
   document.addEventListener('DOMContentLoaded', () => {
-    // This script now also handles the spacer div height
+    // Spacer div height logic
     const headerWrapper = document.querySelector('.header-wrapper');
     const headerSpacer = document.querySelector('.header-spacer');
     if (headerWrapper && headerSpacer) {
       const setSpacerHeight = () => {
-        const headerHeight = headerWrapper.offsetHeight;
-        headerSpacer.style.height = `${headerHeight}px`;
+        headerSpacer.style.height = `${headerWrapper.offsetHeight}px`;
       };
       setSpacerHeight();
       window.addEventListener('resize', setSpacerHeight);
@@ -680,6 +669,7 @@
     const header = document.querySelector('.custom-header');
     if (!header) return;
 
+    // Circle dropdown logic
     const circleDropdownContainer = header.querySelector('.circle-dropdown-container');
     if (circleDropdownContainer) {
       const circleTrigger = circleDropdownContainer.querySelector('.circle-dropdown-trigger');
@@ -688,7 +678,6 @@
         header.classList.toggle('is-circle-menu-active');
       });
     }
-
     document.addEventListener('click', (event) => {
       if (
         circleDropdownContainer &&
@@ -699,9 +688,11 @@
       }
     });
 
+    // Mobile navigation logic
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
-    const mobileNavOverlay = header.querySelector('.mobile-nav-overlay');
+    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay'); // Corrected selector
+    const mobileNavPanel = document.querySelector('.mobile-nav-panel'); // Corrected selector
     const mobileNavContent = header.querySelector('.mobile-nav-content');
     const centerEl = header.querySelector('.header-center');
     const rightEl = header.querySelector('.header-right');
@@ -719,23 +710,48 @@
       } else {
         if (centerEl && mobileNavContent.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
         if (rightEl && mobileNavContent.contains(rightEl)) header.insertBefore(rightEl, mobileNavToggle);
-        toggleMenu(false);
+        toggleMenu(false); // Close menu on resize to desktop
       }
     };
 
     mobileNavToggle.addEventListener('click', () => toggleMenu(true));
     mobileNavClose.addEventListener('click', () => toggleMenu(false));
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
-    header.addEventListener('click', (e) => {
-      const isMobile = window.innerWidth <= BREAKPOINT;
+
+    // MODIFICATION: New mobile menu click handler
+    const navContentContainer = mobileNavPanel.querySelector('.mobile-nav-content');
+    navContentContainer.addEventListener('click', (e) => {
       const dropdownLink = e.target.closest('.dropdown-link');
-      if (isMobile && dropdownLink) {
-        e.preventDefault();
-        const parentDropdown = dropdownLink.closest('.dropdown');
-        if (parentDropdown) {
-          parentDropdown.classList.toggle('is-open');
-        }
+      if (!dropdownLink) return;
+
+      const parentDropdown = dropdownLink.closest('.dropdown');
+      const submenu = parentDropdown.querySelector('.dropdown-content');
+
+      // If there is no submenu, let the link navigate normally.
+      if (!submenu) {
+        toggleMenu(false); // Close menu on navigation
+        return;
       }
+
+      // If there IS a submenu, prevent default navigation
+      e.preventDefault();
+
+      // Second click logic: if menu is already open, navigate to the link
+      if (parentDropdown.classList.contains('is-open')) {
+        window.location.href = dropdownLink.href;
+        return;
+      }
+
+      // First click logic: close other open submenus
+      const openSubmenus = navContentContainer.querySelectorAll('.dropdown.is-open');
+      openSubmenus.forEach((item) => {
+        if (item !== parentDropdown) {
+          item.classList.remove('is-open');
+        }
+      });
+
+      // Toggle the clicked submenu
+      parentDropdown.classList.toggle('is-open');
     });
 
     manageNavElements();
