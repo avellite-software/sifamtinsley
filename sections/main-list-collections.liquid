@@ -1,11 +1,12 @@
 {% comment %}
   =====================================================================================
-  NEW SECTION: All Collections with Sidebar
+  UPDATED SECTION: All Collections with Sidebar
   -------------------------------------------------------------------------------------
-  - Displays ALL store collections in the main grid (except the default 'all' collection).
-  - Collection tiles are styled with a red background and white text, matching the user's image.
-  - Section settings allow for custom background colors for the header, sidebar, and main content.
-  - Section settings also allow for customizing the main title's appearance.
+  - V3 Changes:
+    - Removed 'All Collections' H3 from sidebar.
+    - Fixed main content background color scope.
+    - Added Box Shadow settings for cards and sidebar.
+    - Added selectable 'Featured Page' image/link to sidebar.
   =====================================================================================
 {% endcomment %}
 
@@ -17,20 +18,8 @@
     --title-font-size: {{ section.settings.title_font_size }}px;
     --title-font-weight: {{ section.settings.title_font_weight }};
     --title-text-transform: {% if section.settings.title_uppercase %}uppercase{% else %}none{% endif %};
-  }
-
-  /* ==============================================
-     Section Padding & Layout
-     ============================================== */
-  .all-collections-section-{{ section.id }} .page-width {
-    padding-top: {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
-  }
-
-  .all-collections-section-{{ section.id }} .collections-page-layout {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 40px;
+    --card-box-shadow: {{ section.settings.card_box_shadow }};
+    --sidebar-box-shadow: {{ section.settings.sidebar_box_shadow }};
   }
 
   /* ==============================================
@@ -50,20 +39,28 @@
   }
 
   /* ==============================================
+     Main Page Layout
+     ============================================== */
+  .all-collections-section-{{ section.id }} .page-width-padded {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .all-collections-section-{{ section.id }} .collections-page-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  /* ==============================================
      Sidebar Menu
      ============================================== */
   .all-collections-section-{{ section.id }} .collections-sidebar {
     background-color: var(--sidebar-bg-color);
     padding: 20px;
     border-radius: 8px;
-    align-self: start; /* Prevents sidebar from stretching */
-  }
-
-  .all-collections-section-{{ section.id }} .collections-sidebar h3 {
-    font-size: 18px;
-    margin: 0 0 1rem 0;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e1e1e1;
+    box-shadow: var(--sidebar-box-shadow);
   }
 
   .all-collections-section-{{ section.id }} .collections-sidebar ul {
@@ -87,10 +84,34 @@
     color: #000;
   }
 
+  /* Sidebar Featured Page Image */
+  .all-collections-section-{{ section.id }} .sidebar-featured-page {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #e1e1e1;
+  }
+
+  .all-collections-section-{{ section.id }} .sidebar-featured-page a {
+    padding: 0;
+  }
+
+  .all-collections-section-{{ section.id }} .sidebar-featured-page img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+  }
+
+  .all-collections-section-{{ section.id }} .sidebar-featured-page a:hover img {
+    opacity: 0.85;
+  }
+
+
   /* ==============================================
-     Main Content & Collection Grid
+     Main Content Wrapper & Grid
      ============================================== */
-  .all-collections-section-{{ section.id }} .collections-main-content {
+  .all-collections-section-{{ section.id }} .main-content-wrapper {
     background-color: var(--main-bg-color);
     padding: 20px;
     border-radius: 8px;
@@ -110,10 +131,10 @@
 
 
   /* ==============================================
-     NEW Collection Card Style
+     Collection Card Style
      ============================================== */
   .collection-card-new {
-    background-color: #c1151b; /* As per header style */
+    background-color: #c1151b;
     color: #ffffff;
     border-radius: 8px;
     text-decoration: none;
@@ -124,12 +145,12 @@
     align-items: center;
     text-align: center;
     min-height: 180px;
+    box-shadow: var(--card-box-shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .collection-card-new:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   }
 
   .collection-card-new__title {
@@ -168,13 +189,7 @@
     }
 
     .all-collections-section-{{ section.id }} .collections-sidebar {
-      display: none; /* Hide sidebar on smaller screens */
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    .all-collections-section-{{ section.id }} .section-header {
-      padding: 1.5rem 0;
+      display: none;
     }
   }
 </style>
@@ -190,10 +205,9 @@
     </div>
   {%- endif -%}
 
-  <div class="page-width">
+  <div class="page-width page-width-padded">
     <div class="collections-page-layout">
       <aside class="collections-sidebar">
-        <h3>All Collections</h3>
         <ul>
           {%- for collection in collections -%}
             {%- if collection.handle == 'all' %}{% continue %}{% endif -%}
@@ -204,11 +218,28 @@
             </li>
           {%- endfor -%}
         </ul>
+
+        {% comment %} Sidebar Featured Page {% endcomment %}
+        {%- liquid
+          assign featured_page = section.settings.featured_page
+        -%}
+        {%- if featured_page != blank and featured_page.featured_image != blank -%}
+          <div class="sidebar-featured-page">
+            <a href="{{ featured_page.url }}" title="{{ featured_page.title | escape }}">
+              <img
+                src="{{ featured_page.featured_image | image_url: width: 400 }}"
+                alt="{{ featured_page.featured_image.alt | escape }}"
+                loading="lazy"
+                width="200"
+                height="{{ 200 | divided_by: featured_page.featured_image.aspect_ratio | round }}"
+              >
+            </a>
+          </div>
+        {%- endif -%}
       </aside>
 
-      <main class="collections-main-content">
+      <div class="main-content-wrapper">
         <div class="collection-grid-new">
-          {%- comment %} Loop through ALL collections instead of section blocks {%- endcomment %}
           {%- for collection in collections -%}
             {%- if collection.handle == 'all' %}{% continue %}{% endif -%}
             <a href="{{ collection.url }}" class="collection-card-new">
@@ -217,7 +248,7 @@
             </a>
           {%- endfor -%}
         </div>
-      </main>
+      </div>
     </div>
   </div>
 </div>
@@ -259,6 +290,34 @@
       "id": "main_bg_color",
       "label": "Main Content Background Color",
       "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Shadow Settings"
+    },
+    {
+      "type": "text",
+      "id": "card_box_shadow",
+      "label": "Card Box Shadow",
+      "default": "0 4px 15px rgba(0, 0, 0, 0.1)",
+      "info": "Use standard CSS box-shadow format. Set to 'none' to remove."
+    },
+    {
+      "type": "text",
+      "id": "sidebar_box_shadow",
+      "label": "Sidebar Box Shadow",
+      "default": "0 4px 15px rgba(0, 0, 0, 0.08)",
+      "info": "Use standard CSS box-shadow format. Set to 'none' to remove."
+    },
+    {
+      "type": "header",
+      "content": "Sidebar Featured Page"
+    },
+    {
+      "type": "page",
+      "id": "featured_page",
+      "label": "Featured page",
+      "info": "Select a page to feature at the bottom of the sidebar. The page must have a featured image assigned to it."
     },
     {
       "type": "header",
