@@ -373,14 +373,13 @@
       "label": "Columns on desktop"
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "columns_mobile",
       "label": "Columns on mobile",
-      "options": [
-        { "value": "1", "label": "1 column" },
-        { "value": "2", "label": "2 columns" }
-      ],
-      "default": "1"
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 2
     },
     {
       "type": "header",
