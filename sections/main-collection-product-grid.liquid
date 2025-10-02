@@ -1,6 +1,7 @@
 {% comment %}
-  V5 - Redesigned Collection Page
-  - Increased description length to a maximum of 5 lines.
+  V6 - Redesigned Collection Page
+  - Updated short description to correctly render Rich Text metafields using 'metafield_tag'.
+  - Adjusted CSS to handle line-clamping for rich text output.
 {% endcomment %}
 
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
@@ -117,18 +118,23 @@
     color: #c1151b;
   }
 
-  .custom-product-card__description {
+  /* MODIFICATION: Wrapper now handles spacing, children handle text styles */
+  .custom-product-card__description-wrapper {
+    flex-grow: 1;
+  }
+  .custom-product-card__description-wrapper > p,
+  .custom-product-card__description-wrapper .rte p {
     font-size: 15px;
     line-height: 1.6;
     margin: 0;
-    flex-grow: 1;
     color: #555;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5; /* MODIFICATION: Increased from 4 to 5 lines */
+    -webkit-line-clamp: 5;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
 
   .custom-product-card__buttons {
     margin-top: 20px;
@@ -182,9 +188,11 @@
     .grid--4-col-desktop .custom-product-card__title {
       font-size: 18px;
     }
-    .grid--4-col-desktop .custom-product-card__description {
+    /* MODIFICATION: Updated selector */
+    .grid--4-col-desktop .custom-product-card__description-wrapper > p,
+    .grid--4-col-desktop .custom-product-card__description-wrapper .rte p {
       font-size: 14px;
-      -webkit-line-clamp: 4; /* Adjusted to be proportional */
+      -webkit-line-clamp: 4;
     }
     .grid--4-col-desktop .custom-product-card__btn {
       padding: 8px 16px;
@@ -267,15 +275,14 @@
                         <div class="custom-product-card__content">
                           <a href="{{ product.url }}" class="custom-product-card__title">{{ product.title }}</a>
 
-                          {%- liquid
-                            assign short_desc = product.metafields.custom.shortdescription.value
-                            if short_desc == blank
-                              assign short_desc = product.description | strip_html | truncate: 255
-                            endif
-                          -%}
-                          {%- if short_desc != blank -%}
-                            <p class="custom-product-card__description">{{ short_desc }}</p>
-                          {%- endif -%}
+                          {% comment %} MODIFICATION: Logic updated for Rich Text {% endcomment %}
+                          <div class="custom-product-card__description-wrapper">
+                            {%- if product.metafields.custom.shortdescription.value != blank -%}
+                              {{ product.metafields.custom.shortdescription | metafield_tag }}
+                            {%- else -%}
+                              <p>{{ product.description | strip_html | truncate: 255 }}</p>
+                            {%- endif -%}
+                          </div>
 
                           <div class="custom-product-card__buttons">
                             <a href="{{ product.url }}" class="custom-product-card__btn btn--solid"> See More </a>
