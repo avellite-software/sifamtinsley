@@ -11,6 +11,15 @@
   "sections": {
     "main": {
       "type": "main-product",
+      "settings": {
+        "box_heading": "Sales & Support",
+        "box_subheading": "A dedicated support team to support new purchases, technical queries, troubleshooting, and delivery information.",
+        "box_phone": "Call 01376 335271",
+        "button_label": "Email Support",
+        "button_email": "sandboxing@avellite.co.uk",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     },
     "image-with-text": {
       "type": "image-with-text",
