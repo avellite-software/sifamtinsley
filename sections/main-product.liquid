@@ -62,13 +62,13 @@
   }
 
   .product-info-column__title {
-    font-size: 2.8rem;
+    font-size: 5.8rem;
     margin: 0 0 1rem;
     line-height: 1.2;
   }
 
   .product-info-column .product__description {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     line-height: 1.7;
     color: #333;
     flex-grow: 1;
@@ -133,6 +133,7 @@
      ============================================== */
   .product-tabs-wrapper {
     padding-bottom: 3rem;
+    padding-top: 7rem;
   }
   .product-tabs-container {
     background-color: #fff;
@@ -330,7 +331,7 @@
                 {%- for file in downloads_content -%}
                   <li>
                     <a href="{{ file | file_url }}" download target="_blank">
-                      {{- file.alt | default: 'Download File' -}}
+                      {{- file.name -}}
                     </a>
                   </li>
                 {%- endfor -%}
@@ -343,7 +344,7 @@
                 {%- for file in certifications_content -%}
                   <li>
                     <a href="{{ file | file_url }}" download target="_blank">
-                      {{- file.alt | default: 'Download Certificate' -}}
+                      {{- file.name -}}
                     </a>
                   </li>
                 {%- endfor -%}
