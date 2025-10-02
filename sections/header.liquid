@@ -1,7 +1,9 @@
 {% comment %}
-  - The header-wrapper contains both the announcement bar and the main header.
-  - The header-spacer div creates the needed space for the entire fixed header.
+  - V2 Changes:
+  - Added touch-friendly logic to desktop dropdowns. First tap opens, second tap navigates.
+  - Hover functionality for mouse users is preserved.
 {% endcomment %}
+
 <div class="header-wrapper">
   {%- liquid
     assign announcement_text = section.settings.announcement_text | strip
@@ -133,9 +135,6 @@
     --header-mobile-height: 70px;
   }
 
-  /* ==============================================
-     Wrapper and Spacer Logic
-     ============================================== */
   .header-wrapper {
     position: fixed;
     top: 0;
@@ -148,9 +147,6 @@
     /* Height is now set dynamically by JavaScript */
   }
 
-  /* ==============================================
-     Announcement Bar Styles
-     ============================================== */
   .announcement-bar {
     width: 100%;
     background-color: #c1151b;
@@ -180,21 +176,6 @@
     outline: none !important;
   }
 
-  /* ... other header styles ... */
-
-  .header-shape-clipper--default {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-    visibility: visible;
-    transition: visibility 0s linear 0.5s;
-  }
-
   .header-shape-clipper--default::before {
     content: '';
     position: absolute;
@@ -204,44 +185,6 @@
     height: 250px;
     background: #c1151b;
     border-radius: 125px;
-  }
-
-  .header-shape-clipper--animated {
-    overflow: visible;
-    visibility: hidden;
-    position: absolute;
-    top: 0;
-    left: -20px;
-    height: 100%;
-    width: 250px;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .header-shape-clipper--animated::before {
-    content: '';
-    position: absolute;
-    background: #c1151b;
-    left: 20px;
-    top: 96px;
-    width: 200px;
-    height: var(--menu-height, 130px);
-    border-radius: 0px 0px 12px 0px;
-    transform: scale(0.2);
-    transform-origin: 35px -65px;
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    transition-delay: 0s;
-  }
-
-  .custom-header.is-circle-menu-active .header-shape-clipper--animated {
-    visibility: visible;
-  }
-
-  .custom-header.is-circle-menu-active .header-shape-clipper--animated::before {
-    transform: scale(1);
-    opacity: 1;
-    transition-delay: 0s;
   }
 
   .header-left {
@@ -262,54 +205,6 @@
     height: 100%;
   }
 
-  .circle-dropdown-trigger {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    z-index: 2;
-  }
-
-  .circle-dropdown-content {
-    display: flex;
-    position: absolute;
-    top: 96px;
-    min-width: 200px;
-    z-index: 10;
-    flex-direction: column;
-    background: transparent;
-    border-radius: 12px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.5s;
-  }
-
-  .custom-header.is-circle-menu-active .circle-dropdown-content {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    pointer-events: auto;
-    transition-delay: 0.1s;
-  }
-
-  .circle-dropdown-content a {
-    padding: 12px 20px;
-    text-decoration: none;
-    font-size: 15px;
-    transition: background 0.2s;
-    line-height: 1.4;
-    color: #fff;
-  }
-
-  .circle-dropdown-content a:hover {
-    background: rgba(0, 0, 0, 0.1);
-  }
-
   .logo img {
     height: 56px;
     width: auto;
@@ -321,7 +216,6 @@
     display: flex;
     justify-content: center;
     padding: 0 20px;
-    transition: display 0.3s ease; /* Use transition for display if needed, but it's not standard */
   }
 
   .search-form {
@@ -340,19 +234,6 @@
     font-size: 16px;
     color: #333;
     outline: none;
-  }
-
-  .search-btn {
-    background: white;
-    border: none;
-    border-radius: 0 4px 4px 0;
-    font-size: 16px;
-    color: #c1151b;
-    font-weight: 600;
-    padding: 12px 24px;
-    cursor: pointer;
-    margin-left: -4px;
-    transition: background 0.2s, color 0.2s;
   }
 
   .header-right {
@@ -384,7 +265,8 @@
 
   .header-btn:hover,
   .header-btn:focus,
-  .dropdown:hover > .header-btn {
+  .dropdown:hover > .header-btn,
+  .dropdown.is-open > .header-btn {
     background: #c1151b;
     color: #fff;
   }
@@ -406,7 +288,8 @@
     transition: transform 0.2s ease;
   }
 
-  .dropdown:hover .dropdown-caret {
+  .dropdown:hover .dropdown-caret,
+  .dropdown.is-open .dropdown-caret {
     transform: rotate(180deg);
   }
 
@@ -425,7 +308,9 @@
     border-radius: 0 0 4px 4px;
   }
 
-  .dropdown:hover .dropdown-content {
+  /* MODIFICATION: Dropdown is now also controlled by .is-open class for touch devices */
+  .dropdown:hover .dropdown-content,
+  .dropdown.is-open .dropdown-content {
     display: flex;
   }
 
@@ -444,34 +329,9 @@
   .cart-btn {
     color: #c1151b;
   }
-
   .cart-btn:hover {
     background: #c1151b;
     color: #fff;
-  }
-
-  .svg-wrapper {
-    width: 24px;
-    height: 24px;
-    display: inline-block;
-    margin-right: 8px;
-  }
-
-  .cart-count-bubble {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #c1151b;
-    color: #fff;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border: 2px solid #fff;
   }
 
   .mobile-nav-toggle,
@@ -491,14 +351,12 @@
      RESPONSIVE STYLES
      ============================================== */
 
-  /* First breakpoint hides only the search bar */
   @media screen and (max-width: 1400px) {
     .header-center {
-      display: none; /* MODIFICATION: Changed from visibility:hidden to display:none */
+      display: none;
     }
   }
 
-  /* Second breakpoint handles the switch to mobile view */
   @media screen and (max-width: 1000px) {
     .custom-header {
       height: var(--header-mobile-height);
@@ -509,17 +367,12 @@
       padding-left: 20px;
     }
 
-    /* Hide remaining desktop elements */
     .header-shape-clipper--default,
-    .header-shape-clipper--animated,
     .circle-dropdown-container,
     .header-right {
       display: none;
     }
 
-    /* .header-center is already display:none from the 1400px breakpoint */
-
-    /* Show mobile toggle */
     .mobile-nav-toggle {
       display: block;
       background: none;
@@ -566,16 +419,10 @@
       z-index: 101;
     }
 
-    /* Mobile Nav Content Structure */
     .mobile-nav-content .header-center {
       display: block;
       padding: 0 20px 20px;
       border-bottom: 1px solid #eee;
-    }
-
-    .mobile-nav-content .search-form {
-      width: 100%;
-      margin-bottom: 0;
     }
 
     .mobile-nav-content .header-right {
@@ -597,37 +444,8 @@
       border-radius: 0;
     }
 
-    .mobile-nav-content .dropdown-content {
-      position: static;
-      display: none;
-      box-shadow: none;
-      border: none;
-      background: #f9f9f9;
-      padding: 10px 0;
-      margin: 0;
-      border-top: 1px solid #eee;
-    }
-
-    .mobile-nav-content .dropdown-content a {
-      padding: 12px 20px 12px 40px;
-    }
-
     .mobile-nav-content .dropdown.is-open > .dropdown-content {
       display: flex;
-    }
-
-    .mobile-nav-content .dropdown-caret {
-      transition: transform 0.3s ease;
-    }
-
-    .mobile-nav-content .dropdown.is-open > .header-btn .dropdown-caret {
-      transform: rotate(180deg);
-    }
-
-    .mobile-nav-content .red-btn,
-    .mobile-nav-content .cart-btn {
-      border-bottom: 1px solid #eee;
-      margin: 0;
     }
   }
 </style>
@@ -658,9 +476,7 @@
 {% endschema %}
 
 <script>
-  // Main script for header functionality
   document.addEventListener('DOMContentLoaded', () => {
-    // Spacer div height logic
     const headerWrapper = document.querySelector('.header-wrapper');
     const headerSpacer = document.querySelector('.header-spacer');
     if (headerWrapper && headerSpacer) {
@@ -683,15 +499,6 @@
         header.classList.toggle('is-circle-menu-active');
       });
     }
-    document.addEventListener('click', (event) => {
-      if (
-        circleDropdownContainer &&
-        !circleDropdownContainer.contains(event.target) &&
-        header.classList.contains('is-circle-menu-active')
-      ) {
-        header.classList.remove('is-circle-menu-active');
-      }
-    });
 
     // Mobile navigation logic
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
@@ -701,7 +508,7 @@
     const mobileNavContent = header.querySelector('.mobile-nav-content');
     const centerEl = header.querySelector('.header-center');
     const rightEl = header.querySelector('.header-right');
-    const BREAKPOINT = 1000; // MODIFICATION: Changed from 1400 to 1000
+    const BREAKPOINT = 1000;
 
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
@@ -727,30 +534,62 @@
     navContentContainer.addEventListener('click', (e) => {
       const dropdownLink = e.target.closest('.dropdown-link');
       if (!dropdownLink) return;
-
       const parentDropdown = dropdownLink.closest('.dropdown');
       const submenu = parentDropdown.querySelector('.dropdown-content');
-
       if (!submenu) {
         toggleMenu(false);
         return;
       }
-
       e.preventDefault();
-
       if (parentDropdown.classList.contains('is-open')) {
         window.location.href = dropdownLink.href;
         return;
       }
-
       const openSubmenus = navContentContainer.querySelectorAll('.dropdown.is-open');
       openSubmenus.forEach((item) => {
         if (item !== parentDropdown) {
           item.classList.remove('is-open');
         }
       });
-
       parentDropdown.classList.toggle('is-open');
+    });
+
+    // MODIFICATION: New logic for desktop touch support
+    const desktopNav = document.querySelector('.header-right');
+    desktopNav.addEventListener('click', (e) => {
+      const isMobile = window.innerWidth <= BREAKPOINT;
+      if (isMobile) return; // Don't run this logic on mobile view
+
+      const dropdownLink = e.target.closest('.dropdown-link');
+      if (!dropdownLink) return;
+
+      const parentDropdown = dropdownLink.closest('.dropdown');
+      const submenu = parentDropdown.querySelector('.dropdown-content');
+
+      // Allow normal link behavior for items without a submenu
+      if (!submenu) return;
+
+      // First tap on touch device, or if menu is closed
+      if (!parentDropdown.classList.contains('is-open')) {
+        e.preventDefault();
+
+        // Close any other open dropdowns
+        document.querySelectorAll('.header-right .dropdown.is-open').forEach((openDropdown) => {
+          openDropdown.classList.remove('is-open');
+        });
+
+        // Open the current one
+        parentDropdown.classList.add('is-open');
+      }
+      // If the link is clicked again while the menu is open, the default link behavior will proceed
+    });
+
+    // Close desktop dropdowns if clicking outside
+    document.addEventListener('click', (e) => {
+      const openDropdown = document.querySelector('.header-right .dropdown.is-open');
+      if (openDropdown && !openDropdown.contains(e.target)) {
+        openDropdown.classList.remove('is-open');
+      }
     });
 
     manageNavElements();
