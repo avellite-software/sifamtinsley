@@ -1,8 +1,6 @@
 {% comment %}
-  V4 - Redesigned Collection Page
-  - Fixed image container to be a perfect square.
-  - Removed 'grey line' artifact below image.
-  - Increased spacing between image and content.
+  V5 - Redesigned Collection Page
+  - Increased description length to a maximum of 5 lines.
 {% endcomment %}
 
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
@@ -87,12 +85,12 @@
     display: block;
     position: relative;
     overflow: hidden;
-    aspect-ratio: 1 / 1; /* MODIFICATION: Forces the container to be a perfect square */
+    aspect-ratio: 1 / 1;
   }
   .custom-product-card__image {
     display: block;
     width: 100%;
-    height: 100%; /* MODIFICATION: Ensures image fills the square wrapper */
+    height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
   }
@@ -101,7 +99,7 @@
   }
 
   .custom-product-card__content {
-    padding: 30px; /* MODIFICATION: Increased padding for a bigger gap */
+    padding: 30px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -127,7 +125,7 @@
     color: #555;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 5; /* MODIFICATION: Increased from 4 to 5 lines */
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -141,7 +139,7 @@
 
   .custom-product-card__btn {
     display: inline-block;
-    padding: 10px 22px;
+    padding: 10px 20px;
     border: 1px solid #c1151b;
     border-radius: 4px;
     text-decoration: none;
@@ -186,7 +184,7 @@
     }
     .grid--4-col-desktop .custom-product-card__description {
       font-size: 14px;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 4; /* Adjusted to be proportional */
     }
     .grid--4-col-desktop .custom-product-card__btn {
       padding: 8px 16px;

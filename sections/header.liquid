@@ -73,10 +73,6 @@
     <div class="header-right">
       {%- for link in section.settings.main_menu.links -%}
         <div class="dropdown">
-          {% comment %}
-            MODIFICATION: The .header-btn class is now on the <a> tag itself
-            to make the entire button area clickable.
-          {% endcomment %}
           <a href="{{ link.url }}" class="header-btn dropdown-link">
             {{ link.title }}
             {%- if link.links != empty -%}
@@ -104,7 +100,6 @@
       {%- endif -%}
 
       <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
-        {%- comment %} Cart icon content... {%- endcomment %}
         {%- if cart == empty -%}
           <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
         {%- else -%}
@@ -326,6 +321,7 @@
     display: flex;
     justify-content: center;
     padding: 0 20px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
 
   .search-form {
@@ -366,7 +362,6 @@
     padding-right: 20px;
   }
 
-  /* MODIFICATION: Parent dropdown div is now just for positioning */
   .dropdown {
     position: relative;
   }
@@ -418,7 +413,7 @@
   .dropdown-content {
     display: none;
     position: absolute;
-    top: 100%; /* Position below the button */
+    top: 100%;
     left: 0;
     background: #fff;
     border: 1px solid #eee;
@@ -493,9 +488,20 @@
   }
 
   /* ==============================================
-     MOBILE STYLES
+     RESPONSIVE STYLES
      ============================================== */
+
+  /* MODIFICATION: First breakpoint hides only the search bar */
   @media screen and (max-width: 1400px) {
+    .header-center {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+
+  /* MODIFICATION: Second breakpoint handles the switch to mobile view */
+  @media screen and (max-width: 1000px) {
     .custom-header {
       height: var(--header-mobile-height);
     }
@@ -505,6 +511,7 @@
       padding-left: 20px;
     }
 
+    /* Hide remaining desktop elements */
     .header-shape-clipper--default,
     .header-shape-clipper--animated,
     .circle-dropdown-container,
@@ -513,6 +520,7 @@
       display: none;
     }
 
+    /* Show mobile toggle */
     .mobile-nav-toggle {
       display: block;
       background: none;
@@ -561,7 +569,10 @@
 
     /* Mobile Nav Content Structure */
     .mobile-nav-content .header-center {
-      display: block;
+      display: block; /* It gets moved in via JS */
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
       padding: 0 20px 20px;
       border-bottom: 1px solid #eee;
     }
@@ -572,7 +583,7 @@
     }
 
     .mobile-nav-content .header-right {
-      display: flex;
+      display: flex; /* It gets moved in via JS */
       flex-direction: column;
       align-items: stretch;
       gap: 0;
@@ -590,10 +601,9 @@
       border-radius: 0;
     }
 
-    /* MODIFICATION: Mobile dropdown content styling */
     .mobile-nav-content .dropdown-content {
       position: static;
-      display: none; /* Hide by default */
+      display: none;
       box-shadow: none;
       border: none;
       background: #f9f9f9;
@@ -603,7 +613,7 @@
     }
 
     .mobile-nav-content .dropdown-content a {
-      padding: 12px 20px 12px 40px; /* Indented text */
+      padding: 12px 20px 12px 40px;
     }
 
     .mobile-nav-content .dropdown-caret {
@@ -612,6 +622,10 @@
 
     .mobile-nav-content .dropdown.is-open > .header-btn .dropdown-caret {
       transform: rotate(180deg);
+    }
+
+    .mobile-nav-content .dropdown.is-open > .dropdown-content {
+      display: flex; /* Or block, depending on your preference */
     }
 
     .mobile-nav-content .red-btn,
@@ -686,12 +700,12 @@
     // Mobile navigation logic
     const mobileNavToggle = header.querySelector('.mobile-nav-toggle');
     const mobileNavClose = header.querySelector('.mobile-nav-close');
-    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay'); // Corrected selector
-    const mobileNavPanel = document.querySelector('.mobile-nav-panel'); // Corrected selector
+    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+    const mobileNavPanel = document.querySelector('.mobile-nav-panel');
     const mobileNavContent = header.querySelector('.mobile-nav-content');
     const centerEl = header.querySelector('.header-center');
     const rightEl = header.querySelector('.header-right');
-    const BREAKPOINT = 1400;
+    const BREAKPOINT = 1000; // MODIFICATION: Changed from 1400 to 1000
 
     const toggleMenu = (isOpen) => {
       document.body.classList.toggle('mobile-menu-open', isOpen);
@@ -705,7 +719,7 @@
       } else {
         if (centerEl && mobileNavContent.contains(centerEl)) header.insertBefore(centerEl, mobileNavToggle);
         if (rightEl && mobileNavContent.contains(rightEl)) header.insertBefore(rightEl, mobileNavToggle);
-        toggleMenu(false); // Close menu on resize to desktop
+        toggleMenu(false);
       }
     };
 
@@ -713,7 +727,6 @@
     mobileNavClose.addEventListener('click', () => toggleMenu(false));
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
 
-    // MODIFICATION: New mobile menu click handler
     const navContentContainer = mobileNavPanel.querySelector('.mobile-nav-content');
     navContentContainer.addEventListener('click', (e) => {
       const dropdownLink = e.target.closest('.dropdown-link');
@@ -722,22 +735,18 @@
       const parentDropdown = dropdownLink.closest('.dropdown');
       const submenu = parentDropdown.querySelector('.dropdown-content');
 
-      // If there is no submenu, let the link navigate normally.
       if (!submenu) {
-        toggleMenu(false); // Close menu on navigation
+        toggleMenu(false);
         return;
       }
 
-      // If there IS a submenu, prevent default navigation
       e.preventDefault();
 
-      // Second click logic: if menu is already open, navigate to the link
       if (parentDropdown.classList.contains('is-open')) {
         window.location.href = dropdownLink.href;
         return;
       }
 
-      // First click logic: close other open submenus
       const openSubmenus = navContentContainer.querySelectorAll('.dropdown.is-open');
       openSubmenus.forEach((item) => {
         if (item !== parentDropdown) {
@@ -745,7 +754,6 @@
         }
       });
 
-      // Toggle the clicked submenu
       parentDropdown.classList.toggle('is-open');
     });
 
