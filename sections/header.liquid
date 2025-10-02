@@ -321,7 +321,7 @@
     display: flex;
     justify-content: center;
     padding: 0 20px;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: display 0.3s ease; /* Use transition for display if needed, but it's not standard */
   }
 
   .search-form {
@@ -491,16 +491,14 @@
      RESPONSIVE STYLES
      ============================================== */
 
-  /* MODIFICATION: First breakpoint hides only the search bar */
+  /* First breakpoint hides only the search bar */
   @media screen and (max-width: 1400px) {
     .header-center {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
+      display: none; /* MODIFICATION: Changed from visibility:hidden to display:none */
     }
   }
 
-  /* MODIFICATION: Second breakpoint handles the switch to mobile view */
+  /* Second breakpoint handles the switch to mobile view */
   @media screen and (max-width: 1000px) {
     .custom-header {
       height: var(--header-mobile-height);
@@ -515,10 +513,11 @@
     .header-shape-clipper--default,
     .header-shape-clipper--animated,
     .circle-dropdown-container,
-    .header-center,
     .header-right {
       display: none;
     }
+
+    /* .header-center is already display:none from the 1400px breakpoint */
 
     /* Show mobile toggle */
     .mobile-nav-toggle {
@@ -569,10 +568,7 @@
 
     /* Mobile Nav Content Structure */
     .mobile-nav-content .header-center {
-      display: block; /* It gets moved in via JS */
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
+      display: block;
       padding: 0 20px 20px;
       border-bottom: 1px solid #eee;
     }
@@ -583,7 +579,7 @@
     }
 
     .mobile-nav-content .header-right {
-      display: flex; /* It gets moved in via JS */
+      display: flex;
       flex-direction: column;
       align-items: stretch;
       gap: 0;
@@ -616,16 +612,16 @@
       padding: 12px 20px 12px 40px;
     }
 
+    .mobile-nav-content .dropdown.is-open > .dropdown-content {
+      display: flex;
+    }
+
     .mobile-nav-content .dropdown-caret {
       transition: transform 0.3s ease;
     }
 
     .mobile-nav-content .dropdown.is-open > .header-btn .dropdown-caret {
       transform: rotate(180deg);
-    }
-
-    .mobile-nav-content .dropdown.is-open > .dropdown-content {
-      display: flex; /* Or block, depending on your preference */
     }
 
     .mobile-nav-content .red-btn,
