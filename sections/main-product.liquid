@@ -1,8 +1,7 @@
 {% comment %}
-  V3 - Custom Product Page
-  - Rebuilt layout to achieve a true "full-bleed" background effect on the right column.
-  - Fixed support button positioning.
-  - Adjusted tab coordinates and increased font sizes as requested.
+  V4 - Custom Product Page
+  - Support box button now uses a `mailto:` link.
+  - Schema updated to accept an email address instead of a URL.
 {% endcomment %}
 
 {%- style -%}
@@ -64,13 +63,13 @@
   }
 
   .product-info-column__title {
-    font-size: 2.8rem; /* INCREASED */
+    font-size: 2.8rem;
     margin: 0 0 1rem;
     line-height: 1.2;
   }
 
   .product-info-column .product__description {
-    font-size: 1.1rem; /* INCREASED */
+    font-size: 1.1rem;
     line-height: 1.7;
     color: #333;
     flex-grow: 1;
@@ -94,7 +93,7 @@
   }
   .support-box-content {
     padding: 40px 40px 30px;
-    flex-grow: 1; /* FIX: This pushes the button to the bottom */
+    flex-grow: 1;
   }
   .support-box-heading {
     font-size: 32px;
@@ -149,8 +148,8 @@
     margin: 0;
     padding: 0;
     position: absolute;
-    top: -55px; /* ADJUSTED */
-    left: -1px; /* ADJUSTED */
+    top: -55px;
+    left: -1px;
   }
   .product-tabs-nav__item {
     background-color: #f0f0f0;
@@ -290,8 +289,8 @@
               <span class="support-box-phone">{{ section.settings.box_phone }}</span>
             </div>
 
-            {% if section.settings.button_label != blank and section.settings.button_link != blank %}
-              <a href="{{ section.settings.button_link }}" class="support-box-button">
+            {% if section.settings.button_label != blank and section.settings.button_email != blank %}
+              <a href="mailto:{{ section.settings.button_email }}" class="support-box-button">
                 {{ section.settings.button_label }}
               </a>
             {% endif %}
@@ -420,9 +419,10 @@
       "default": "Email Support"
     },
     {
-      "type": "url",
-      "id": "button_link",
-      "label": "Button Link"
+      "type": "text",
+      "id": "button_email",
+      "label": "Button Email Address",
+      "info": "Enter the email address for the support button."
     },
     {
       "type": "header",

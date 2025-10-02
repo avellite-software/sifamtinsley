@@ -1,8 +1,6 @@
 {% comment %}
   Section: Text with Box
-  - A two-column layout with a text block and a styled contact box.
-  - Uses Flexbox to automatically stack on mobile devices.
-  - All content is editable in the Theme Customizer.
+  - V2 Change: Button now uses a `mailto:` link to open an email client.
 {% endcomment %}
 
 <style>
@@ -27,7 +25,7 @@
     margin: 0 0 1em;
   }
 
-  /* --- FIX: Updated Box and Button Styles --- */
+  /* --- Updated Box and Button Styles --- */
   .support-box {
     flex: 1;
     min-width: 300px;
@@ -35,14 +33,13 @@
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     text-align: center;
-    /* 1. Remove padding and use flex to manage content */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Crucial for clipping the button's corners */
+    overflow: hidden;
   }
-  /* 2. New container for the text content to handle padding */
   .support-box-content {
-    padding: 40px 40px 30px; /* Top, Sides, Bottom padding */
+    padding: 40px 40px 30px;
+    flex-grow: 1;
   }
   .support-box-heading {
     font-size: 32px;
@@ -72,13 +69,11 @@
     font-weight: 600;
     padding: 15px 20px;
     transition: background-color 0.2s;
-    /* 3. Match the bottom corners of the parent box */
     border-radius: 0 0 12px 12px;
   }
   .support-box-button:hover {
     background-color: #a10f16;
   }
-  /* --- End of Fix --- */
 
   @media (max-width: 768px) {
     .support-flex-wrapper {
@@ -101,8 +96,9 @@
         <span class="support-box-phone">{{ section.settings.box_phone }}</span>
       </div>
 
-      {% if section.settings.button_label != blank and section.settings.button_link != blank %}
-        <a href="{{ section.settings.button_link }}" class="support-box-button">
+      {% comment %} MODIFICATION: The href now creates a mailto: link {% endcomment %}
+      {% if section.settings.button_label != blank and section.settings.button_email != blank %}
+        <a href="mailto:{{ section.settings.button_email }}" class="support-box-button">
           {{ section.settings.button_label }}
         </a>
       {% endif %}
@@ -154,9 +150,10 @@
       "default": "Email Support"
     },
     {
-      "type": "url",
-      "id": "button_link",
-      "label": "Button Link"
+      "type": "text",
+      "id": "button_email",
+      "label": "Button Email Address",
+      "info": "Enter the email address for the support button."
     }
   ],
   "presets": [
