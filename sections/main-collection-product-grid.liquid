@@ -1,8 +1,9 @@
 {% comment %}
-  V2 - Redesigned Collection Page
-  - Adds a collections sidebar with an active state.
-  - Replaces the default product card with a new custom card design.
-  - Integrates custom metafields for short description and downloadable files.
+  V3 - Redesigned Collection Page
+  - Images are now square and fill their container.
+  - Card heights are consistent via line-clamp on the description.
+  - Box shadow has been updated.
+  - Added style adjustments for 4-column desktop layouts.
 {% endcomment %}
 
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
@@ -53,7 +54,6 @@
     background-color: #f0f0f0;
   }
 
-  /* Active state for the current collection link */
   .collections-sidebar a.is-active {
     background-color: #c1151b;
     color: #fff;
@@ -66,7 +66,6 @@
     width: 100%;
   }
 
-  /* Basic styling for filter/sort bar */
   .collection-filters {
     margin-bottom: 2rem;
   }
@@ -77,12 +76,12 @@
   .custom-product-card {
     background-color: #fff;
     border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* MODIFIED */
     overflow: hidden;
     display: flex;
     flex-direction: column;
     color: #333;
-    height: 100%; /* Ensures cards in a row are the same height */
+    height: 100%;
   }
 
   .custom-product-card__image-wrapper {
@@ -93,8 +92,8 @@
   }
   .custom-product-card__image {
     width: 100%;
-    aspect-ratio: 16 / 10;
-    object-fit: contain; /* Use 'contain' to see the whole product */
+    aspect-ratio: 1 / 1; /* MODIFIED: Makes the image container square */
+    object-fit: cover; /* MODIFIED: Fills the container, cropping instead of letterboxing */
     transition: transform 0.3s ease;
   }
   .custom-product-card:hover .custom-product-card__image {
@@ -105,7 +104,7 @@
     padding: 25px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Pushes buttons to the bottom */
+    flex-grow: 1;
   }
 
   .custom-product-card__title {
@@ -124,15 +123,21 @@
     font-size: 15px;
     line-height: 1.6;
     margin: 0;
-    flex-grow: 1; /* Pushes buttons to the bottom */
+    flex-grow: 1;
     color: #555;
+    /* MODIFICATION: Truncates text to 4 lines to keep card sizes consistent */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .custom-product-card__buttons {
     margin-top: 20px;
     display: flex;
     gap: 10px;
-    flex-wrap: wrap; /* Allows buttons to stack on small cards */
+    flex-wrap: wrap;
   }
 
   .custom-product-card__btn {
@@ -165,14 +170,29 @@
   }
 
   /* ==============================================
-     RESPONSIVENESS
+     RESPONSIVENESS & LAYOUT ADJUSTMENTS
      ============================================== */
   @media screen and (max-width: 990px) {
     .collection-page-layout {
       grid-template-columns: 1fr;
     }
     .collections-sidebar {
-      display: none; /* Hides sidebar on mobile */
+      display: none;
+    }
+  }
+
+  /* MODIFICATION: Adjusts card content for 4-column layouts to prevent cramping */
+  @media screen and (min-width: 1200px) {
+    .grid--4-col-desktop .custom-product-card__title {
+      font-size: 18px;
+    }
+    .grid--4-col-desktop .custom-product-card__description {
+      font-size: 14px;
+      -webkit-line-clamp: 3;
+    }
+    .grid--4-col-desktop .custom-product-card__btn {
+      padding: 8px 16px;
+      font-size: 14px;
     }
   }
 {%- endstyle -%}
@@ -233,25 +253,24 @@
                 >
                   {%- for product in collection.products -%}
                     <li class="grid__item">
-                      {%- comment -%}
-                        START: Custom Product Card HTML
-                        - Replaces the default `card-product` snippet
-                      {%- endcomment -%}
                       <div class="custom-product-card">
                         <a href="{{ product.url }}" class="custom-product-card__image-wrapper">
-                          <img
-                            src="{{ product.featured_image | image_url: width: 400 }}"
-                            alt="{{ product.featured_image.alt | escape }}"
-                            class="custom-product-card__image"
-                            width="{{ product.featured_image.width }}"
-                            height="{{ product.featured_image.height }}"
-                            loading="lazy"
-                          >
+                          {% if product.featured_image %}
+                            <img
+                              src="{{ product.featured_image | image_url: width: 400 }}"
+                              alt="{{ product.featured_image.alt | escape }}"
+                              class="custom-product-card__image"
+                              width="400"
+                              height="400"
+                              loading="lazy"
+                            >
+                          {% else %}
+                            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg custom-product-card__image' }}
+                          {% endif %}
                         </a>
                         <div class="custom-product-card__content">
                           <a href="{{ product.url }}" class="custom-product-card__title">{{ product.title }}</a>
 
-                          {%- comment -%} Short description with fallback {%- endcomment -%}
                           {%- liquid
                             assign short_desc = product.metafields.custom.short_description.value
                             if short_desc == blank
@@ -265,7 +284,6 @@
                           <div class="custom-product-card__buttons">
                             <a href="{{ product.url }}" class="custom-product-card__btn btn--solid"> See More </a>
 
-                            {%- comment -%} Conditional datasheet button {%- endcomment -%}
                             {%- assign datasheet = product.metafields.custom.downloads.value | first -%}
                             {%- if datasheet -%}
                               <a
@@ -280,7 +298,6 @@
                           </div>
                         </div>
                       </div>
-                      {%- comment -%} END: Custom Product Card HTML {%- endcomment -%}
                     </li>
                   {%- endfor -%}
                 </ul>
@@ -314,7 +331,7 @@
     {
       "type": "range",
       "id": "columns_desktop",
-      "min": 1,
+      "min": 2,
       "max": 4,
       "step": 1,
       "default": 3,
