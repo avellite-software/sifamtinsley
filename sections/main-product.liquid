@@ -1,7 +1,7 @@
 {% comment %}
-  V4 - Custom Product Page
-  - Support box button now uses a `mailto:` link.
-  - Schema updated to accept an email address instead of a URL.
+  V5 - Custom Product Page
+  - Fixed rich text rendering by using the 'metafield_tag' filter.
+  - Removed top padding setting to eliminate the gap above the product info.
 {% endcomment %}
 
 {%- style -%}
@@ -23,7 +23,7 @@
     display: grid;
     grid-template-columns: 45fr 55fr;
     gap: 0;
-    margin-top: 3rem;
+    /* margin-top removed to close the gap */
     margin-bottom: 4rem;
   }
 
@@ -41,7 +41,6 @@
     position: relative;
   }
 
-  /* This pseudo-element creates the full-bleed background */
   .product-info-column::before {
     content: '';
     position: absolute;
@@ -51,7 +50,7 @@
     z-index: -1;
     background-color: #f5f5f5;
     border-bottom-left-radius: 50px;
-    width: 100vw; /* Extends far to the right */
+    width: 100vw;
   }
 
   .product-info-column__vendor {
@@ -63,13 +62,13 @@
   }
 
   .product-info-column__title {
-    font-size: 5.8rem;
+    font-size: 2.8rem;
     margin: 0 0 1rem;
     line-height: 1.2;
   }
 
   .product-info-column .product__description {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     line-height: 1.7;
     color: #333;
     flex-grow: 1;
@@ -134,7 +133,6 @@
      ============================================== */
   .product-tabs-wrapper {
     padding-bottom: 3rem;
-    padding-top: 7rem;
   }
   .product-tabs-container {
     background-color: #fff;
@@ -182,15 +180,16 @@
   .product-tabs-content__panel.is-active {
     display: block;
   }
-  .product-tabs-content__panel.rte p {
+  /* The metafield_tag filter will generate its own .rte class, so we style that directly */
+  .product-tabs-content__panel .rte p {
     margin: 0 0 1em;
   }
-  .product-tabs-content__panel.rte ul,
-  .product-tabs-content__panel.rte ol {
+  .product-tabs-content__panel .rte ul,
+  .product-tabs-content__panel .rte ol {
     margin: 1em 0;
     padding-left: 1.5em;
   }
-  .product-tabs-content__panel.rte li {
+  .product-tabs-content__panel .rte li {
     margin-bottom: 0.5em;
   }
   .product-file-list {
@@ -251,12 +250,15 @@
 {%- endstyle -%}
 
 {%- liquid
-  assign features_content = product.metafields.custom.features.value
+  assign features_metafield = product.metafields.custom.features
   assign downloads_content = product.metafields.custom.downloads.value
   assign certifications_content = product.metafields.custom.certifications.value
 -%}
 
-<section class="color-{{ section.settings.color_scheme }} product-page-section">
+<section
+  class="color-{{ section.settings.color_scheme }} product-page-section"
+  style="padding-top: {{ section.settings.padding_top }}px;"
+>
   <div class="product-section-wrapper">
     <div class="product-main-container">
       <div class="product-image-column">
@@ -302,10 +304,10 @@
   </div>
 
   <div class="product-section-wrapper product-tabs-wrapper">
-    {%- if features_content != blank or downloads_content != blank or certifications_content != blank -%}
+    {%- if features_metafield.value != blank or downloads_content != blank or certifications_content != blank -%}
       <div class="product-tabs-container">
         <ul class="product-tabs-nav" role="tablist">
-          {%- if features_content != blank -%}
+          {%- if features_metafield.value != blank -%}
             <li class="product-tabs-nav__item" data-tab="features" role="tab">Features</li>
           {%- endif -%}
           {%- if downloads_content != blank -%}
@@ -316,9 +318,10 @@
           {%- endif -%}
         </ul>
         <div class="product-tabs-content">
-          {%- if features_content != blank -%}
-            <div class="product-tabs-content__panel rte" data-content="features" role="tabpanel">
-              {{ features_content }}
+          {%- if features_metafield.value != blank -%}
+            <div class="product-tabs-content__panel" data-content="features" role="tabpanel">
+              {% comment %} MODIFICATION: Use metafield_tag for rich text {% endcomment %}
+              {{ features_metafield | metafield_tag }}
             </div>
           {%- endif -%}
           {%- if downloads_content != blank -%}
@@ -428,16 +431,6 @@
     {
       "type": "header",
       "content": "Section Padding"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "Padding top",
-      "default": 36
     },
     {
       "type": "range",
