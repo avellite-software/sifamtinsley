@@ -331,7 +331,7 @@
                 {%- for file in downloads_content -%}
                   <li>
                     <a href="{{ file | file_url }}" download target="_blank">
-                      {{- file.name -}}
+                      {{ file | file_url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
                     </a>
                   </li>
                 {%- endfor -%}
@@ -344,7 +344,7 @@
                 {%- for file in certifications_content -%}
                   <li>
                     <a href="{{ file | file_url }}" download target="_blank">
-                      {{- file.name -}}
+                      {{ file | file_url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
                     </a>
                   </li>
                 {%- endfor -%}
