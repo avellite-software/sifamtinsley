@@ -1,7 +1,7 @@
 {% comment %}
-  - V3 Changes:
-  - Desktop dropdowns are now click-only (hover effect removed).
-  - Restored the necessary CSS for the "Our Brands" animated menu.
+  - V4 Changes:
+  - Removed incorrect positioning from circle-dropdown-trigger.
+  - Restored missing CSS for the search button.
 {% endcomment %}
 
 <div class="header-wrapper">
@@ -36,7 +36,7 @@
 
     <div class="mobile-nav-panel">
       <button type="button" class="mobile-nav-close" aria-label="Close menu">
-        <svg xmlns="http://www.w.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
         </svg>
       </button>
@@ -172,7 +172,7 @@
   }
 
   /* ==============================================
-     RESTORED: Circle Menu & Shape Animation Styles
+     Circle Menu & Shape Animation Styles
      ============================================== */
   .header-shape-clipper--default {
     position: absolute;
@@ -310,7 +310,6 @@
     width: 100%;
     max-width: 600px;
   }
-
   .search-input {
     flex: 1;
     padding: 12px 20px;
@@ -321,7 +320,7 @@
     color: #333;
     outline: none;
   }
-
+  /* RESTORED: Search button styles */
   .search-btn {
     background: white;
     border: none;
@@ -333,6 +332,10 @@
     cursor: pointer;
     margin-left: -4px;
     transition: background 0.2s, color 0.2s;
+  }
+  .search-btn:hover {
+    background: #eaeaea;
+    color: #a10f16;
   }
   .header-right {
     display: flex;
@@ -395,7 +398,6 @@
     padding: 5px 0;
     border-radius: 0 0 4px 4px;
   }
-  /* MODIFICATION: Removed hover effect for opening dropdown */
   .dropdown.is-open .dropdown-content {
     display: flex;
   }
@@ -636,10 +638,8 @@
 
       if (!submenu) return;
 
-      // If the clicked menu is already open, the default <a> behavior will trigger and navigate
       if (parentDropdown.classList.contains('is-open')) return;
 
-      // Otherwise, this is the first click.
       e.preventDefault();
 
       document.querySelectorAll('.header-right .dropdown.is-open').forEach((openDropdown) => {
