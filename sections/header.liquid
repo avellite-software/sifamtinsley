@@ -1,7 +1,7 @@
 {% comment %}
-  - V2 Changes:
-  - Added touch-friendly logic to desktop dropdowns. First tap opens, second tap navigates.
-  - Hover functionality for mouse users is preserved.
+  - V3 Changes:
+  - Desktop dropdowns are now click-only (hover effect removed).
+  - Restored the necessary CSS for the "Our Brands" animated menu.
 {% endcomment %}
 
 <div class="header-wrapper">
@@ -36,7 +36,7 @@
 
     <div class="mobile-nav-panel">
       <button type="button" class="mobile-nav-close" aria-label="Close menu">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <svg xmlns="http://www.w.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
         </svg>
       </button>
@@ -134,7 +134,6 @@
     --header-height: 96px;
     --header-mobile-height: 70px;
   }
-
   .header-wrapper {
     position: fixed;
     top: 0;
@@ -142,11 +141,9 @@
     width: 100%;
     z-index: 100;
   }
-
   .header-spacer {
-    /* Height is now set dynamically by JavaScript */
+    /* Height is set by JS */
   }
-
   .announcement-bar {
     width: 100%;
     background-color: #c1151b;
@@ -158,12 +155,10 @@
     font-weight: 500;
     transition: all 0.3s ease;
   }
-
   .announcement-bar--no-content {
     height: 5px;
     padding: 0;
   }
-
   .custom-header {
     display: flex;
     align-items: center;
@@ -176,6 +171,21 @@
     outline: none !important;
   }
 
+  /* ==============================================
+     RESTORED: Circle Menu & Shape Animation Styles
+     ============================================== */
+  .header-shape-clipper--default {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    visibility: visible;
+    transition: visibility 0s linear 0.5s;
+  }
   .header-shape-clipper--default::before {
     content: '';
     position: absolute;
@@ -186,7 +196,44 @@
     background: #c1151b;
     border-radius: 125px;
   }
+  .header-shape-clipper--animated {
+    overflow: visible;
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: -20px;
+    height: 100%;
+    width: 250px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .header-shape-clipper--animated::before {
+    content: '';
+    position: absolute;
+    background: #c1151b;
+    left: 20px;
+    top: 96px;
+    width: 200px;
+    height: var(--menu-height, 130px);
+    border-radius: 0px 0px 12px 0px;
+    transform: scale(0.2);
+    transform-origin: 35px -65px;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: 0s;
+  }
+  .custom-header.is-circle-menu-active .header-shape-clipper--animated {
+    visibility: visible;
+  }
+  .custom-header.is-circle-menu-active .header-shape-clipper--animated::before {
+    transform: scale(1);
+    opacity: 1;
+    transition-delay: 0s;
+  }
 
+  /* ==============================================
+     Main Header Styles
+     ============================================== */
   .header-left {
     display: flex;
     align-items: center;
@@ -195,7 +242,6 @@
     position: relative;
     z-index: 1;
   }
-
   .circle-dropdown-container {
     position: absolute;
     left: 0;
@@ -204,27 +250,70 @@
     width: 110px;
     height: 100%;
   }
-
+  .circle-dropdown-trigger {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    /* You may need to adjust top/left to center it perfectly */
+    top: 50%;
+    left: 35px;
+    transform: translateY(-50%);
+  }
+  .circle-dropdown-content {
+    display: flex;
+    position: absolute;
+    top: 96px;
+    min-width: 200px;
+    z-index: 10;
+    flex-direction: column;
+    background: transparent;
+    border-radius: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.5s;
+  }
+  .custom-header.is-circle-menu-active .circle-dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition-delay: 0.1s;
+  }
+  .circle-dropdown-content a {
+    padding: 12px 20px;
+    text-decoration: none;
+    font-size: 15px;
+    transition: background 0.2s;
+    line-height: 1.4;
+    color: #fff;
+  }
+  .circle-dropdown-content a:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
   .logo img {
     height: 56px;
     width: auto;
     display: block;
   }
-
   .header-center {
     flex: 1;
     display: flex;
     justify-content: center;
     padding: 0 20px;
   }
-
   .search-form {
     display: flex;
     align-items: center;
     width: 100%;
     max-width: 600px;
   }
-
   .search-input {
     flex: 1;
     padding: 12px 20px;
@@ -235,18 +324,15 @@
     color: #333;
     outline: none;
   }
-
   .header-right {
     display: flex;
     align-items: center;
     gap: 16px;
     padding-right: 20px;
   }
-
   .dropdown {
     position: relative;
   }
-
   .header-btn {
     position: relative;
     padding: 10px 22px;
@@ -262,37 +348,29 @@
     align-items: center;
     white-space: nowrap;
   }
-
   .header-btn:hover,
   .header-btn:focus,
-  .dropdown:hover > .header-btn,
   .dropdown.is-open > .header-btn {
     background: #c1151b;
     color: #fff;
   }
-
   .red-btn {
     background: #c1151b;
     color: #fff;
     border: 1px solid #c1151b;
   }
-
   .dropdown-link {
     font-weight: 900;
   }
-
   .dropdown-caret {
     margin-left: 6px;
     display: flex;
     align-items: center;
     transition: transform 0.2s ease;
   }
-
-  .dropdown:hover .dropdown-caret,
   .dropdown.is-open .dropdown-caret {
     transform: rotate(180deg);
   }
-
   .dropdown-content {
     display: none;
     position: absolute;
@@ -307,13 +385,10 @@
     padding: 5px 0;
     border-radius: 0 0 4px 4px;
   }
-
-  /* MODIFICATION: Dropdown is now also controlled by .is-open class for touch devices */
-  .dropdown:hover .dropdown-content,
+  /* MODIFICATION: Removed hover effect for opening dropdown */
   .dropdown.is-open .dropdown-content {
     display: flex;
   }
-
   .dropdown-content a {
     padding: 10px 16px;
     text-decoration: none;
@@ -321,11 +396,9 @@
     font-size: 15px;
     transition: background 0.2s;
   }
-
   .dropdown-content a:hover {
     background: #f5f5f5;
   }
-
   .cart-btn {
     color: #c1151b;
   }
@@ -333,13 +406,11 @@
     background: #c1151b;
     color: #fff;
   }
-
   .mobile-nav-toggle,
   .mobile-nav-panel,
   .mobile-nav-overlay {
     display: none;
   }
-
   body.mobile-menu-open .mobile-nav-panel {
     right: 0;
   }
@@ -350,29 +421,25 @@
   /* ==============================================
      RESPONSIVE STYLES
      ============================================== */
-
   @media screen and (max-width: 1400px) {
     .header-center {
       display: none;
     }
   }
-
   @media screen and (max-width: 1000px) {
     .custom-header {
       height: var(--header-mobile-height);
     }
-
     .custom-header,
     .header-left {
       padding-left: 20px;
     }
-
     .header-shape-clipper--default,
+    .header-shape-clipper--animated,
     .circle-dropdown-container,
     .header-right {
       display: none;
     }
-
     .mobile-nav-toggle {
       display: block;
       background: none;
@@ -380,7 +447,6 @@
       cursor: pointer;
       padding: 5px;
     }
-
     .mobile-nav-panel {
       display: block;
       position: fixed;
@@ -394,7 +460,6 @@
       box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
       overflow-y: auto;
     }
-
     .mobile-nav-close {
       display: block;
       position: absolute;
@@ -404,11 +469,9 @@
       border: none;
       cursor: pointer;
     }
-
     .mobile-nav-content {
       margin-top: 50px;
     }
-
     .mobile-nav-overlay {
       position: fixed;
       top: 0;
@@ -418,13 +481,11 @@
       background: rgba(0, 0, 0, 0.5);
       z-index: 101;
     }
-
     .mobile-nav-content .header-center {
       display: block;
       padding: 0 20px 20px;
       border-bottom: 1px solid #eee;
     }
-
     .mobile-nav-content .header-right {
       display: flex;
       flex-direction: column;
@@ -432,18 +493,15 @@
       gap: 0;
       padding: 0;
     }
-
     .mobile-nav-content .dropdown {
       border-bottom: 1px solid #eee;
     }
-
     .mobile-nav-content .header-btn {
       justify-content: space-between;
       width: 100%;
       padding: 15px 20px;
       border-radius: 0;
     }
-
     .mobile-nav-content .dropdown.is-open > .dropdown-content {
       display: flex;
     }
@@ -554,11 +612,11 @@
       parentDropdown.classList.toggle('is-open');
     });
 
-    // MODIFICATION: New logic for desktop touch support
+    // Desktop touch/click support for main navigation
     const desktopNav = document.querySelector('.header-right');
     desktopNav.addEventListener('click', (e) => {
       const isMobile = window.innerWidth <= BREAKPOINT;
-      if (isMobile) return; // Don't run this logic on mobile view
+      if (isMobile) return;
 
       const dropdownLink = e.target.closest('.dropdown-link');
       if (!dropdownLink) return;
@@ -566,29 +624,31 @@
       const parentDropdown = dropdownLink.closest('.dropdown');
       const submenu = parentDropdown.querySelector('.dropdown-content');
 
-      // Allow normal link behavior for items without a submenu
       if (!submenu) return;
 
-      // First tap on touch device, or if menu is closed
-      if (!parentDropdown.classList.contains('is-open')) {
-        e.preventDefault();
+      // If the clicked menu is already open, the default <a> behavior will trigger and navigate
+      if (parentDropdown.classList.contains('is-open')) return;
 
-        // Close any other open dropdowns
-        document.querySelectorAll('.header-right .dropdown.is-open').forEach((openDropdown) => {
-          openDropdown.classList.remove('is-open');
-        });
+      // Otherwise, this is the first click.
+      e.preventDefault();
 
-        // Open the current one
-        parentDropdown.classList.add('is-open');
-      }
-      // If the link is clicked again while the menu is open, the default link behavior will proceed
+      document.querySelectorAll('.header-right .dropdown.is-open').forEach((openDropdown) => {
+        openDropdown.classList.remove('is-open');
+      });
+
+      parentDropdown.classList.add('is-open');
     });
 
-    // Close desktop dropdowns if clicking outside
+    // Close all dropdowns if clicking outside
     document.addEventListener('click', (e) => {
-      const openDropdown = document.querySelector('.header-right .dropdown.is-open');
-      if (openDropdown && !openDropdown.contains(e.target)) {
-        openDropdown.classList.remove('is-open');
+      const activeDesktopDropdown = document.querySelector('.header-right .dropdown.is-open');
+      if (activeDesktopDropdown && !activeDesktopDropdown.contains(e.target)) {
+        activeDesktopDropdown.classList.remove('is-open');
+      }
+
+      const activeCircleDropdown = document.querySelector('.custom-header.is-circle-menu-active');
+      if (activeCircleDropdown && !activeCircleDropdown.contains(e.target)) {
+        activeCircleDropdown.classList.remove('is-circle-menu-active');
       }
     });
 
