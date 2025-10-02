@@ -1,31 +1,26 @@
 {% comment %}
-  V2 - Custom Product Page
-  - Main info background is now full-width.
-  - Increased gap between top section and tabs.
-  - Fixed rich text formatting for the "Features" tab.
-  - Replaced the product form with the "Sales & Support" box.
+  V3 - Custom Product Page
+  - Implemented a "full-bleed" background for the right info column.
+  - Fixed the positioning of the support button.
+  - Corrected rich text formatting for the "Features" tab.
 {% endcomment %}
 
 {%- style -%}
-  /* ==============================================
-     TOP SECTION: Full-width container and content wrapper
-     ============================================== */
-  .product-main-full-width {
-    background-color: #f5f5f5;
-  }
-
   .product-section-wrapper {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
   }
 
+  /* ==============================================
+     TOP SECTION: Image & Main Info
+     ============================================== */
   .product-main-container {
     display: grid;
     grid-template-columns: 45fr 55fr;
     gap: 0;
-    margin-bottom: 4rem; /* INCREASED from 2rem */
-    padding: 3rem 0;
+    margin-top: 3rem;
+    margin-bottom: 4rem;
   }
 
   .product-image-column img {
@@ -35,12 +30,27 @@
     display: block;
   }
 
+  /* MODIFICATION: Info column is now a container for a pseudo-element background */
   .product-info-column {
-    /* Background color is now on the parent */
     padding: 40px;
-    border-bottom-left-radius: 50px;
     display: flex;
     flex-direction: column;
+    position: relative; /* Acts as a positioning context */
+    overflow: hidden; /* Prevents scrollbars from the pseudo-element */
+  }
+
+  /* MODIFICATION: This pseudo-element creates the full-bleed background */
+  .product-info-column::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    background-color: #f5f5f5;
+    border-bottom-left-radius: 50px;
+    /* This calculation extends the background to the right edge of the viewport */
+    right: calc(-1 * (100vw - 100%) / 2);
   }
 
   .product-info-column__vendor {
@@ -53,7 +63,7 @@
 
   .product-info-column__title {
     font-size: 2.5rem;
-    margin: 0 0: 1rem;
+    margin: 0 0 1rem;
     line-height: 1.2;
   }
 
@@ -61,14 +71,14 @@
     font-size: 1rem;
     line-height: 1.6;
     color: #333;
-    flex-grow: 1; /* Pushes support box down */
+    flex-grow: 1;
   }
 
   /* ==============================================
      SUPPORT BOX STYLES (Integrated)
      ============================================== */
   .support-box-wrapper {
-    margin-top: auto; /* Pushes to the bottom of the column */
+    margin-top: auto;
     padding-top: 2rem;
   }
   .support-box {
@@ -82,6 +92,7 @@
   }
   .support-box-content {
     padding: 40px 40px 30px;
+    flex-grow: 1; /* MODIFICATION: Pushes the button to the bottom */
   }
   .support-box-heading {
     font-size: 32px;
@@ -126,7 +137,7 @@
   .product-tabs-container {
     background-color: #fff;
     border: 1px solid #e5e5e5;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     border-radius: 0 50px 50px 50px;
     position: relative;
   }
@@ -169,7 +180,6 @@
   .product-tabs-content__panel.is-active {
     display: block;
   }
-  /* FIX: Added basic RTE styles for features tab */
   .product-tabs-content__panel.rte p {
     margin: 0 0 1em;
   }
@@ -201,16 +211,19 @@
     text-decoration: underline;
   }
 
-  /* Mobile responsiveness */
   @media screen and (max-width: 768px) {
     .product-main-container {
       grid-template-columns: 1fr;
     }
     .product-info-column {
-      border-radius: 0 0 50px 50px;
+      border-radius: 0;
+    }
+    .product-info-column::before {
+      border-bottom-left-radius: 50px;
+      border-bottom-right-radius: 50px; /* Round both corners on mobile */
     }
     .product-tabs-container {
-       border-radius: 50px;
+      border-radius: 50px;
     }
     .product-tabs-nav {
       position: static;
@@ -224,9 +237,9 @@
       text-align: center;
     }
     .product-tabs-nav__item.is-active {
-       background-color: #f0f0f0;
-       border-bottom: 2px solid #c1151b;
-       top: 0;
+      background-color: #f0f0f0;
+      border-bottom: 2px solid #c1151b;
+      top: 0;
     }
     .product-tabs-content {
       padding: 30px 20px;
@@ -241,46 +254,44 @@
 -%}
 
 <section class="color-{{ section.settings.color_scheme }}">
-  <div class="product-main-full-width">
-    <div class="product-section-wrapper">
-      <div class="product-main-container">
-        <div class="product-image-column">
-          {%- if product.featured_image -%}
-            <img
-              src="{{ product.featured_image | image_url: width: 1024 }}"
-              alt="{{ product.featured_image.alt | escape }}"
-              width="{{ product.featured_image.width }}"
-              height="{{ product.featured_image.height }}"
-              loading="eager"
-            >
-          {%- else -%}
-            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-          {%- endif -%}
-        </div>
-        <div class="product-info-column">
-          <p class="product-info-column__vendor">{{ product.vendor }}</p>
-          <h1 class="product-info-column__title">{{ product.title }}</h1>
+  <div class="product-section-wrapper">
+    <div class="product-main-container">
+      <div class="product-image-column">
+        {%- if product.featured_image -%}
+          <img
+            src="{{ product.featured_image | image_url: width: 1024 }}"
+            alt="{{ product.featured_image.alt | escape }}"
+            width="{{ product.featured_image.width }}"
+            height="{{ product.featured_image.height }}"
+            loading="eager"
+          >
+        {%- else -%}
+          {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+      </div>
+      <div class="product-info-column">
+        <p class="product-info-column__vendor">{{ product.vendor }}</p>
+        <h1 class="product-info-column__title">{{ product.title }}</h1>
 
-          {%- if product.description != blank -%}
-            <div class="product__description rte">
-              {{ product.description }}
+        {%- if product.description != blank -%}
+          <div class="product__description rte">
+            {{ product.description }}
+          </div>
+        {%- endif -%}
+
+        <div class="support-box-wrapper">
+          <div class="support-box">
+            <div class="support-box-content">
+              <h2 class="support-box-heading">{{ section.settings.box_heading }}</h2>
+              <p class="support-box-subheading">{{ section.settings.box_subheading }}</p>
+              <span class="support-box-phone">{{ section.settings.box_phone }}</span>
             </div>
-          {%- endif -%}
 
-          <div class="support-box-wrapper">
-            <div class="support-box">
-              <div class="support-box-content">
-                <h2 class="support-box-heading">{{ section.settings.box_heading }}</h2>
-                <p class="support-box-subheading">{{ section.settings.box_subheading }}</p>
-                <span class="support-box-phone">{{ section.settings.box_phone }}</span>
-              </div>
-
-              {% if section.settings.button_label != blank and section.settings.button_link != blank %}
-                <a href="{{ section.settings.button_link }}" class="support-box-button">
-                  {{ section.settings.button_label }}
-                </a>
-              {% endif %}
-            </div>
+            {% if section.settings.button_label != blank and section.settings.button_link != blank %}
+              <a href="{{ section.settings.button_link }}" class="support-box-button">
+                {{ section.settings.button_label }}
+              </a>
+            {% endif %}
           </div>
         </div>
       </div>
