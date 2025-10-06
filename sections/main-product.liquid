@@ -331,7 +331,7 @@
                 {%- for file in downloads_content -%}
                   <li>
                     <a href="{{ file | file_url }}" download target="_blank">
-                      {{ file | file_url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
+                      {{ file | file_url }}
                     </a>
                   </li>
                 {%- endfor -%}
