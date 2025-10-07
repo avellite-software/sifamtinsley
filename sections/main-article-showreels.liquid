@@ -1,6 +1,7 @@
 {% comment %}
   Template for a single "Showreel" article.
   - Displays the YouTube embed prominently at the top.
+  - MODIFIED: Now correctly handles both standard YouTube and youtu.be short URLs.
 {% endcomment %}
 
 <style>
@@ -15,7 +16,7 @@
     height: 0;
     overflow: hidden;
     margin-bottom: 2.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
   }
   .showreel-video-embed {
@@ -47,11 +48,22 @@
 <article class="showreel-article-section">
   {%- liquid
     assign showreel_url = article.metafields.custom.showreel_link.value
+    assign video_id = ''
+
+    if showreel_url contains 'watch?v='
+      assign video_id = showreel_url | split: 'watch?v=' | last | split: '&' | first
+    elsif showreel_url contains 'youtu.be/'
+      assign video_id = showreel_url | split: 'youtu.be/' | last | split: '?' | first | split: '&' | first
+    endif
+
+    assign video_embed_url = ''
+    if video_id != blank
+      assign video_embed_url = 'https://www.youtube.com/embed/' | append: video_id
+    endif
   -%}
 
-  {%- if showreel_url != blank -%}
+  {%- if video_embed_url != blank -%}
     <div class="showreel-video-container">
-      {%- assign video_embed_url = showreel_url | replace: 'watch?v=', 'embed/' | split: '&' | first -%}
       <iframe
         class="showreel-video-embed"
         src="{{ video_embed_url }}"
