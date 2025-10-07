@@ -331,15 +331,6 @@
               <ul class="product-file-list">
                 {%- for file in downloads_content -%}
                   <li>
-                    {%- assign file_public_url = file.url | prepend: 'https:' -%}
-                    <a
-                      href="https://docs.google.com/gview?url={{ file_public_url }}&embedded=true"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
-                    </a>
-
                     <a href="{{ file.url }}" target="_blank">
                       {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
                     </a>
@@ -353,8 +344,8 @@
               <ul class="product-file-list">
                 {%- for file in certifications_content -%}
                   <li>
-                    <a href="{{ file | file_url }}" target="_blank">
-                      {{ file | file_url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
+                    <a href="{{ file.url }}" target="_blank">
+                      {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
                     </a>
                   </li>
                 {%- endfor -%}
