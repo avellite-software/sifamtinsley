@@ -326,6 +326,7 @@
             </div>
           {%- endif -%}
           {%- if downloads_content != blank -%}
+            {{ downloads_content.url }}
             <div class="product-tabs-content__panel" data-content="downloads" role="tabpanel">
               <ul class="product-file-list">
                 {%- for file in downloads_content -%}
