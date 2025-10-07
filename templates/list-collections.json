@@ -16,7 +16,7 @@
         "header_bg_color": "#f5f5f5",
         "content_area_bg_color": "#ffffff",
         "sidebar_bg_color": "#ffffff",
-        "card_box_shadow": "0 10px 25px rgba(0, 0, 0, 0.08)",
+        "card_box_shadow": "0 10px 25px rgba(0, 0, 0, 0.2)",
         "sidebar_box_shadow": "0 10px 25px rgba(0, 0, 0, 0.08)",
         "featured_page": "become-a-distributor",
         "featured_image": "shopify://shop_images/distributor_image_square.jpg",
