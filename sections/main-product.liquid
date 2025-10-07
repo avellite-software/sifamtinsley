@@ -331,7 +331,7 @@
               <ul class="product-file-list">
                 {%- for file in downloads_content -%}
                   <li>
-                    <a href="{{ file.url | file_url }}" download target="_blank">
+                    <a href="{{ file | file_url }}" download target="_blank">
                       {{ file.url }}
                     </a>
                   </li>
