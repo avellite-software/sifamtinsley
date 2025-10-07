@@ -1,0 +1,214 @@
+{% comment %}
+  Custom Contact Page Section
+  - Features a Google Maps embed.
+  - Two-column text area for details.
+  - A single-column rich text area for international info.
+  - All content is editable in the theme customizer.
+{% endcomment %}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .custom-contact-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem; /* Space between the major sections */
+  }
+
+  /* --- 1. Google Maps --- */
+  .contact-map-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 40%; /* Sets an aspect ratio for the map, adjust as needed */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  }
+  .contact-map-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* --- 2. Two Columns --- */
+  .contact-columns-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .contact-column h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: #1c1c1c;
+  }
+  .contact-column .rte {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .contact-column .rte p {
+    margin: 0 0 1em;
+  }
+
+  /* --- 3. International Info --- */
+  .contact-international-info {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 2rem;
+  }
+  .contact-international-info .rte {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .contact-international-info .rte h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  /* --- Responsiveness --- */
+  @media screen and (max-width: 768px) {
+    .contact-columns-container {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .custom-contact-section {
+      gap: 3rem;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width section-{{ section.id }}-padding">
+  <div class="custom-contact-section">
+    {% comment %} --- 1. Google Maps Embed --- {% endcomment %}
+    {%- if section.settings.map_embed_code != blank -%}
+      <div class="contact-map-container">
+        {{ section.settings.map_embed_code }}
+      </div>
+    {%- endif -%}
+
+    {% comment %} --- 2. Two Columns --- {% endcomment %}
+    {%- if section.settings.column_1_title != blank or section.settings.column_2_title != blank -%}
+      <div class="contact-columns-container">
+        <div class="contact-column">
+          {%- if section.settings.column_1_title != blank -%}
+            <h2>{{ section.settings.column_1_title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.column_1_body != blank -%}
+            <div class="rte">{{ section.settings.column_1_body }}</div>
+          {%- endif -%}
+        </div>
+        <div class="contact-column">
+          {%- if section.settings.column_2_title != blank -%}
+            <h2>{{ section.settings.column_2_title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.column_2_body != blank -%}
+            <div class="rte">{{ section.settings.column_2_body }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {% comment %} --- 3. International Info --- {% endcomment %}
+    {%- if section.settings.international_info_body != blank -%}
+      <div class="contact-international-info">
+        <div class="rte">
+          {{ section.settings.international_info_body }}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom Contact Page",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Google Map"
+    },
+    {
+      "type": "liquid",
+      "id": "map_embed_code",
+      "label": "Google Maps Embed Code",
+      "info": "Go to Google Maps, find your location, click 'Share', then 'Embed a map'. Copy the HTML code and paste it here."
+    },
+    {
+      "type": "header",
+      "content": "Two Columns"
+    },
+    {
+      "type": "text",
+      "id": "column_1_title",
+      "label": "Column 1 Title",
+      "default": "Our Office"
+    },
+    {
+      "type": "richtext",
+      "id": "column_1_body",
+      "label": "Column 1 Body",
+      "default": "<p>Use this space to provide details about your primary location, business hours, or other key information.</p>"
+    },
+    {
+      "type": "text",
+      "id": "column_2_title",
+      "label": "Column 2 Title",
+      "default": "Get In Touch"
+    },
+    {
+      "type": "richtext",
+      "id": "column_2_body",
+      "label": "Column 2 Body",
+      "default": "<p>Provide your contact email, phone number, or other ways for customers to reach you here.</p>"
+    },
+    {
+      "type": "header",
+      "content": "International Information"
+    },
+    {
+      "type": "richtext",
+      "id": "international_info_body",
+      "label": "International Info Content",
+      "default": "<h3>USA Office</h3><p>123 Example St, New York, NY</p><h3>Europe Office</h3><p>456 Example Ave, London, UK</p>"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Contact Page"
+    }
+  ]
+}
+{% endschema %}
