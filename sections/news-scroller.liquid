@@ -299,96 +299,99 @@
       const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
       if (!scroller) return;
 
-      // MODIFICATION: Check if the total content width is greater than 1200px
-      const isScrollable = scroller.scrollWidth > 1200;
-      
-      if (!isScrollable) {
-        scroller.classList.add('not-scrollable');
-        return; // Exit if no scrolling is needed
-      }
-      
-      scroller.classList.add('is-scrollable');
-
-      const originalItems = Array.from(scroller.children);
-      if (originalItems.length === 0) return;
-
-      // --- 1. Infinite Scroll Setup ---
-      originalItems.forEach(item => {
-        const clonedItem = item.cloneNode(true);
-        clonedItem.setAttribute('aria-hidden', 'true');
+      // FIX: Delay the measurement with a setTimeout to prevent a race condition in Brave.
+      // This gives the browser a moment to finish rendering before we measure the width.
+      setTimeout(() => {
+        const isScrollable = scroller.scrollWidth > 1200;
         
-        clonedItem.querySelectorAll('a').forEach(link => {
-            link.setAttribute('tabindex', '-1');
-            link.style.pointerEvents = 'none';
+        if (!isScrollable) {
+          scroller.classList.add('not-scrollable');
+          return; // Exit if no scrolling is needed
+        }
+        
+        scroller.classList.add('is-scrollable');
+
+        const originalItems = Array.from(scroller.children);
+        if (originalItems.length === 0) return;
+
+        // --- 1. Infinite Scroll Setup ---
+        originalItems.forEach(item => {
+          const clonedItem = item.cloneNode(true);
+          clonedItem.setAttribute('aria-hidden', 'true');
+          
+          clonedItem.querySelectorAll('a').forEach(link => {
+              link.setAttribute('tabindex', '-1');
+              link.style.pointerEvents = 'none';
+          });
+
+          scroller.appendChild(clonedItem);
         });
 
-        scroller.appendChild(clonedItem);
-      });
+        const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
+        const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + (originalItems.length * gap);
 
-      const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
-      const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + (originalItems.length * gap);
+        // --- 2. Auto-Scroll Logic ---
+        let animationFrameId;
+        let isPaused = false;
+        const durationInSeconds = {{ section.settings.autoscroll_duration }};
+        const totalFrames = durationInSeconds * 60;
+        const speed = originalContentWidth / totalFrames;
 
-      // --- 2. Auto-Scroll Logic ---
-      let animationFrameId;
-      let isPaused = false;
-      const durationInSeconds = {{ section.settings.autoscroll_duration }};
-      const totalFrames = durationInSeconds * 60;
-      const speed = originalContentWidth / totalFrames;
-
-      function scrollStep() {
-        if (isPaused) return;
-        scroller.scrollLeft = (scroller.scrollLeft + speed) % originalContentWidth;
-        animationFrameId = requestAnimationFrame(scrollStep);
-      }
-
-      // --- 3. Click-and-Drag Scrolling Logic ---
-      let isDown = false;
-      let startX;
-      let scrollLeft;
-      let hasDragged = false;
-
-      scroller.addEventListener('mousedown', (e) => {
-        if (e.target.closest('a')) return;
-        
-        e.preventDefault();
-        isDown = true;
-        isPaused = true;
-        hasDragged = false;
-        scroller.classList.add('is-dragging');
-        startX = e.pageX - scroller.offsetLeft;
-        scrollLeft = scroller.scrollLeft;
-        cancelAnimationFrame(animationFrameId);
-      });
-
-      const stopDragging = () => {
-        if (!isDown) return;
-        isDown = false;
-        isPaused = false;
-        scroller.classList.remove('is-dragging');
-        requestAnimationFrame(scrollStep);
-      };
-
-      scroller.addEventListener('mouseleave', stopDragging);
-      scroller.addEventListener('mouseup', stopDragging);
-
-      scroller.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        hasDragged = true;
-        const x = e.pageX - scroller.offsetLeft;
-        const walk = (x - startX) * 2;
-        scroller.scrollLeft = scrollLeft - walk;
-      });
-
-      // --- 4. Link Click Logic ---
-      scroller.addEventListener('click', (e) => {
-        // Prevent link clicks on the whole card if a drag happened
-        if (hasDragged && !e.target.closest('a.news-card-read-more')) {
-          e.preventDefault();
+        function scrollStep() {
+          if (isPaused) return;
+          scroller.scrollLeft = (scroller.scrollLeft + speed) % originalContentWidth;
+          animationFrameId = requestAnimationFrame(scrollStep);
         }
-      }, true);
 
-      requestAnimationFrame(scrollStep);
+        // --- 3. Click-and-Drag Scrolling Logic ---
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let hasDragged = false;
+
+        scroller.addEventListener('mousedown', (e) => {
+          if (e.target.closest('a')) return;
+          
+          e.preventDefault();
+          isDown = true;
+          isPaused = true;
+          hasDragged = false;
+          scroller.classList.add('is-dragging');
+          startX = e.pageX - scroller.offsetLeft;
+          scrollLeft = scroller.scrollLeft;
+          cancelAnimationFrame(animationFrameId);
+        });
+
+        const stopDragging = () => {
+          if (!isDown) return;
+          isDown = false;
+          isPaused = false;
+          scroller.classList.remove('is-dragging');
+          requestAnimationFrame(scrollStep);
+        };
+
+        scroller.addEventListener('mouseleave', stopDragging);
+        scroller.addEventListener('mouseup', stopDragging);
+
+        scroller.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          hasDragged = true;
+          const x = e.pageX - scroller.offsetLeft;
+          const walk = (x - startX) * 2;
+          scroller.scrollLeft = scrollLeft - walk;
+        });
+
+        // --- 4. Link Click Logic ---
+        scroller.addEventListener('click', (e) => {
+          if (hasDragged && !e.target.closest('a.news-card-read-more')) {
+            e.preventDefault();
+          }
+        }, true);
+
+        requestAnimationFrame(scrollStep);
+
+      }, 100); // A small 100ms delay is usually enough.
     });
   </script>
 {% endif %}
