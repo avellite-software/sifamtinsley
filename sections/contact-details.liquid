@@ -1,9 +1,6 @@
 {% comment %}
   Custom Contact Page Section
-  - Features a Google Maps embed.
-  - Two-column text area for details.
-  - A single-column rich text area for international info.
-  - All content is editable in the theme customizer.
+  - V2: Updated title and description font sizes.
 {% endcomment %}
 
 {%- style -%}
@@ -22,7 +19,7 @@
   .contact-map-container {
     position: relative;
     width: 100%;
-    padding-bottom: 40%; /* Sets an aspect ratio for the map, adjust as needed */
+    padding-bottom: 40%;
     height: 0;
     overflow: hidden;
     border-radius: 8px;
@@ -44,13 +41,13 @@
     gap: 40px;
   }
   .contact-column h2 {
-    font-size: 1.8rem;
+    font-size: 2rem; /* MODIFIED */
     font-weight: 700;
     margin: 0 0 1rem;
     color: #1c1c1c;
   }
   .contact-column .rte {
-    font-size: 1rem;
+    font-size: 1.5rem; /* MODIFIED */
     line-height: 1.7;
   }
   .contact-column .rte p {
@@ -63,11 +60,11 @@
     padding-top: 2rem;
   }
   .contact-international-info .rte {
-    font-size: 1rem;
+    font-size: 1.5rem; /* MODIFIED */
     line-height: 1.7;
   }
   .contact-international-info .rte h3 {
-    font-size: 1.2rem;
+    font-size: 1.8rem; /* MODIFIED (Proportionally increased) */
     font-weight: 600;
     margin-bottom: 0.5rem;
   }
