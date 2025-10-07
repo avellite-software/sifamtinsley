@@ -299,22 +299,24 @@
       const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
       if (!scroller) return;
 
-      // FIX: Delay the measurement with a setTimeout to prevent a race condition in Brave.
-      // This gives the browser a moment to finish rendering before we measure the width.
       setTimeout(() => {
+        // Check if the content is wide enough to need scrolling
         const isScrollable = scroller.scrollWidth > 1200;
         
         if (!isScrollable) {
           scroller.classList.add('not-scrollable');
-          return; // Exit if no scrolling is needed
+          return;
         }
         
         scroller.classList.add('is-scrollable');
-
+        
+        // --- 1. Measure BEFORE duplicating for cross-browser reliability ---
+        const originalContentWidth = scroller.scrollWidth;
         const originalItems = Array.from(scroller.children);
+
         if (originalItems.length === 0) return;
 
-        // --- 1. Infinite Scroll Setup ---
+        // --- 2. Duplicate items for infinite loop effect ---
         originalItems.forEach(item => {
           const clonedItem = item.cloneNode(true);
           clonedItem.setAttribute('aria-hidden', 'true');
@@ -327,23 +329,26 @@
           scroller.appendChild(clonedItem);
         });
 
-        const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
-        const originalContentWidth = (originalItems.length * originalItems[0].offsetWidth) + (originalItems.length * gap);
-
-        // --- 2. Auto-Scroll Logic ---
+        // --- 3. Auto-Scroll Logic ---
         let animationFrameId;
         let isPaused = false;
         const durationInSeconds = {{ section.settings.autoscroll_duration }};
-        const totalFrames = durationInSeconds * 60;
-        const speed = originalContentWidth / totalFrames;
+        const speed = originalContentWidth / (durationInSeconds * 60);
 
         function scrollStep() {
           if (isPaused) return;
-          scroller.scrollLeft = (scroller.scrollLeft + speed) % originalContentWidth;
+
+          // Use a more robust 'if' check for the loop
+          if (scroller.scrollLeft >= originalContentWidth) {
+            scroller.scrollLeft -= originalContentWidth;
+          } else {
+            scroller.scrollLeft += speed;
+          }
+          
           animationFrameId = requestAnimationFrame(scrollStep);
         }
 
-        // --- 3. Click-and-Drag Scrolling Logic ---
+        // --- 4. Click-and-Drag Scrolling Logic ---
         let isDown = false;
         let startX;
         let scrollLeft;
@@ -381,17 +386,17 @@
           const walk = (x - startX) * 2;
           scroller.scrollLeft = scrollLeft - walk;
         });
-
-        // --- 4. Link Click Logic ---
+        
         scroller.addEventListener('click', (e) => {
           if (hasDragged && !e.target.closest('a.news-card-read-more')) {
             e.preventDefault();
           }
         }, true);
 
+        // Start the animation
         requestAnimationFrame(scrollStep);
 
-      }, 100); // A small 100ms delay is usually enough.
+      }, 100);
     });
   </script>
 {% endif %}
