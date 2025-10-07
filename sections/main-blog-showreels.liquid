@@ -1,0 +1,119 @@
+{% comment %}
+  Template for the "Showreels" blog list.
+  - Displays a YouTube embed if a metafield link exists.
+  - Falls back to a square featured image.
+{% endcomment %}
+
+<style>
+  .blog-page-section {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  .blog-page-header { margin-bottom: 40px; text-align: center; }
+  .blog-page-header .blog-page-title { font-size: 36px; }
+  .blog-post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+  .blog-post-card { background-color: #fff; border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.07); overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+  
+  /* Media container for image or video */
+  .blog-post-card__media-wrapper {
+    display: block;
+    line-height: 0;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1; /* MODIFIED: Makes the media container square */
+    background-color: #f0f0f0;
+  }
+  .blog-post-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .blog-post-card__video-embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .blog-post-card__content { padding: 25px; display: flex; flex-direction: column; flex-grow: 1; }
+  .blog-post-card__meta { font-size: 13px; color: #777; margin-bottom: 10px; }
+  .blog-post-card__title { font-size: 20px; font-weight: 700; margin: 0 0 10px; line-height: 1.4; }
+  .blog-post-card__title a { text-decoration: none; color: #1c1c1c; }
+  .blog-post-card__excerpt { font-size: 15px; line-height: 1.6; margin: 0; color: #333; flex-grow: 1; }
+  .blog-post-card__read-more { display: inline-block; margin-top: 20px; padding: 10px 22px; background: #c1151b; color: #fff !important; border: 1px solid #c1151b; border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 16px; text-align: center; transition: background-color 0.2s; align-self: flex-start; }
+  .blog-post-card__read-more:hover { background: #a10f16; }
+  
+  .pagination-wrapper { margin-top: 50px; }
+  .pagination__list { display: flex; justify-content: center; align-items: center; gap: 10px; list-style: none; padding-left: 0; }
+
+  @media (max-width: 990px) { .blog-post-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 750px) { .blog-post-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="blog-page-section page-width">
+  <div class="blog-page-header">
+    <h1 class="blog-page-title">{{ blog.title | escape }}</h1>
+  </div>
+
+  {%- paginate blog.articles by section.settings.posts_per_page -%}
+    <div class="blog-post-grid">
+      {%- for article in blog.articles -%}
+        <div class="blog-post-grid__item">
+          <div class="blog-post-card">
+            {%- liquid
+              assign showreel_url = article.metafields.custom.showreel_link.value
+            -%}
+            <div class="blog-post-card__media-wrapper">
+              {%- if showreel_url != blank -%}
+                {%- assign video_embed_url = showreel_url | replace: 'watch?v=', 'embed/' | split: '&' | first -%}
+                <iframe
+                  class="blog-post-card__video-embed"
+                  src="{{ video_embed_url }}"
+                  title="YouTube video player for {{ article.title | escape }}"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
+              {%- elsif article.image and section.settings.show_image -%}
+                <a href="{{ article.url }}" class="blog-post-card__image-link">
+                  {{ article.image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'blog-post-card__image', widths: '400, 600, 800' }}
+                </a>
+              {%- endif -%}
+            </div>
+            <div class="blog-post-card__content">
+              <div class="blog-post-card__meta">
+                {%- if section.settings.show_date -%}<span>{{ article.published_at | time_tag: format: 'date' }}</span>{%- endif -%}
+                {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
+                {%- if section.settings.show_author -%}<span>by {{ article.author }}</span>{%- endif -%}
+              </div>
+              <h3 class="blog-post-card__title"><a href="{{ article.url }}">{{ article.title }}</a></h3>
+              <p class="blog-post-card__excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
+              <a href="{{ article.url }}" class="blog-post-card__read-more">Read More</a>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if paginate.pages > 1 -%}{%- render 'pagination', paginate: paginate -%}{%- endif -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Main blog (Showreels)",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "range", "id": "posts_per_page", "min": 3, "max": 15, "step": 1, "label": "Posts per page", "default": 6 },
+    { "type": "checkbox", "id": "show_image", "default": true, "label": "Show featured image (fallback)" },
+    { "type": "checkbox", "id": "show_date", "default": true, "label": "Show date" },
+    { "type": "checkbox", "id": "show_author", "default": false, "label": "Show author" },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 36 }
+  ]
+}
+{% endschema %}
