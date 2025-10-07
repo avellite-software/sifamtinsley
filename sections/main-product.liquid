@@ -344,7 +344,7 @@
               <ul class="product-file-list">
                 {%- for file in certifications_content -%}
                   <li>
-                    <a href="{{ file | file_url }}" download target="_blank">
+                    <a href="{{ file | file_url }}" target="_blank">
                       {{ file | file_url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
                     </a>
                   </li>
