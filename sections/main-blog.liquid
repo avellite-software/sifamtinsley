@@ -42,7 +42,6 @@
   .blog-post-card__image-link {
     display: block;
     line-height: 0;
-    /* ADDED: Container for the image */
     position: relative;
     overflow: hidden;
     aspect-ratio: 1 / 1;
@@ -151,23 +150,30 @@
           {% endif %}
         >
           <div class="blog-post-card">
-            {%- if article.image and section.settings.show_image -%}
+            {%- if section.settings.show_image -%}
               <a href="{{ article.url }}" class="blog-post-card__image-link">
-                {{
-                  article.image
-                  | image_url: width: 800
-                  | image_tag: loading: 'lazy', class: 'blog-post-card__image', widths: '400, 600, 800'
-                }}
+                {%- if article.image -%}
+                  {{
+                    article.image
+                    | image_url: width: 800
+                    | image_tag: loading: 'lazy', class: 'blog-post-card__image', widths: '400, 600, 800'
+                  }}
+                {%- else -%}
+                  <img
+                    src="https://cdn.shopify.com/s/files/1/0949/2745/4595/files/sifam_tinsley_instrumentation_limited_logo.jpg?v=1759850304"
+                    alt="{{ article.title | escape }}"
+                    class="blog-post-card__image"
+                    loading="lazy"
+                    width="800"
+                    height="800"
+                  >
+                {%- endif -%}
               </a>
             {%- endif -%}
             <div class="blog-post-card__content">
               <div class="blog-post-card__meta">
                 {%- if section.settings.show_date -%}
                   <span>{{ article.published_at | time_tag: format: 'date' }}</span>
-                {%- endif -%}
-                {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
-                {%- if section.settings.show_author -%}
-                  <span>by {{ article.author }}</span>
                 {%- endif -%}
               </div>
               <h3 class="blog-post-card__title">
@@ -213,12 +219,6 @@
       "id": "show_date",
       "default": true,
       "label": "Show date"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_author",
-      "default": false,
-      "label": "Show author"
     },
     {
       "type": "header",
