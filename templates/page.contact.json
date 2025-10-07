@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -10,9 +19,12 @@
     "form": {
       "type": "contact-details",
       "settings": {
-        "heading": "",
-        "heading_size": "h1",
-        "color_scheme": "scheme-1",
+        "map_embed_code": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m19!1m8!1m3!1d78807.7280195474!2d0.4994620000000001!3d51.883931!3m2!1i1024!2i768!4f13.1!4m8!3e0!4m0!4m5!1s0x47d8f051cc9a144d%3A0x848f6f7da26b41ea!2sTinsley%20Instrumentation%20Ltd%2C%201%20Warner%20Dr%2C%20Braintree%20CM7%202YW!3m2!1d51.8839362!2d0.5344814999999999!5e0!3m2!1sen!2suk!4v1759852440713!5m2!1sen!2suk\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"></iframe>",
+        "column_1_title": "Our Office",
+        "column_1_body": "<p>Use this space to provide details about your primary location, business hours, or other key information.</p>",
+        "column_2_title": "Get In Touch",
+        "column_2_body": "<p>Provide your contact email, phone number, or other ways for customers to reach you here.</p>",
+        "international_info_body": "<h3>USA Office</h3><p>123 Example St, New York, NY</p><h3>Europe Office</h3><p>456 Example Ave, London, UK</p>",
         "padding_top": 36,
         "padding_bottom": 36
       }
