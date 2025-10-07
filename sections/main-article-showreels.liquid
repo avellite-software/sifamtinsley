@@ -1,0 +1,106 @@
+{% comment %}
+  Template for a single "Showreel" article.
+  - Displays the YouTube embed prominently at the top.
+{% endcomment %}
+
+<style>
+  .showreel-article-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+  .showreel-video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  .showreel-video-embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  .showreel-article-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .showreel-article-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin: 0;
+  }
+  .showreel-article-content.rte {
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  .showreel-article-content.rte p {
+    margin-bottom: 1em;
+  }
+</style>
+
+<article class="showreel-article-section">
+  {%- liquid
+    assign showreel_url = article.metafields.custom.showreel_link.value
+  -%}
+
+  {%- if showreel_url != blank -%}
+    <div class="showreel-video-container">
+      {%- assign video_embed_url = showreel_url | replace: 'watch?v=', 'embed/' | split: '&' | first -%}
+      <iframe
+        class="showreel-video-embed"
+        src="{{ video_embed_url }}"
+        title="YouTube video player for {{ article.title | escape }}"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </div>
+  {%- endif -%}
+
+  <header class="showreel-article-header">
+    <h1 class="showreel-article-title">{{ article.title }}</h1>
+  </header>
+
+  <div class="showreel-article-content rte">
+    {{ article.content }}
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Main article (Showreels)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}
