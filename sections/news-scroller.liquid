@@ -1,6 +1,7 @@
 {% comment %}
   Section: News Scroller
-  - A draggable, auto-scrolling marquee of blog posts.
+  - V3 Changes:
+    - Auto-scroll now triggers if total content width is > 1200px.
 {% endcomment %}
 
 <style>
@@ -30,6 +31,10 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+  /* Center items if there are too few to scroll */
+  .news-scroller-container.not-scrollable {
+    justify-content: center;
+  }
   .news-scroller-container::-webkit-scrollbar {
     display: none;
   }
@@ -46,9 +51,13 @@
     flex-direction: column;
     color: #333;
   }
+  .news-card-image-link {
+    display: block;
+    aspect-ratio: 1 / 1; /* Square aspect ratio */
+  }
   .news-card-image {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    height: 100%;
     object-fit: cover;
     pointer-events: none;
   }
@@ -70,7 +79,7 @@
     margin: 0 0 10px;
     color: #1c1c1c;
     line-height: 1.4;
-    font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
+    text-decoration: none;
   }
   .news-card-excerpt {
     font-size: 15px;
@@ -146,9 +155,17 @@
     {%- for article in blog.articles limit: section.settings.posts_to_show -%}
       <div class="news-card">
         {%- if article.image -%}
-          {{ article.image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'news-card-image' }}
+          <a href="{{ article.url }}" class="news-card-image-link">
+            {{
+              article.image
+              | image_url: width: 320, height: 320, crop: 'center'
+              | image_tag: loading: 'lazy', class: 'news-card-image'
+            }}
+          </a>
         {%- else -%}
-          {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+          <div class="news-card-image-link">
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+          </div>
         {%- endif -%}
         <div class="news-card-content">
           <div class="news-card-meta">
@@ -160,7 +177,9 @@
               <span>by {{ article.author }}</span>
             {%- endif -%}
           </div>
-          <h3 class="news-card-title">{{ article.title }}</h3>
+          <h3 class="news-card-title">
+            <a href="{{ article.url }}" style="color: inherit; text-decoration: none;">{{ article.title }}</a>
+          </h3>
           <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
           <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
         </div>
@@ -168,7 +187,9 @@
     {%- else -%}
       {%- for i in (1..4) -%}
         <div class="news-card">
-          {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+          <div class="news-card-image-link">
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+          </div>
           <div class="news-card-content">
             <h3 class="news-card-title">Example News Article</h3>
             <p class="news-card-excerpt">
@@ -278,21 +299,28 @@
       const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
       if (!scroller) return;
 
-      const originalItems = Array.from(scroller.children);
-      if (originalItems.length === 0 || scroller.scrollWidth <= scroller.clientWidth) {
-        return;
+      // MODIFICATION: Check if the total content width is greater than 1200px
+      const isScrollable = scroller.scrollWidth > 1200;
+      
+      if (!isScrollable) {
+        scroller.classList.add('not-scrollable');
+        return; // Exit if no scrolling is needed
       }
+      
+      scroller.classList.add('is-scrollable');
+
+      const originalItems = Array.from(scroller.children);
+      if (originalItems.length === 0) return;
 
       // --- 1. Infinite Scroll Setup ---
       originalItems.forEach(item => {
         const clonedItem = item.cloneNode(true);
         clonedItem.setAttribute('aria-hidden', 'true');
         
-        // FIX: Find the link inside the cloned item and disable it
-        const clonedLink = clonedItem.querySelector('a.news-card-read-more');
-        if (clonedLink) {
-          clonedLink.setAttribute('tabindex', '-1');
-        }
+        clonedItem.querySelectorAll('a').forEach(link => {
+            link.setAttribute('tabindex', '-1');
+            link.style.pointerEvents = 'none';
+        });
 
         scroller.appendChild(clonedItem);
       });
@@ -320,7 +348,7 @@
       let hasDragged = false;
 
       scroller.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('news-card-read-more')) return;
+        if (e.target.closest('a')) return;
         
         e.preventDefault();
         isDown = true;
@@ -329,6 +357,7 @@
         scroller.classList.add('is-dragging');
         startX = e.pageX - scroller.offsetLeft;
         scrollLeft = scroller.scrollLeft;
+        cancelAnimationFrame(animationFrameId);
       });
 
       const stopDragging = () => {
@@ -352,12 +381,12 @@
       });
 
       // --- 4. Link Click Logic ---
-      // This ensures that a click only registers if the mouse hasn't dragged.
       scroller.addEventListener('click', (e) => {
-        if (hasDragged && !e.target.classList.contains('news-card-read-more')) {
-           e.preventDefault();
+        // Prevent link clicks on the whole card if a drag happened
+        if (hasDragged && !e.target.closest('a.news-card-read-more')) {
+          e.preventDefault();
         }
-      }, true); // Use capture phase to catch the click early
+      }, true);
 
       requestAnimationFrame(scrollStep);
     });
