@@ -1,7 +1,9 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V9 Changes:
-    - Set a minimum scale of 0.1 to prevent items from disappearing.
+  - Final Version:
+    - Added bottom-right border radius.
+    - Added a radial gradient background.
+    - Removed debug colors.
 {% endcomment %}
 
 {%- liquid
@@ -12,23 +14,25 @@
     - orbit_radius_x_multiplier: Controls the orbit's width. A larger number makes the path wider.
     - orbit_radius_y_multiplier: Controls the orbit's height. A larger number makes the path taller.
   endcomment
-  assign orbit_center_x_multiplier = 0.25
+  assign orbit_center_x_multiplier = 0.2
   assign orbit_center_y_multiplier = 0.2
-  assign orbit_radius_x_multiplier = 0.45
+  assign orbit_radius_x_multiplier = 0.4
   assign orbit_radius_y_multiplier = 0.25
 -%}
 
 <style>
   .orbit-section-{{ section.id }} {
     --animation-duration: {{ section.settings.animation_duration }}s;
-    background-color: #111;
-    border: 2px solid cyan;
     position: relative;
     width: 100%;
     min-height: 600px;
     overflow: hidden;
     cursor: grab;
     user-select: none;
+
+    /* MODIFICATION: Final styling */
+    background: radial-gradient(circle 50% at bottom right, #c1151b, #111 70%);
+    border-bottom-right-radius: 50px;
   }
   .orbit-section-{{ section.id }}:active {
     cursor: grabbing;
@@ -46,7 +50,7 @@
     left: 0;
     will-change: transform, opacity;
     transform-origin: center center;
-    background-color: rgba(255, 0, 150, 0.5);
+    /* Debug background removed */
     border-radius: 50%;
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
@@ -118,21 +122,19 @@
     const items = Array.from(container.querySelectorAll('.orbit-item'));
     if (items.length === 0) return;
 
-    // --- 1. Read Orbit Parameters ---
     const centerXMultiplier = parseFloat(section.dataset.centerX);
     const centerYMultiplier = parseFloat(section.dataset.centerY);
     const radiusXMultiplier = parseFloat(section.dataset.radiusX);
     const radiusYMultiplier = parseFloat(section.dataset.radiusY);
 
-    // --- 2. State & Animation Variables ---
     let currentAngle = 0;
     let isDragging = false;
+    let isHovering = false;
     let startX = 0;
     let startAngle = 0;
     let animationFrameId;
     const speed = 360 / ({{ section.settings.animation_duration }} * 60);
 
-    // --- OPTIMIZATION: Cache container dimensions to avoid reading from the DOM on every frame ---
     let containerWidth, containerHeight;
     function updateDimensions() {
       containerWidth = container.offsetWidth;
@@ -153,21 +155,18 @@
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        let scale = (y / containerHeight) * 2.4;
+        let scale = (y / containerHeight) * 2.4; 
         scale = Math.max(0.1, Math.min(2.0, scale));
 
-        // Store values on dataset for hover and z-index check
         item.dataset.x = x;
         item.dataset.y = y;
         item.dataset.scale = scale;
         
-        // Apply transform. If item is hovered, the hover listener will apply its own transform.
         if (!item.classList.contains('is-hovered')) {
           item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         }
         item.style.opacity = 1;
 
-        // --- OPTIMIZATION: Only update z-index when it actually changes ---
         const newZIndex = Math.round(scale * 100);
         if (item.dataset.zIndex != newZIndex) {
             item.style.zIndex = newZIndex;
@@ -177,7 +176,7 @@
     };
 
     const animate = () => {
-      if (!isDragging) {
+      if (!isDragging && !isHovering) {
         currentAngle -= speed;
         updatePositions();
       }
@@ -207,7 +206,6 @@
       section.style.cursor = 'grab';
     };
 
-    // --- OPTIMIZATION: Smoother hover effect that doesn't pause the main animation ---
     items.forEach(item => {
       item.addEventListener('mouseover', () => {
         item.classList.add('is-hovered');
@@ -219,11 +217,9 @@
       
       item.addEventListener('mouseout', () => {
         item.classList.remove('is-hovered');
-        // The main animation loop will automatically correct the transform on the next frame
       });
     });
-
-    // --- OPTIMIZATION: Debounce the resize event to prevent lag ---
+    
     let resizeTimeout;
     const onResize = () => {
         clearTimeout(resizeTimeout);
@@ -233,7 +229,6 @@
         }, 150);
     };
     
-    // --- Event Listeners ---
     section.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
     window.addEventListener('mouseup', stopDrag);
@@ -243,7 +238,6 @@
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('resize', onResize);
 
-    // Initial setup
     updateDimensions();
     updatePositions();
     animate();
