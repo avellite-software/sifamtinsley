@@ -1,245 +1,251 @@
-{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+{% comment %}
+  Section: Interactive Product Orbit
+  - V2 Changes:
+    - Added width and height attributes to all <img> tags to prevent layout shift and fix theme-check errors.
+{% endcomment %}
 
 <style>
-  #Banner-{{ section.id }} {
-    border-bottom-right-radius: 50px;
+  .orbit-section-{{ section.id }} {
+    --animation-duration: {{ section.settings.animation_duration }}s;
+    background-color: #f5f5f5;
+    position: relative;
+    width: 100%;
+    min-height: 600px;
     overflow: hidden;
+    cursor: grab;
+    user-select: none;
+  }
+  .orbit-section-{{ section.id }}:active {
+    cursor: grabbing;
+  }
+
+  .orbit-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .orbit-item {
+    position: absolute;
+    /* Will be positioned by JS */
+    top: 50%;
+    left: 50%;
+    will-change: transform, opacity;
+    transform-origin: center center;
+  }
+
+  .orbit-item__image {
+    display: block;
+    max-width: 150px; /* Base size of the product image */
+    height: auto;
+    pointer-events: none; /* Prevents image from interfering with drag */
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 768px) {
+    .orbit-section-{{ section.id }} {
+      min-height: 500px;
+    }
+    .orbit-item__image {
+      max-width: 100px;
+    }
   }
 </style>
 
-{%- if section.settings.image_height == 'adapt' and section.settings.image != blank -%}
-  {%- style -%}
-    @media screen and (max-width: 749px) {
-      #Banner-{{ section.id }}::before,
-      #Banner-{{ section.id }} .banner__media::before,
-      #Banner-{{ section.id }}:not(.banner--mobile-bottom) .banner__content::before {
-        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
-        content: '';
-        display: block;
-      }
-    }
-    @media screen and (min-width: 750px) {
-      #Banner-{{ section.id }}::before,
-      #Banner-{{ section.id }} .banner__media::before {
-        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
-        content: '';
-        display: block;
-      }
-    }
-  {%- endstyle -%}
-{%- endif -%}
+<div class="orbit-section-{{ section.id }}" data-section-id="{{ section.id }}">
+  <div class="orbit-container">
+    {%- liquid
+      assign product_list = section.settings.product_list
+      assign has_products = false
+      if product_list.size > 0
+        assign has_products = true
+      endif
+    -%}
 
-{%- style -%}
-  #Banner-{{ section.id }}::after {
-    opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
-  }
-{%- endstyle -%}
-
-{%- liquid
-  assign full_width = '100vw'
-  assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
-  assign fetch_priority = 'auto'
-  if section.index == 1
-    assign fetch_priority = 'high'
-  endif
--%}
-
-<div
-  id="Banner-{{ section.id }}"
-  class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.image_height == 'adapt' and section.settings.image != blank %} banner--adapt{% endif %}{% if section.settings.show_text_below %} banner--mobile-bottom{%- endif -%}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}"
->
-  {%- if section.settings.image != blank -%}
-    <div class="banner__media media">
-      {%- liquid
-        assign image_height = section.settings.image.width | divided_by: section.settings.image.aspect_ratio
-        assign sizes = full_width
-      -%}
-      {{
-        section.settings.image
-        | image_url: width: 3840
-        | image_tag:
-          width: section.settings.image.width,
-          height: image_height,
-          sizes: sizes,
-          widths: widths,
-          fetchpriority: fetch_priority
-      }}
-    </div>
-  {%- else -%}
-    <div class="banner__media media placeholder">
-      {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
-    </div>
-  {%- endif -%}
-
-  <div class="banner__content banner__content--{{ section.settings.desktop_content_position }} page-width">
-    <div class="banner__box content-container content-container--full-width-mobile color-{{ section.settings.color_scheme }} gradient">
-      {%- for block in section.blocks -%}
-        {%- case block.type -%}
-          {%- when 'heading' -%}
-            <h2
-              class="banner__heading inline-richtext {{ block.settings.heading_size }}"
-              {{ block.shopify_attributes }}
-            >
-              {{ block.settings.heading }}
-            </h2>
-          {%- when 'text' -%}
-            <div class="banner__text rte {{ block.settings.text_style }}" {{ block.shopify_attributes }}>
-              <p>{{ block.settings.text }}</p>
-            </div>
-        {%- endcase -%}
+    {%- if has_products -%}
+      {%- for product in product_list -%}
+        <div class="orbit-item">
+          {%- liquid
+            assign image = product.featured_image
+            assign image_height = 300 | divided_by: image.aspect_ratio | round
+          -%}
+          <img
+            src="{{ image | image_url: width: 300 }}"
+            alt="{{ image.alt | escape }}"
+            class="orbit-item__image"
+            loading="lazy"
+            width="300"
+            height="{{ image_height }}"
+          >
+        </div>
       {%- endfor -%}
-    </div>
+    {%- else -%}
+      {%- comment -%} Fallback for theme editor when no products are selected {%- endcomment -%}
+      {%- for i in (1..6) -%}
+        <div class="orbit-item">
+          <img
+            src="https://placehold.co/300x300/png?text=Product+{{ i }}"
+            alt="Placeholder product"
+            class="orbit-item__image"
+            width="300"
+            height="300"
+          >
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
   </div>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const section = document.querySelector('.orbit-section-{{ section.id }}');
+    if (!section) return;
+
+    const container = section.querySelector('.orbit-container');
+    const items = Array.from(container.querySelectorAll('.orbit-item'));
+    if (items.length === 0) return;
+
+    // --- 1. Orbit & Animation Parameters ---
+    let currentAngle = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startAngle = 0;
+    let animationFrameId;
+
+    const speed = 360 / ({{ section.settings.animation_duration }} * 60); // Degrees per frame
+
+    // --- 2. Positioning Function ---
+    const updatePositions = () => {
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
+
+      // Define the ellipse. Center is off-screen to the top-left.
+      const ellipseCenterX = containerWidth * -0.2;
+      const ellipseCenterY = containerHeight * -0.5;
+      const ellipseRadiusX = containerWidth * 1.1;
+      const ellipseRadiusY = containerHeight * 1.5;
+
+      const angleStart = 10; // Starting degree (bottom-ish)
+      const angleEnd = 110;   // Ending degree (right-ish)
+      const angleRange = angleEnd - angleStart;
+
+      items.forEach((item, index) => {
+        const itemAngleOffset = (360 / items.length) * index;
+        let totalAngle = (currentAngle + itemAngleOffset) % 360;
+
+        // Convert degrees to radians for Math functions
+        const angleInRadians = (totalAngle * Math.PI) / 180;
+
+        const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
+        const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
+        
+        // Calculate scale and opacity based on position in the visible arc
+        let scale = 0;
+        let opacity = 0;
+
+        if (totalAngle >= angleStart && totalAngle <= angleEnd) {
+          const progress = (totalAngle - angleStart) / angleRange; // 0 to 1
+          
+          // Scale: Largest in the middle (progress 0.5), smallest at ends
+          scale = 1 - Math.abs(progress - 0.5) * 1.5;
+          scale = Math.max(0, scale); // Clamp at 0
+
+          // Opacity: Fade in and out at the edges
+          if (progress < 0.2) { // Fade in
+            opacity = progress / 0.2;
+          } else if (progress > 0.8) { // Fade out
+            opacity = (1 - progress) / 0.2;
+          } else {
+            opacity = 1;
+          }
+        }
+        
+        item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        item.style.opacity = opacity;
+        item.style.zIndex = Math.round(scale * 100);
+      });
+    };
+
+    // --- 3. Animation Loop ---
+    const animate = () => {
+      if (!isDragging) {
+        currentAngle += speed;
+        updatePositions();
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    // --- 4. Drag Interaction Logic ---
+    const startDrag = (e) => {
+      isDragging = true;
+      startX = e.pageX || e.touches[0].pageX;
+      startAngle = currentAngle;
+      container.style.cursor = 'grabbing';
+    };
+
+    const onDrag = (e) => {
+      if (!isDragging) return;
+      const currentX = e.pageX || e.touches[0].pageX;
+      const deltaX = currentX - startX;
+      
+      // Adjust angle based on drag distance. The multiplier controls sensitivity.
+      const angleChange = (deltaX / container.offsetWidth) * 180;
+      currentAngle = startAngle + angleChange;
+      
+      updatePositions();
+    };
+
+    const stopDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      container.style.cursor = 'grab';
+    };
+
+    // Mouse events
+    container.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', onDrag);
+    window.addEventListener('mouseup', stopDrag);
+    
+    // Touch events
+    container.addEventListener('touchstart', startDrag);
+    window.addEventListener('touchmove', onDrag);
+    window.addEventListener('touchend', stopDrag);
+
+    // Initial call and start animation
+    updatePositions();
+    animate();
+  });
+</script>
+
 {% schema %}
 {
-  "name": "Presenter Banner",
+  "name": "Interactive Orbit",
   "tag": "section",
   "class": "section",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Image"
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products to display",
+      "limit": 12
     },
     {
       "type": "range",
-      "id": "image_overlay_opacity",
-      "min": 0,
-      "max": 100,
+      "id": "animation_duration",
+      "min": 20,
+      "max": 120,
       "step": 10,
-      "unit": "%",
-      "label": "Image overlay opacity",
-      "default": 0
-    },
-    {
-      "type": "select",
-      "id": "image_height",
-      "options": [
-        { "value": "adapt", "label": "Adapt to image" },
-        { "value": "small", "label": "Small" },
-        { "value": "medium", "label": "Medium" },
-        { "value": "large", "label": "Large" }
-      ],
-      "default": "medium",
-      "label": "Banner height"
-    },
-    {
-      "type": "select",
-      "id": "desktop_content_position",
-      "options": [
-        { "value": "top-left", "label": "Top left" },
-        { "value": "top-center", "label": "Top center" },
-        { "value": "top-right", "label": "Top right" },
-        { "value": "middle-left", "label": "Middle left" },
-        { "value": "middle-center", "label": "Middle center" },
-        { "value": "middle-right", "label": "Middle right" },
-        { "value": "bottom-left", "label": "Bottom left" },
-        { "value": "bottom-center", "label": "Bottom center" },
-        { "value": "bottom-right", "label": "Bottom right" }
-      ],
-      "default": "middle-center",
-      "label": "Desktop content position"
-    },
-    {
-      "type": "select",
-      "id": "desktop_content_alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
-      ],
-      "default": "center",
-      "label": "Desktop content alignment"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_text_box",
-      "default": true,
-      "label": "Show text box"
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Color scheme",
-      "default": "scheme-1"
-    },
-    {
-      "type": "header",
-      "content": "Mobile layout"
-    },
-    {
-      "type": "select",
-      "id": "mobile_content_alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
-      ],
-      "default": "center",
-      "label": "Mobile content alignment"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_text_below",
-      "default": true,
-      "label": "Show text below image on mobile"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "heading",
-      "name": "Heading",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "inline_richtext",
-          "id": "heading",
-          "default": "Image banner",
-          "label": "Heading"
-        },
-        {
-          "type": "select",
-          "id": "heading_size",
-          "options": [
-            { "value": "h2", "label": "Small" },
-            { "value": "h1", "label": "Medium" },
-            { "value": "h0", "label": "Large" }
-          ],
-          "default": "h1",
-          "label": "Heading size"
-        }
-      ]
-    },
-    {
-      "type": "text",
-      "name": "Text",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "inline_richtext",
-          "id": "text",
-          "default": "Give customers details about the banner image.",
-          "label": "Text"
-        },
-        {
-          "type": "select",
-          "id": "text_style",
-          "options": [
-            { "value": "body", "label": "Paragraph" },
-            { "value": "subtitle", "label": "Subtitle" }
-          ],
-          "default": "body",
-          "label": "Text style"
-        }
-      ]
+      "unit": "s",
+      "label": "Full orbit duration (longer is slower)",
+      "default": 80
     }
   ],
   "presets": [
     {
-      "name": "Presenter Banner",
-      "blocks": [{ "type": "heading" }, { "type": "text" }]
+      "name": "Interactive Orbit"
     }
   ]
 }
