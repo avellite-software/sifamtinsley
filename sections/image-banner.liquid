@@ -1,7 +1,9 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V6 Changes:
-    - Removed the opacity fade-in/fade-out effect. Items are now always visible.
+  - V7 Changes:
+    - Increased max scale for a more dramatic effect.
+    - Corrected drag direction to be intuitive.
+    - Added a hover effect to pause animation and scale the item.
 {% endcomment %}
 
 {%- liquid
@@ -48,6 +50,8 @@
     transform-origin: center center;
     background-color: rgba(255, 0, 150, 0.5);
     border-radius: 50%;
+    /* Added transition for the hover effect */
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   .orbit-item__image {
     display: block;
@@ -117,7 +121,6 @@
     const items = Array.from(container.querySelectorAll('.orbit-item'));
     if (items.length === 0) return;
 
-    // --- 1. Read Orbit Parameters from HTML data-attributes ---
     const centerXMultiplier = parseFloat(section.dataset.centerX);
     const centerYMultiplier = parseFloat(section.dataset.centerY);
     const radiusXMultiplier = parseFloat(section.dataset.radiusX);
@@ -125,6 +128,7 @@
 
     let currentAngle = 0;
     let isDragging = false;
+    let isHovering = false;
     let startX = 0;
     let startAngle = 0;
     let animationFrameId;
@@ -147,18 +151,25 @@
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        // Scale is based on vertical position (lower is bigger)
-        let scale = (y / containerHeight) * 1.2;
-        scale = Math.max(0.1, Math.min(1.0, scale));
+        // MODIFICATION: Adjusted scaling for a more dramatic effect.
+        // It now maps the Y position to a scale range of 0 to 2.0.
+        let scale = (y / containerHeight) * 2.4; 
+        scale = Math.max(0, Math.min(2.0, scale)); // Clamp scale between 0 and 2.0.
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-        item.style.opacity = 1; // MODIFICATION: Opacity is now always 1
+        item.style.opacity = 1;
         item.style.zIndex = Math.round(scale * 100);
+        
+        // Store the calculated values on the element for the hover effect
+        item.dataset.x = x;
+        item.dataset.y = y;
+        item.dataset.scale = scale;
       });
     };
 
     const animate = () => {
-      if (!isDragging) {
+      // Pause animation if dragging OR hovering
+      if (!isDragging && !isHovering) {
         currentAngle -= speed;
         updatePositions();
       }
@@ -177,7 +188,9 @@
       e.preventDefault();
       const currentX = e.pageX || e.touches[0].pageX;
       const deltaX = currentX - startX;
-      const angleChange = (deltaX / container.offsetWidth) * 180;
+      
+      // MODIFICATION: Inverted the angle change for intuitive dragging.
+      const angleChange = (deltaX / container.offsetWidth) * -180;
       currentAngle = startAngle + angleChange;
       updatePositions();
     };
@@ -187,6 +200,27 @@
       isDragging = false;
       section.style.cursor = 'grab';
     };
+
+    // --- NEW: Hover Logic ---
+    items.forEach(item => {
+      item.addEventListener('mouseover', () => {
+        isHovering = true;
+        // Apply an extra scale transform on top of the calculated one
+        const x = parseFloat(item.dataset.x);
+        const y = parseFloat(item.dataset.y);
+        const scale = parseFloat(item.dataset.scale);
+        item.style.transform = `translate(${x}px, ${y}px) scale(${scale * 1.1})`;
+      });
+      
+      item.addEventListener('mouseout', () => {
+        isHovering = false;
+        // Revert to the original calculated transform
+        const x = parseFloat(item.dataset.x);
+        const y = parseFloat(item.dataset.y);
+        const scale = parseFloat(item.dataset.scale);
+        item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+      });
+    });
 
     section.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
