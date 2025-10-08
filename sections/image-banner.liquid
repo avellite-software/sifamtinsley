@@ -1,7 +1,7 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V4 Changes:
-    - Added easy-to-edit Liquid variables at the top to control the orbit's shape and position.
+  - V5 Changes:
+    - Increased the base size of the orbiting product images.
 {% endcomment %}
 
 {%- liquid
@@ -51,7 +51,7 @@
   }
   .orbit-item__image {
     display: block;
-    max-width: 150px;
+    max-width: 450px; /* MODIFIED: Increased from 150px */
     height: auto;
     pointer-events: none;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
@@ -61,7 +61,7 @@
       min-height: 500px;
     }
     .orbit-item__image {
-      max-width: 100px;
+      max-width: 250px; /* MODIFIED: Proportionally increased from 100px */
     }
   }
 </style>
