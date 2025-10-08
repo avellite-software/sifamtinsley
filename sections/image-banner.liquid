@@ -1,11 +1,10 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V10 - Major Feature Update:
-    - Replaced PNGs with styled product cards with index.
-    - Added click-to-expand functionality with animated info panel.
-    - Added scrolling text marquee for metafields.
-    - Added a static "glass" overlay box.
-    - Removed hover effect and added click prevention on distant items.
+  - V11 - Refinements & New Glass Overlay:
+    - Fixed duplicate image in expanded view.
+    - Corrected z-index logic for proper layering.
+    - Reintroduced opacity fade for background items.
+    - Added a second, wider glass overlay to the top-left.
 {% endcomment %}
 
 {%- liquid
@@ -27,7 +26,7 @@
     --animation-duration: {{ section.settings.animation_duration }}s;
     position: relative;
     width: 100%;
-    min-height: 700px;
+    min-height: 700px; /* Increased min-height to accommodate elements better */
     overflow: hidden;
     cursor: grab;
     user-select: none;
@@ -44,22 +43,33 @@
     left: 0;
     width: 100%;
     height: 100%;
+    z-index: 10; /* Ensure orbit items are below glass overlays initially */
   }
 
-  /* --- New Product Card Styling --- */
+  /* --- Product Card Styling --- */
   .orbit-product-card {
     position: absolute;
     top: 0;
     left: 0;
     width: 450px; /* Base width */
-    will-change: transform;
+    will-change: transform, opacity;
     transform-origin: center center;
     transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
+    z-index: 1; /* Base z-index for orbit items */
+    pointer-events: auto; /* Enable clicks by default */
+    cursor: pointer;
   }
+  /* When expanded, fade out non-active cards */
   .orbit-section--expanded .orbit-product-card:not(.is-active) {
-    opacity: 0.2;
+    opacity: 0; /* Fully transparent when expanded */
     pointer-events: none;
   }
+  /* The active card when expanded should stay visible */
+  .orbit-section--expanded .orbit-product-card.is-active {
+    opacity: 1;
+    cursor: default; /* Not draggable when expanded */
+  }
+
   .orbit-product-card__inner {
     position: relative;
     width: 100%;
@@ -74,9 +84,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none; /* Images inside card shouldn't trigger clicks directly */
   }
   .orbit-product-card.is-unclickable {
-    pointer-events: none;
+    pointer-events: none; /* Disable clicks on items too far back */
   }
   .card-index {
     position: absolute;
@@ -91,12 +102,10 @@
     z-index: 2;
   }
 
-  /* --- New Glass Overlay --- */
+  /* --- Glass Overlays --- */
   .glass-overlay {
     position: absolute;
     top: 40px;
-    right: 40px;
-    width: 300px;
     padding: 25px;
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -105,11 +114,24 @@
     border-radius: 12px;
     color: #fff;
     z-index: 500;
+    display: flex; /* Make it a flex container */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: center; /* Center content vertically */
+    height: 180px; /* Fixed height for both */
+  }
+  .glass-overlay--right {
+    right: 40px;
+    width: 300px; /* Original width */
+  }
+  .glass-overlay--left {
+    left: 40px;
+    width: 450px; /* Wider for the left box */
   }
   .glass-overlay__title {
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 1rem;
+    line-height: 1.2;
   }
   .glass-overlay__text.rte p {
     margin: 0;
@@ -117,7 +139,7 @@
     opacity: 0.9;
   }
 
-  /* --- New Expanded View --- */
+  /* --- Expanded View --- */
   .expanded-view {
     position: absolute;
     top: 0;
@@ -131,17 +153,14 @@
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.4s ease, visibility 0.4s ease;
-    z-index: 1000;
+    z-index: 1000; /* Ensure expanded view is on top */
   }
   .expanded-view.is-active {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
   }
-  .expanded-view__card {
-    position: absolute;
-    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
+  /* No more expanded-view__card, the original card moves */
   .expanded-view__info {
     position: absolute;
     width: 600px;
@@ -149,7 +168,7 @@
     border-radius: 12px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     padding: 30px;
-    transform: translateX(100px) scale(0.9);
+    transform: translateX(100px) scale(0.9); /* Initial state for animation */
     opacity: 0;
     transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s, opacity 0.4s ease 0.1s;
   }
@@ -173,11 +192,11 @@
     animation: marquee 20s linear infinite;
     font-size: 1rem;
     line-height: 1.7;
+    white-space: pre-wrap; /* Preserve line breaks from rich text */
   }
-  .expanded-view__scroller-content p { margin: 0 0 1em; }
-  .expanded-view__scroller-content .rte {
-    font-size: 1rem;
-    line-height: 1.7;
+  .expanded-view__scroller-content p,
+  .expanded-view__scroller-content li {
+    margin: 0 0 1em; /* Add some space between paragraphs/list items */
   }
   .expanded-view__button {
     display: inline-block;
@@ -195,13 +214,17 @@
     100% { transform: translateY(-100%); }
   }
 
-  /* --- Responsive --- */
+  /* --- Responsive Adjustments --- */
   @media screen and (max-width: 990px) {
-    .glass-overlay { display: none; }
+    .glass-overlay { display: none; } /* Hide glass overlays on tablets */
+    .expanded-view__info { width: 90%; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .expanded-view__scroller { height: 80px; }
   }
   @media screen and (max-width: 768px) {
     .orbit-section-{{ section.id }} { min-height: 500px; }
-    .orbit-product-card { width: 250px; }
+    .orbit-product-card { width: 250px; } /* Mobile card size */
+    .expanded-view__info { padding: 20px; }
+    .expanded-view__title { font-size: 1.5rem; }
   }
 </style>
 
@@ -256,19 +279,29 @@
     {%- endfor -%}
   </div>
 
-  {%- if section.settings.glass_title != blank or section.settings.glass_text != blank -%}
-    <div class="glass-overlay">
-      {%- if section.settings.glass_title != blank -%}
-        <h3 class="glass-overlay__title">{{ section.settings.glass_title }}</h3>
+  {%- if section.settings.glass_right_title != blank or section.settings.glass_right_text != blank -%}
+    <div class="glass-overlay glass-overlay--right">
+      {%- if section.settings.glass_right_title != blank -%}
+        <h3 class="glass-overlay__title">{{ section.settings.glass_right_title }}</h3>
       {%- endif -%}
-      {%- if section.settings.glass_text != blank -%}
-        <div class="glass-overlay__text rte">{{ section.settings.glass_text }}</div>
+      {%- if section.settings.glass_right_text != blank -%}
+        <div class="glass-overlay__text rte">{{ section.settings.glass_right_text }}</div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.glass_left_title != blank or section.settings.glass_left_text != blank -%}
+    <div class="glass-overlay glass-overlay--left">
+      {%- if section.settings.glass_left_title != blank -%}
+        <h3 class="glass-overlay__title">{{ section.settings.glass_left_title }}</h3>
+      {%- endif -%}
+      {%- if section.settings.glass_left_text != blank -%}
+        <div class="glass-overlay__text rte">{{ section.settings.glass_left_text }}</div>
       {%- endif -%}
     </div>
   {%- endif -%}
 
   <div class="expanded-view">
-    <div class="expanded-view__card"></div>
     <div class="expanded-view__info">
       <h2 class="expanded-view__title"></h2>
       <div class="expanded-view__scroller">
@@ -289,11 +322,13 @@
     if (items.length === 0) return;
 
     const expandedView = section.querySelector('.expanded-view');
-    const expandedCardContainer = expandedView.querySelector('.expanded-view__card');
     const expandedInfo = expandedView.querySelector('.expanded-view__info');
     const expandedTitle = expandedView.querySelector('.expanded-view__title');
     const expandedScroller = expandedView.querySelector('.expanded-view__scroller-content');
     const expandedButton = expandedView.querySelector('.expanded-view__button');
+
+    // Store original position and scale for each item
+    const itemOriginalStates = new Map();
 
     const productData = [
       {%- for product in section.settings.product_list -%}
@@ -317,6 +352,7 @@
     let startAngle = 0;
     let animationFrameId;
     let isExpanded = false;
+    let activeCard = null; // Store the currently expanded card
     const speed = 360 / ({{ section.settings.animation_duration }} * 60);
 
     let containerWidth, containerHeight;
@@ -332,7 +368,7 @@
       const ellipseRadiusY = containerHeight * radiusYMultiplier;
 
       items.forEach((item, index) => {
-        if (item.classList.contains('is-active')) return;
+        if (item === activeCard) return; // Don't move the active card
 
         const itemAngleOffset = (360 / items.length) * index;
         const totalAngle = (currentAngle + itemAngleOffset) % 360;
@@ -341,12 +377,28 @@
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        let scale = (y / containerHeight) * 2.4;
+        let scale = (y / containerHeight) * 2.4; 
         scale = Math.max(0.1, Math.min(2.0, scale));
 
-        item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        // Calculate opacity based on depth (y-position)
+        let opacity = 1;
+        if (y < ellipseCenterY - ellipseRadiusY * 0.5) { // When item is far up (at the back)
+          opacity = 0.3 + (y / (ellipseCenterY - ellipseRadiusY * 0.5)) * 0.7; // Fade out to 0.3
+          opacity = Math.max(0.3, Math.min(1, opacity));
+        }
+
+        item.style.transform = `translate(${x - (item.offsetWidth/2)}px, ${y - (item.offsetHeight/2)}px) scale(${scale})`;
+        item.style.opacity = opacity;
+
+        // Store original state for when closing expanded view
+        itemOriginalStates.set(item, { x, y, scale, opacity });
         
-        if (scale < 0.5) {
+        // Z-Index: front items have higher z-index
+        const zIndex = Math.round(scale * 100);
+        item.style.zIndex = zIndex;
+
+        // Disable clicks on small, distant items
+        if (scale < 0.5 || opacity < 0.4) {
           item.classList.add('is-unclickable');
         } else {
           item.classList.remove('is-unclickable');
@@ -365,27 +417,30 @@
     function openExpandedView(clickedCard) {
       if (isExpanded) return;
       isExpanded = true;
+      activeCard = clickedCard; // Set the active card
       section.classList.add('orbit-section--expanded');
-      clickedCard.classList.add('is-active');
-      const productIndex = parseInt(clickedCard.dataset.productIndex);
+      activeCard.classList.add('is-active');
+
+      const productIndex = parseInt(activeCard.dataset.productIndex);
       const data = productData[productIndex];
 
       expandedTitle.textContent = data.title;
+      // Combine and duplicate content for seamless scrolling
       const scrollerContent = (data.short_description ? `<p>${data.short_description}</p>` : '') + (data.features || '');
-      expandedScroller.innerHTML = scrollerContent + scrollerContent; // Duplicate content for seamless scroll
+      expandedScroller.innerHTML = scrollerContent + scrollerContent; 
       expandedButton.href = data.url;
 
-      expandedCardContainer.innerHTML = clickedCard.querySelector('.orbit-product-card__inner').outerHTML;
-      const cardWidth = clickedCard.offsetWidth;
+      const cardWidth = activeCard.offsetWidth;
+      const cardHeight = activeCard.offsetHeight;
       
-      const targetX = (containerWidth / 2) - cardWidth - 20;
-      const targetY = (containerHeight / 2) - (clickedCard.offsetHeight / 2);
+      const targetCardX = (containerWidth / 2) - cardWidth - (cardWidth * 0.1); // Move left by 10% of card width
+      const targetCardY = (containerHeight / 2) - (cardHeight / 2);
       
-      clickedCard.style.transform = `translate(${targetX}px, ${targetY}px) scale(1)`;
-      
-      expandedInfo.style.left = `${targetX + cardWidth + 40}px`;
-      expandedInfo.style.top = `${targetY}px`;
-      
+      activeCard.style.transform = `translate(${targetCardX}px, ${targetCardY}px) scale(1)`;
+      activeCard.style.zIndex = 1001; // Ensure active card is above info panel
+
+      expandedInfo.style.left = `${targetCardX + cardWidth + (cardWidth * 0.1) + 40}px`; // Info panel to the right of the card
+      expandedInfo.style.top = `${targetCardY}px`;
       expandedView.classList.add('is-active');
     }
     
@@ -393,26 +448,36 @@
       if (!isExpanded) return;
       isExpanded = false;
       section.classList.remove('orbit-section--expanded');
-      const activeCard = section.querySelector('.orbit-product-card.is-active');
       
       expandedView.classList.remove('is-active');
 
       if (activeCard) {
+        // Restore original state of the active card
+        const originalState = itemOriginalStates.get(activeCard);
+        if (originalState) {
+          activeCard.style.transform = `translate(${originalState.x - (activeCard.offsetWidth/2)}px, ${originalState.y - (activeCard.offsetHeight/2)}px) scale(${originalState.scale})`;
+          activeCard.style.opacity = originalState.opacity;
+          activeCard.style.zIndex = Math.round(originalState.scale * 100);
+        }
         activeCard.classList.remove('is-active');
+        activeCard = null; // Clear active card
       }
-      updatePositions(); // Recalculate positions immediately
+      // Re-enable pointer events for all cards after a slight delay for transition
+      items.forEach(item => item.classList.remove('is-unclickable'));
+      updatePositions(); // Update all other positions
     }
 
     container.addEventListener('click', (e) => {
       const clickedCard = e.target.closest('.orbit-product-card');
-      if (clickedCard && !clickedCard.classList.contains('is-unclickable') && !isDragging) {
+      if (clickedCard && !clickedCard.classList.contains('is-unclickable') && !isDragging && !isExpanded) {
         e.preventDefault();
         openExpandedView(clickedCard);
       }
     });
 
     section.addEventListener('click', (e) => {
-      if (isExpanded && !e.target.closest('.orbit-product-card') && !e.target.closest('.expanded-view__info')) {
+      // Close if clicking on the background, not on the active card or info panel
+      if (isExpanded && !e.target.closest('.orbit-product-card.is-active') && !e.target.closest('.expanded-view__info')) {
         closeExpandedView();
       }
     });
@@ -422,7 +487,7 @@
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             updateDimensions();
-            closeExpandedView();
+            closeExpandedView(); // Close expanded view on resize to reset layout
             updatePositions();
         }, 150);
     };
@@ -431,7 +496,7 @@
     const startDrag = (e) => {
       if (isExpanded) return;
       isDragging = true;
-      hasDragged = false;
+      hasDragged = false; // Reset drag flag
       startX = e.pageX || e.touches[0].pageX;
       startAngle = currentAngle;
       section.style.cursor = 'grabbing';
@@ -439,7 +504,7 @@
     const onDrag = (e) => {
       if (isExpanded || !isDragging) return;
       e.preventDefault();
-      hasDragged = true;
+      hasDragged = true; // Mark as dragged
       const currentX = e.pageX || e.touches[0].pageX;
       const deltaX = currentX - startX;
       const angleChange = (deltaX / container.offsetWidth) * -180;
@@ -450,8 +515,6 @@
       if (!isDragging) return;
       isDragging = false;
       section.style.cursor = 'grab';
-      // Prevent click from firing after a drag
-      setTimeout(() => { hasDragged = false; }, 0);
     };
 
     section.addEventListener('mousedown', startDrag);
@@ -463,6 +526,7 @@
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('resize', onResize);
 
+    // Initial setup
     updateDimensions();
     updatePositions();
     animate();
@@ -493,19 +557,35 @@
     },
     {
       "type": "header",
-      "content": "Glass Overlay"
+      "content": "Right Glass Overlay"
     },
     {
       "type": "text",
-      "id": "glass_title",
+      "id": "glass_right_title",
       "label": "Title",
       "default": "Featured Products"
     },
     {
       "type": "richtext",
-      "id": "glass_text",
+      "id": "glass_right_text",
       "label": "Text",
       "default": "<p>Drag to explore our latest innovations and featured items.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Left Glass Overlay"
+    },
+    {
+      "type": "text",
+      "id": "glass_left_title",
+      "label": "Title",
+      "default": "New Arrivals"
+    },
+    {
+      "type": "richtext",
+      "id": "glass_left_text",
+      "label": "Text",
+      "default": "<p>Discover our newest collection of cutting-edge technology.</p>"
     }
   ],
   "presets": [
