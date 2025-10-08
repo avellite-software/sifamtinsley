@@ -1,9 +1,8 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - Final Version - Rebuilt from stable baseline
-  - All features from previous attempts correctly integrated.
-  - Fixed mobile view, expanded view responsiveness, and z-index.
-  - Implemented new content carousel for expanded view.
+  - Final Version - Layout & Z-Index Fixes
+  - Fixed z-index of expanded view to appear over glass overlays.
+  - Implemented a stacked vertical layout for the expanded view on mobile.
 {% endcomment %}
 
 {%- liquid
@@ -43,6 +42,12 @@
     width: 100%;
     height: 100%;
     z-index: 10;
+    transition: z-index 0s linear 0.5s; /* Delay z-index change on close */
+  }
+  /* MODIFICATION: Elevate the entire orbit when a card is expanded */
+  .orbit-container.is-expanded {
+    z-index: 1600;
+    transition-delay: 0s;
   }
   .orbit-product-card {
     position: absolute;
@@ -152,20 +157,18 @@
   .expanded-view__title { font-size: 2rem; font-weight: 700; margin: 0 0 1rem; color: #1c1c1c; }
   .expanded-view__button { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #c1151b; color: #fff; border-radius: 4px; text-decoration: none; font-weight: 600; }
 
-  /* Carousel Styles */
   .carousel-container { position: relative; height: 120px; overflow: hidden; margin-bottom: 20px; }
   .carousel-content-wrapper { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
-  .carousel-item { width:200px; min-width: 100%; flex-shrink: 0; padding-right: 20px; box-sizing: border-box; font-size: 1rem; line-height: 1.6; color: #333; overflow-y: auto; white-space: normal; word-wrap: break-word; }
+  .carousel-item { min-width: 100%; flex-shrink: 0; padding-right: 20px; box-sizing: border-box; font-size: 1rem; line-height: 1.6; color: #333; overflow-y: auto; white-space: normal; word-wrap: break-word; }
   .carousel-item p, .carousel-item li { margin-bottom: 1em; }
   .carousel-controls { display: flex; justify-content: flex-start; align-items: center; gap: 10px; margin-top: 15px; }
   .carousel-control-btn { background: #eee; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 0.9rem; color: #333; transition: background 0.2s; }
   .carousel-control-btn.active, .carousel-control-btn:hover { background: #c1151b; color: #fff; }
 
-  /* Responsive Adjustments */
   @media screen and (max-width: 1500px) {
     .expanded-view__info {
-      left: auto !important; /* Let position be controlled by JS logic */
-      right: 40px; /* Pin to the right */
+      left: auto !important;
+      right: 40px;
       width: 500px;
     }
   }
@@ -179,9 +182,15 @@
   @media screen and (max-width: 768px) {
     .orbit-section-{{ section.id }} { min-height: 500px; }
     .expanded-view__info {
-      width: calc(100% - 80px);
-      left: 40px !important;
-      right: 40px !important;
+      width: calc(100% - 40px); /* Full width with padding */
+      left: 20px !important;
+      right: 20px !important;
+      top: auto !important; /* Let JS handle top position */
+      transform: translateY(50px) scale(0.95); /* Animate from bottom */
+      opacity: 0;
+    }
+    .expanded-view.is-active .expanded-view__info {
+      transform: translateY(0) scale(1);
     }
   }
 </style>
@@ -286,14 +295,12 @@
     const container = section.querySelector('.orbit-container');
     const items = Array.from(container.querySelectorAll('.orbit-product-card'));
     if (items.length === 0) return;
-
     const expandedView = section.querySelector('.expanded-view');
     const expandedInfo = expandedView.querySelector('.expanded-view__info');
     const expandedTitle = expandedView.querySelector('.expanded-view__title');
     const carouselWrapper = expandedView.querySelector('.carousel-content-wrapper');
     const carouselControls = expandedView.querySelector('.carousel-controls');
     const expandedButton = expandedView.querySelector('.expanded-view__button');
-
     const itemOriginalStates = new Map();
     const productData = [
       {%- for product in section.settings.product_list -%}
@@ -305,12 +312,10 @@
         },
       {%- endfor -%}
     ];
-
     const centerXMultiplier = parseFloat(section.dataset.centerX);
     const centerYMultiplier = parseFloat(section.dataset.centerY);
     const radiusXMultiplier = parseFloat(section.dataset.radiusX);
     const radiusYMultiplier = parseFloat(section.dataset.radiusY);
-
     let currentAngle = 0, isDragging = false, startX = 0, startAngle = 0, animationFrameId, isExpanded = false, activeCard = null;
     const speed = 360 / ({{ section.settings.animation_duration }} * 60);
     let containerWidth, containerHeight;
@@ -377,58 +382,53 @@
     };
 
     function startAutoPlay() {
-        if (carouselWrapper.children.length < 2 || autoPlayPausedByUser) return;
-        stopAutoPlay();
-        autoPlayInterval = setInterval(() => showCarouselSlide(currentSlide + 1), AUTO_PLAY_DELAY);
-        const playPauseBtn = carouselControls.querySelector('.carousel-play-pause-btn');
-        playPauseBtn.querySelector('.icon-play').style.display = 'none';
-        playPauseBtn.querySelector('.icon-pause').style.display = 'inline-block';
+      if (carouselWrapper.children.length < 2 || autoPlayPausedByUser) return;
+      stopAutoPlay();
+      autoPlayInterval = setInterval(() => showCarouselSlide(currentSlide + 1), AUTO_PLAY_DELAY);
+      carouselControls.querySelector('.icon-play').style.display = 'none';
+      carouselControls.querySelector('.icon-pause').style.display = 'inline-block';
     }
 
-    function stopAutoPlay() {
-        clearInterval(autoPlayInterval);
-    }
+    function stopAutoPlay() { clearInterval(autoPlayInterval); }
 
     function showCarouselSlide(index) {
-        const slides = Array.from(carouselWrapper.children);
-        if (slides.length === 0) return;
-        currentSlide = (index + slides.length) % slides.length;
-        carouselWrapper.style.transform = `translateX(${-currentSlide * 100}%)`;
-        carouselControls.querySelectorAll('[data-slide]').forEach(btn => {
-            btn.classList.toggle('active', parseInt(btn.dataset.slide) === currentSlide);
-        });
+      const slides = Array.from(carouselWrapper.children);
+      if (slides.length === 0) return;
+      currentSlide = (index + slides.length) % slides.length;
+      carouselWrapper.style.transform = `translateX(${-currentSlide * 100}%)`;
+      carouselControls.querySelectorAll('[data-slide]').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.slide) === currentSlide);
+      });
     }
 
     function initCarousel(data) {
-        carouselWrapper.innerHTML = '';
-        const slides = [];
-        if (data.short_description) slides.push(`<div class="carousel-item rte">${data.short_description}</div>`);
-        if (data.features) slides.push(`<div class="carousel-item rte">${data.features}</div>`);
-        carouselWrapper.innerHTML = slides.join('');
-
-        const hasMultipleSlides = slides.length > 1;
-        carouselControls.style.display = hasMultipleSlides ? 'flex' : 'none';
-        
-        currentSlide = 0;
-        autoPlayPausedByUser = false;
-        showCarouselSlide(0);
-        startAutoPlay();
+      carouselWrapper.innerHTML = '';
+      const slides = [];
+      if (data.short_description) slides.push(`<div class="carousel-item rte"><p>${data.short_description}</p></div>`);
+      if (data.features) slides.push(`<div class="carousel-item rte">${data.features}</div>`);
+      carouselWrapper.innerHTML = slides.join('');
+      const hasMultipleSlides = slides.length > 1;
+      carouselControls.style.display = hasMultipleSlides ? 'flex' : 'none';
+      currentSlide = 0;
+      autoPlayPausedByUser = false;
+      showCarouselSlide(0);
+      startAutoPlay();
     }
     
     carouselControls.addEventListener('click', (e) => {
-        const targetBtn = e.target.closest('.carousel-control-btn');
-        if (!targetBtn) return;
-        stopAutoPlay();
-        autoPlayPausedByUser = true;
-        const playPauseBtn = carouselControls.querySelector('.carousel-play-pause-btn');
-        playPauseBtn.querySelector('.icon-play').style.display = 'inline-block';
-        playPauseBtn.querySelector('.icon-pause').style.display = 'none';
-        if (targetBtn.dataset.slide) {
-            showCarouselSlide(parseInt(targetBtn.dataset.slide));
-        } else if (targetBtn.classList.contains('carousel-play-pause-btn')) {
-            autoPlayPausedByUser = !autoPlayPausedByUser;
-            if (!autoPlayPausedByUser) startAutoPlay();
-        }
+      const targetBtn = e.target.closest('.carousel-control-btn');
+      if (!targetBtn) return;
+      stopAutoPlay();
+      autoPlayPausedByUser = true;
+      const playPauseBtn = carouselControls.querySelector('.carousel-play-pause-btn');
+      playPauseBtn.querySelector('.icon-play').style.display = 'inline-block';
+      playPauseBtn.querySelector('.icon-pause').style.display = 'none';
+      if (targetBtn.dataset.slide) {
+        showCarouselSlide(parseInt(targetBtn.dataset.slide));
+      } else if (targetBtn.classList.contains('carousel-play-pause-btn')) {
+        autoPlayPausedByUser = !autoPlayPausedByUser;
+        if (!autoPlayPausedByUser) startAutoPlay();
+      }
     });
 
     function openExpandedView(clickedCard) {
@@ -436,6 +436,7 @@
       isExpanded = true;
       activeCard = clickedCard;
       section.classList.add('orbit-section--expanded');
+      container.classList.add('is-expanded'); // Elevate z-index of orbit
       activeCard.classList.add('is-active');
       const productIndex = parseInt(activeCard.dataset.productIndex);
       const data = productData[productIndex];
@@ -446,21 +447,30 @@
       const cardWidth = activeCard.offsetWidth;
       const cardHeight = activeCard.offsetHeight;
       
-      let targetCardX = (containerWidth / 2) - cardWidth;
-      if (window.innerWidth <= 1500) {
-        targetCardX = 40;
-      }
+      let targetCardX, targetCardY;
+
+      // MODIFICATION: New responsive logic for expanded view
       if (window.innerWidth <= 768) {
-        targetCardX = 20;
+        // Stacked layout for small mobile
+        targetCardX = (containerWidth / 2) - (cardWidth / 2);
+        targetCardY = containerHeight * 0.15;
+        expandedInfo.style.top = `${targetCardY + cardHeight + 20}px`;
+      } else if (window.innerWidth <= 1500) {
+        // Side-by-side for tablet/small desktop
+        targetCardX = 40;
+        targetCardY = (containerHeight / 2) - (cardHeight / 2);
+        expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
+        expandedInfo.style.top = `${targetCardY}px`;
+      } else {
+        // Original layout for large desktop
+        targetCardX = (containerWidth / 2) - cardWidth - 20;
+        targetCardY = (containerHeight / 2) - (cardHeight / 2);
+        expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
+        expandedInfo.style.top = `${targetCardY}px`;
       }
-      
-      const targetCardY = (containerHeight / 2) - (cardHeight / 2);
       
       activeCard.style.transform = `translate(${targetCardX}px, ${targetCardY}px) scale(1)`;
       activeCard.style.zIndex = 1001;
-
-      expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
-      expandedInfo.style.top = `${targetCardY}px`;
       
       expandedView.classList.add('is-active');
     }
@@ -469,6 +479,7 @@
       if (!isExpanded) return;
       isExpanded = false;
       section.classList.remove('orbit-section--expanded');
+      container.classList.remove('is-expanded'); // Lower z-index of orbit
       expandedView.classList.remove('is-active');
       stopAutoPlay();
       if (activeCard) {
@@ -529,7 +540,6 @@
       section.style.cursor = 'grab';
       setTimeout(() => { hasDragged = false; }, 0);
     };
-
     section.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
     window.addEventListener('mouseup', stopDrag);
@@ -538,7 +548,6 @@
     window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('resize', onResize);
-
     updateDimensions();
     updatePositions();
     animate();
