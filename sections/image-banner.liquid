@@ -1,12 +1,8 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V11 - Refinements & Fixes:
-    - Restored correct orbit path calculation.
-    - Fixed duplicate image in expanded view.
-    - Corrected z-index logic for proper layering.
-    - Reintroduced opacity fade for background items.
-    - Added a second glass overlay to the top-left.
-    - Adjusted mobile breakpoint.
+  - V12 - Bug Fix:
+    - Restored the original, correct orbit positioning calculation.
+    - Restructured HTML to group glass overlays as requested.
 {% endcomment %}
 
 {%- liquid
@@ -49,8 +45,8 @@
   }
   .orbit-product-card {
     position: absolute;
-    top: 50%; /* Center the transform origin */
-    left: 50%; /* Center the transform origin */
+    top: 0; /* FIX: Reverted to top: 0, left: 0 for original calculation */
+    left: 0;
     width: 450px;
     will-change: transform, opacity;
     transform-origin: center center;
@@ -60,7 +56,7 @@
     cursor: pointer;
   }
   .orbit-section--expanded .orbit-product-card:not(.is-active) {
-    opacity: 0 !important; /* Use important to override JS opacity */
+    opacity: 0 !important;
     pointer-events: none;
   }
   .orbit-section--expanded .orbit-product-card.is-active {
@@ -160,7 +156,7 @@
   .expanded-view__button { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #c1151b; color: #fff; border-radius: 4px; text-decoration: none; font-weight: 600; }
   @keyframes marquee { 0% { transform: translateY(0%); } 100% { transform: translateY(-100%); } }
 
-  @media screen and (max-width: 1000px) { /* ADJUSTED BREAKPOINT */
+  @media screen and (max-width: 1000px) {
     .orbit-product-card { width: 250px; }
   }
   @media screen and (max-width: 990px) {
@@ -225,27 +221,30 @@
     {%- endfor -%}
   </div>
 
-  {%- if section.settings.glass_right_title != blank or section.settings.glass_right_text != blank -%}
-    <div class="glass-overlay glass-overlay--right">
-      {%- if section.settings.glass_right_title != blank -%}
-        <h3 class="glass-overlay__title">{{ section.settings.glass_right_title }}</h3>
-      {%- endif -%}
-      {%- if section.settings.glass_right_text != blank -%}
-        <div class="glass-overlay__text rte">{{ section.settings.glass_right_text }}</div>
-      {%- endif -%}
-    </div>
-  {%- endif -%}
+  {% comment %} Wrapper for overlay elements to keep them separate from the orbit container {% endcomment %}
+  <div class="overlays-wrapper">
+    {%- if section.settings.glass_right_title != blank or section.settings.glass_right_text != blank -%}
+      <div class="glass-overlay glass-overlay--right">
+        {%- if section.settings.glass_right_title != blank -%}
+          <h3 class="glass-overlay__title">{{ section.settings.glass_right_title }}</h3>
+        {%- endif -%}
+        {%- if section.settings.glass_right_text != blank -%}
+          <div class="glass-overlay__text rte">{{ section.settings.glass_right_text }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
 
-  {%- if section.settings.glass_left_title != blank or section.settings.glass_left_text != blank -%}
-    <div class="glass-overlay glass-overlay--left">
-      {%- if section.settings.glass_left_title != blank -%}
-        <h3 class="glass-overlay__title">{{ section.settings.glass_left_title }}</h3>
-      {%- endif -%}
-      {%- if section.settings.glass_left_text != blank -%}
-        <div class="glass-overlay__text rte">{{ section.settings.glass_left_text }}</div>
-      {%- endif -%}
-    </div>
-  {%- endif -%}
+    {%- if section.settings.glass_left_title != blank or section.settings.glass_left_text != blank -%}
+      <div class="glass-overlay glass-overlay--left">
+        {%- if section.settings.glass_left_title != blank -%}
+          <h3 class="glass-overlay__title">{{ section.settings.glass_left_title }}</h3>
+        {%- endif -%}
+        {%- if section.settings.glass_left_text != blank -%}
+          <div class="glass-overlay__text rte">{{ section.settings.glass_left_text }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
 
   <div class="expanded-view">
     <div class="expanded-view__info">
@@ -325,19 +324,15 @@
         let scale = (y / containerHeight) * 2.4; 
         scale = Math.max(0.1, Math.min(2.0, scale));
 
-        // FIX: Translate from the center of the item, not the top-left corner
-        const translateX = x - (item.offsetWidth / 2);
-        const translateY = y - (item.offsetHeight / 2);
-        item.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        // FIX: Reverted to the original, correct positioning calculation
+        item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         
-        // RE-ADD: Opacity based on depth
-        let opacity = (scale - 0.1) / (2.0 - 0.1); // Map scale (0.1 to 2.0) to opacity (0 to 1)
-        opacity = 0.4 + opacity * 0.6; // Remap to a range of 0.4 to 1.0
+        let opacity = (scale - 0.1) / (2.0 - 0.1);
+        opacity = 0.4 + opacity * 0.6;
         item.style.opacity = Math.max(0.4, Math.min(1, opacity));
 
         itemOriginalStates.set(item, item.style.transform);
         
-        // FIX: Correct Z-Index logic
         const zIndex = 10 + Math.round(scale * 100);
         item.style.zIndex = zIndex;
         
@@ -375,7 +370,7 @@
       const cardWidth = activeCard.offsetWidth;
       const cardHeight = activeCard.offsetHeight;
       
-      const targetCardX = (containerWidth / 2) - cardWidth; // Move left
+      const targetCardX = (containerWidth / 2) - cardWidth;
       const targetCardY = (containerHeight / 2) - (cardHeight / 2);
       
       activeCard.style.transform = `translate(${targetCardX}px, ${targetCardY}px) scale(1)`;
