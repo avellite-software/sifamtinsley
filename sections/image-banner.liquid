@@ -1,7 +1,10 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V2 Changes:
-    - Added width and height attributes to all <img> tags to prevent layout shift and fix theme-check errors.
+  - V3 Changes:
+    - Corrected orbit path to be visible in the bottom-right.
+    - Reversed default animation direction.
+    - Improved scaling logic based on position.
+    - Added debug background colors for visualization.
 {% endcomment %}
 
 <style>
@@ -29,22 +32,36 @@
 
   .orbit-item {
     position: absolute;
-    /* Will be positioned by JS */
-    top: 50%;
-    left: 50%;
+    top: 0;
+    left: 0;
     will-change: transform, opacity;
     transform-origin: center center;
   }
 
   .orbit-item__image {
     display: block;
-    max-width: 150px; /* Base size of the product image */
+    max-width: 150px;
     height: auto;
-    pointer-events: none; /* Prevents image from interfering with drag */
+    pointer-events: none;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
   }
 
-  /* Responsive adjustments */
+  /*
+    DEBUG COLORS:
+    These are the harsh colors you requested for development.
+    You can remove these two rules when you are done.
+  */
+  .orbit-section-{{ section.id }} {
+    background-color: #111;
+    border: 2px solid cyan;
+  }
+  .orbit-item {
+    background-color: rgba(255, 0, 150, 0.5);
+    border-radius: 50%;
+  }
+  /* --- END DEBUG COLORS --- */
+
+
   @media screen and (max-width: 768px) {
     .orbit-section-{{ section.id }} {
       min-height: 500px;
@@ -83,7 +100,6 @@
         </div>
       {%- endfor -%}
     {%- else -%}
-      {%- comment -%} Fallback for theme editor when no products are selected {%- endcomment -%}
       {%- for i in (1..6) -%}
         <div class="orbit-item">
           <img
@@ -115,56 +131,50 @@
     let startAngle = 0;
     let animationFrameId;
 
-    const speed = 360 / ({{ section.settings.animation_duration }} * 60); // Degrees per frame
+    const speed = 360 / ({{ section.settings.animation_duration }} * 60);
 
     // --- 2. Positioning Function ---
     const updatePositions = () => {
       const containerWidth = container.offsetWidth;
       const containerHeight = container.offsetHeight;
 
-      // Define the ellipse. Center is off-screen to the top-left.
-      const ellipseCenterX = containerWidth * -0.2;
-      const ellipseCenterY = containerHeight * -0.5;
-      const ellipseRadiusX = containerWidth * 1.1;
-      const ellipseRadiusY = containerHeight * 1.5;
-
-      const angleStart = 10; // Starting degree (bottom-ish)
-      const angleEnd = 110;   // Ending degree (right-ish)
-      const angleRange = angleEnd - angleStart;
+      // MODIFICATION: New ellipse parameters to create the bottom-right arc
+      const ellipseCenterX = containerWidth * 0.2;
+      const ellipseCenterY = -containerHeight * 0.8;
+      const ellipseRadiusX = containerWidth * 1.2;
+      const ellipseRadiusY = containerHeight * 1.8;
 
       items.forEach((item, index) => {
         const itemAngleOffset = (360 / items.length) * index;
-        let totalAngle = (currentAngle + itemAngleOffset) % 360;
-
-        // Convert degrees to radians for Math functions
+        const totalAngle = (currentAngle + itemAngleOffset) % 360;
         const angleInRadians = (totalAngle * Math.PI) / 180;
 
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        // Calculate scale and opacity based on position in the visible arc
-        let scale = 0;
+        // MODIFICATION: New scaling and opacity logic
+        // Calculate visibility based on whether the item is within the screen bounds
         let opacity = 0;
-
-        if (totalAngle >= angleStart && totalAngle <= angleEnd) {
-          const progress = (totalAngle - angleStart) / angleRange; // 0 to 1
-          
-          // Scale: Largest in the middle (progress 0.5), smallest at ends
-          scale = 1 - Math.abs(progress - 0.5) * 1.5;
-          scale = Math.max(0, scale); // Clamp at 0
-
-          // Opacity: Fade in and out at the edges
-          if (progress < 0.2) { // Fade in
-            opacity = progress / 0.2;
-          } else if (progress > 0.8) { // Fade out
-            opacity = (1 - progress) / 0.2;
-          } else {
-            opacity = 1;
-          }
+        if (x > -150 && x < containerWidth + 150 && y > -150 && y < containerHeight + 150) {
+            // Simple fade based on horizontal position for entry/exit
+            const fadeInPoint = containerWidth * 0.1;
+            const fadeOutPoint = containerWidth * 0.9;
+            
+            if (x < fadeInPoint) {
+                opacity = x / fadeInPoint;
+            } else if (x > fadeOutPoint) {
+                opacity = (containerWidth - x) / (containerWidth - fadeOutPoint);
+            } else {
+                opacity = 1;
+            }
         }
         
+        // Scale is now based on vertical position (lower is bigger)
+        let scale = (y / containerHeight) * 1.2;
+        scale = Math.max(0.1, Math.min(1.0, scale)); // Clamp scale between 0.1 and 1.0
+
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-        item.style.opacity = opacity;
+        item.style.opacity = Math.max(0, opacity); // Clamp opacity
         item.style.zIndex = Math.round(scale * 100);
       });
     };
@@ -172,7 +182,7 @@
     // --- 3. Animation Loop ---
     const animate = () => {
       if (!isDragging) {
-        currentAngle += speed;
+        currentAngle -= speed; // MODIFICATION: Changed to -= to reverse direction
         updatePositions();
       }
       animationFrameId = requestAnimationFrame(animate);
@@ -183,15 +193,15 @@
       isDragging = true;
       startX = e.pageX || e.touches[0].pageX;
       startAngle = currentAngle;
-      container.style.cursor = 'grabbing';
+      section.style.cursor = 'grabbing';
     };
 
     const onDrag = (e) => {
       if (!isDragging) return;
+      e.preventDefault();
       const currentX = e.pageX || e.touches[0].pageX;
       const deltaX = currentX - startX;
       
-      // Adjust angle based on drag distance. The multiplier controls sensitivity.
       const angleChange = (deltaX / container.offsetWidth) * 180;
       currentAngle = startAngle + angleChange;
       
@@ -201,22 +211,26 @@
     const stopDrag = () => {
       if (!isDragging) return;
       isDragging = false;
-      container.style.cursor = 'grab';
+      section.style.cursor = 'grab';
     };
 
     // Mouse events
-    container.addEventListener('mousedown', startDrag);
+    section.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
     window.addEventListener('mouseup', stopDrag);
+    section.addEventListener('mouseleave', stopDrag); // Stop if mouse leaves section
     
     // Touch events
-    container.addEventListener('touchstart', startDrag);
-    window.addEventListener('touchmove', onDrag);
+    section.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', stopDrag);
 
     // Initial call and start animation
     updatePositions();
     animate();
+
+    // Re-calculate on resize
+    window.addEventListener('resize', updatePositions);
   });
 </script>
 
