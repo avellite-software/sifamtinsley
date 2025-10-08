@@ -1,7 +1,7 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V8 Changes:
-    - Adjusted scaling logic to set a minimum size, preventing items from disappearing.
+  - V9 Changes:
+    - Set a minimum scale of 0.1 to prevent items from disappearing.
 {% endcomment %}
 
 {%- liquid
@@ -149,8 +149,8 @@
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
         let scale = (y / containerHeight) * 2.4; 
-        // MODIFICATION: Changed minimum scale from 0 to 0.4
-        scale = Math.max(0.4, Math.min(2.0, scale));
+        // MODIFICATION: Changed minimum scale from 0.4 to 0.1
+        scale = Math.max(0.1, Math.min(2.0, scale));
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         item.style.opacity = 1;
