@@ -1,7 +1,7 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V9 - Major Feature Update:
-    - Replaced PNGs with styled product cards.
+  - V10 - Major Feature Update:
+    - Replaced PNGs with styled product cards with index.
     - Added click-to-expand functionality with animated info panel.
     - Added scrolling text marquee for metafields.
     - Added a static "glass" overlay box.
@@ -25,13 +25,15 @@
 <style>
   .orbit-section-{{ section.id }} {
     --animation-duration: {{ section.settings.animation_duration }}s;
-    background: #111;
     position: relative;
     width: 100%;
     min-height: 700px;
     overflow: hidden;
     cursor: grab;
     user-select: none;
+    background-color: #111;
+    background-image: radial-gradient(circle at bottom right, #c1151b 0%, transparent 60%);
+    border-bottom-right-radius: 50px;
   }
   .orbit-section-{{ section.id }}:active {
     cursor: grabbing;
@@ -50,9 +52,13 @@
     top: 0;
     left: 0;
     width: 450px; /* Base width */
-    will-change: transform, opacity;
+    will-change: transform;
     transform-origin: center center;
-    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
+  }
+  .orbit-section--expanded .orbit-product-card:not(.is-active) {
+    opacity: 0.2;
+    pointer-events: none;
   }
   .orbit-product-card__inner {
     position: relative;
@@ -68,7 +74,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    pointer-events: none;
   }
   .orbit-product-card.is-unclickable {
     pointer-events: none;
@@ -134,21 +139,22 @@
     pointer-events: auto;
   }
   .expanded-view__card {
-    position: absolute; /* Will be positioned by JS */
+    position: absolute;
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   .expanded-view__info {
-    position: absolute; /* Will be positioned by JS */
+    position: absolute;
     width: 600px;
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     padding: 30px;
-    transform: translateX(100px);
+    transform: translateX(100px) scale(0.9);
     opacity: 0;
     transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s, opacity 0.4s ease 0.1s;
   }
   .expanded-view.is-active .expanded-view__info {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
   .expanded-view__title {
@@ -164,11 +170,15 @@
     mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
   }
   .expanded-view__scroller-content {
-    animation: marquee 15s linear infinite;
+    animation: marquee 20s linear infinite;
     font-size: 1rem;
     line-height: 1.7;
   }
   .expanded-view__scroller-content p { margin: 0 0 1em; }
+  .expanded-view__scroller-content .rte {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
   .expanded-view__button {
     display: inline-block;
     margin-top: 20px;
@@ -181,15 +191,17 @@
   }
 
   @keyframes marquee {
-    0% { transform: translateY(0%); }
+    0%   { transform: translateY(0%); }
     100% { transform: translateY(-100%); }
   }
 
   /* --- Responsive --- */
+  @media screen and (max-width: 990px) {
+    .glass-overlay { display: none; }
+  }
   @media screen and (max-width: 768px) {
     .orbit-section-{{ section.id }} { min-height: 500px; }
-    .orbit-product-card { width: 250px; } /* MODIFIED: Mobile card size */
-    .glass-overlay { display: none; } /* Hide glass overlay on small screens */
+    .orbit-product-card { width: 250px; }
   }
 </style>
 
@@ -202,11 +214,11 @@
   data-radius-y="{{ orbit_radius_y_multiplier }}"
 >
   <div class="orbit-container">
-    {%- if section.settings.product_list.size > 0 -%}
-      {%- for product in section.settings.product_list -%}
-        <a href="{{ product.url }}" class="orbit-product-card" data-product-index="{{ forloop.index0 }}">
-          <div class="orbit-product-card__inner">
-            <span class="card-index">{{ forloop.index }}/{{ forloop.length }}</span>
+    {%- for product in section.settings.product_list -%}
+      <a href="{{ product.url }}" class="orbit-product-card" data-product-index="{{ forloop.index0 }}">
+        <div class="orbit-product-card__inner">
+          <span class="card-index">{{ forloop.index }}/{{ forloop.length }}</span>
+          {% if product.featured_image %}
             <img
               src="{{ product.featured_image | image_url: width: 450 }}"
               alt="{{ product.featured_image.alt | escape }}"
@@ -215,12 +227,20 @@
               width="450"
               height="{{ 450 | divided_by: product.featured_image.aspect_ratio | round }}"
             >
-          </div>
-        </a>
-      {%- endfor -%}
+          {% else %}
+            <img
+              src="https://placehold.co/450x450/fff/ccc?text={{ product.title | escape }}"
+              alt="{{ product.title | escape }}"
+              class="orbit-product-card__image"
+              width="450"
+              height="450"
+            >
+          {% endif %}
+        </div>
+      </a>
     {%- else -%}
       {%- for i in (1..6) -%}
-        <div class="orbit-product-card">
+        <div class="orbit-product-card is-unclickable">
           <div class="orbit-product-card__inner">
             <span class="card-index">{{ i }}/6</span>
             <img
@@ -233,7 +253,7 @@
           </div>
         </div>
       {%- endfor -%}
-    {%- endif -%}
+    {%- endfor -%}
   </div>
 
   {%- if section.settings.glass_title != blank or section.settings.glass_text != blank -%}
@@ -261,7 +281,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Existing orbit script here...
     const section = document.querySelector('.orbit-section-{{ section.id }}');
     if (!section) return;
 
@@ -269,7 +288,6 @@
     const items = Array.from(container.querySelectorAll('.orbit-product-card'));
     if (items.length === 0) return;
 
-    // Expanded View elements
     const expandedView = section.querySelector('.expanded-view');
     const expandedCardContainer = expandedView.querySelector('.expanded-view__card');
     const expandedInfo = expandedView.querySelector('.expanded-view__info');
@@ -314,7 +332,7 @@
       const ellipseRadiusY = containerHeight * radiusYMultiplier;
 
       items.forEach((item, index) => {
-        if (item.classList.contains('is-active')) return; // Don't move the active card
+        if (item.classList.contains('is-active')) return;
 
         const itemAngleOffset = (360 / items.length) * index;
         const totalAngle = (currentAngle + itemAngleOffset) % 360;
@@ -328,7 +346,6 @@
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         
-        // Disable clicks on small, distant items
         if (scale < 0.5) {
           item.classList.add('is-unclickable');
         } else {
@@ -346,37 +363,36 @@
     };
 
     function openExpandedView(clickedCard) {
+      if (isExpanded) return;
       isExpanded = true;
+      section.classList.add('orbit-section--expanded');
       clickedCard.classList.add('is-active');
       const productIndex = parseInt(clickedCard.dataset.productIndex);
       const data = productData[productIndex];
 
-      // Populate and show the expanded view
       expandedTitle.textContent = data.title;
-      expandedScroller.innerHTML = `<p>${data.short_description || ''}</p><div>${data.features || ''}</div>`;
+      const scrollerContent = (data.short_description ? `<p>${data.short_description}</p>` : '') + (data.features || '');
+      expandedScroller.innerHTML = scrollerContent + scrollerContent; // Duplicate content for seamless scroll
       expandedButton.href = data.url;
 
-      // Clone the clicked card's visuals into the expanded view
       expandedCardContainer.innerHTML = clickedCard.querySelector('.orbit-product-card__inner').outerHTML;
-      
       const cardWidth = clickedCard.offsetWidth;
-      const expandedCardX = (containerWidth / 2) - (cardWidth * 0.5) - (cardWidth * 0.2); // Center then move left 20%
-      const expandedCardY = (containerHeight / 2) - (clickedCard.offsetHeight * 0.5);
       
-      expandedCardContainer.style.transform = `translate(${expandedCardX}px, ${expandedCardY}px) scale(1)`;
-      expandedInfo.style.transform = `translate(${expandedCardX + cardWidth}px, ${expandedCardY}px)`;
+      const targetX = (containerWidth / 2) - cardWidth - 20;
+      const targetY = (containerHeight / 2) - (clickedCard.offsetHeight / 2);
+      
+      clickedCard.style.transform = `translate(${targetX}px, ${targetY}px) scale(1)`;
+      
+      expandedInfo.style.left = `${targetX + cardWidth + 40}px`;
+      expandedInfo.style.top = `${targetY}px`;
       
       expandedView.classList.add('is-active');
-
-      // Animate the info box into place
-      setTimeout(() => {
-        expandedInfo.style.transform = `translate(${expandedCardX + cardWidth - 20}px, ${expandedCardY}px)`;
-      }, 50);
     }
     
     function closeExpandedView() {
       if (!isExpanded) return;
       isExpanded = false;
+      section.classList.remove('orbit-section--expanded');
       const activeCard = section.querySelector('.orbit-product-card.is-active');
       
       expandedView.classList.remove('is-active');
@@ -384,25 +400,19 @@
       if (activeCard) {
         activeCard.classList.remove('is-active');
       }
-      
-      // Clear content after transition
-      setTimeout(() => {
-        expandedCardContainer.innerHTML = '';
-      }, 500);
+      updatePositions(); // Recalculate positions immediately
     }
 
-    // --- Event Listeners ---
     container.addEventListener('click', (e) => {
       const clickedCard = e.target.closest('.orbit-product-card');
-      if (clickedCard && !clickedCard.classList.contains('is-unclickable') && !isExpanded) {
+      if (clickedCard && !clickedCard.classList.contains('is-unclickable') && !isDragging) {
         e.preventDefault();
         openExpandedView(clickedCard);
       }
     });
 
     section.addEventListener('click', (e) => {
-      // Close if clicking on the background, not on the expanded view itself
-      if (isExpanded && !e.target.closest('.expanded-view__card') && !e.target.closest('.expanded-view__info')) {
+      if (isExpanded && !e.target.closest('.orbit-product-card') && !e.target.closest('.expanded-view__info')) {
         closeExpandedView();
       }
     });
@@ -412,15 +422,16 @@
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             updateDimensions();
+            closeExpandedView();
             updatePositions();
-            if (isExpanded) closeExpandedView();
         }, 150);
     };
     
-    // Drag functionality (should not run when view is expanded)
+    let hasDragged = false;
     const startDrag = (e) => {
       if (isExpanded) return;
       isDragging = true;
+      hasDragged = false;
       startX = e.pageX || e.touches[0].pageX;
       startAngle = currentAngle;
       section.style.cursor = 'grabbing';
@@ -428,6 +439,7 @@
     const onDrag = (e) => {
       if (isExpanded || !isDragging) return;
       e.preventDefault();
+      hasDragged = true;
       const currentX = e.pageX || e.touches[0].pageX;
       const deltaX = currentX - startX;
       const angleChange = (deltaX / container.offsetWidth) * -180;
@@ -438,6 +450,8 @@
       if (!isDragging) return;
       isDragging = false;
       section.style.cursor = 'grab';
+      // Prevent click from firing after a drag
+      setTimeout(() => { hasDragged = false; }, 0);
     };
 
     section.addEventListener('mousedown', startDrag);
