@@ -1,9 +1,7 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V7 Changes:
-    - Increased max scale for a more dramatic effect.
-    - Corrected drag direction to be intuitive.
-    - Added a hover effect to pause animation and scale the item.
+  - V8 Changes:
+    - Adjusted scaling logic to set a minimum size, preventing items from disappearing.
 {% endcomment %}
 
 {%- liquid
@@ -50,7 +48,6 @@
     transform-origin: center center;
     background-color: rgba(255, 0, 150, 0.5);
     border-radius: 50%;
-    /* Added transition for the hover effect */
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   .orbit-item__image {
@@ -151,16 +148,14 @@
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        // MODIFICATION: Adjusted scaling for a more dramatic effect.
-        // It now maps the Y position to a scale range of 0 to 2.0.
         let scale = (y / containerHeight) * 2.4; 
-        scale = Math.max(0, Math.min(2.0, scale)); // Clamp scale between 0 and 2.0.
+        // MODIFICATION: Changed minimum scale from 0 to 0.4
+        scale = Math.max(0.4, Math.min(2.0, scale));
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         item.style.opacity = 1;
         item.style.zIndex = Math.round(scale * 100);
         
-        // Store the calculated values on the element for the hover effect
         item.dataset.x = x;
         item.dataset.y = y;
         item.dataset.scale = scale;
@@ -168,7 +163,6 @@
     };
 
     const animate = () => {
-      // Pause animation if dragging OR hovering
       if (!isDragging && !isHovering) {
         currentAngle -= speed;
         updatePositions();
@@ -188,8 +182,6 @@
       e.preventDefault();
       const currentX = e.pageX || e.touches[0].pageX;
       const deltaX = currentX - startX;
-      
-      // MODIFICATION: Inverted the angle change for intuitive dragging.
       const angleChange = (deltaX / container.offsetWidth) * -180;
       currentAngle = startAngle + angleChange;
       updatePositions();
@@ -201,11 +193,9 @@
       section.style.cursor = 'grab';
     };
 
-    // --- NEW: Hover Logic ---
     items.forEach(item => {
       item.addEventListener('mouseover', () => {
         isHovering = true;
-        // Apply an extra scale transform on top of the calculated one
         const x = parseFloat(item.dataset.x);
         const y = parseFloat(item.dataset.y);
         const scale = parseFloat(item.dataset.scale);
@@ -214,7 +204,6 @@
       
       item.addEventListener('mouseout', () => {
         isHovering = false;
-        // Revert to the original calculated transform
         const x = parseFloat(item.dataset.x);
         const y = parseFloat(item.dataset.y);
         const scale = parseFloat(item.dataset.scale);
