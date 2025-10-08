@@ -1,8 +1,11 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V12 - Bug Fix:
-    - Restored the original, correct orbit positioning calculation.
-    - Restructured HTML to group glass overlays as requested.
+  - V12 - Full Feature Implementation & Bug Fixes:
+    - Based on user-provided correct code.
+    - Added full click-to-expand functionality.
+    - Corrected dynamic opacity.
+    - Increased clickable range.
+    - Adjusted mobile breakpoint.
 {% endcomment %}
 
 {%- liquid
@@ -45,7 +48,7 @@
   }
   .orbit-product-card {
     position: absolute;
-    top: 0; /* FIX: Reverted to top: 0, left: 0 for original calculation */
+    top: 0;
     left: 0;
     width: 450px;
     will-change: transform, opacity;
@@ -156,7 +159,7 @@
   .expanded-view__button { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #c1151b; color: #fff; border-radius: 4px; text-decoration: none; font-weight: 600; }
   @keyframes marquee { 0% { transform: translateY(0%); } 100% { transform: translateY(-100%); } }
 
-  @media screen and (max-width: 1000px) {
+  @media screen and (max-width: 1000px) { /* ADJUSTED BREAKPOINT */
     .orbit-product-card { width: 250px; }
   }
   @media screen and (max-width: 990px) {
@@ -221,7 +224,6 @@
     {%- endfor -%}
   </div>
 
-  {% comment %} Wrapper for overlay elements to keep them separate from the orbit container {% endcomment %}
   <div class="overlays-wrapper">
     {%- if section.settings.glass_right_title != blank or section.settings.glass_right_text != blank -%}
       <div class="glass-overlay glass-overlay--right">
@@ -233,7 +235,6 @@
         {%- endif -%}
       </div>
     {%- endif -%}
-
     {%- if section.settings.glass_left_title != blank or section.settings.glass_left_text != blank -%}
       <div class="glass-overlay glass-overlay--left">
         {%- if section.settings.glass_left_title != blank -%}
@@ -261,7 +262,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     const section = document.querySelector('.orbit-section-{{ section.id }}');
     if (!section) return;
-
     const container = section.querySelector('.orbit-container');
     const items = Array.from(container.querySelectorAll('.orbit-product-card'));
     if (items.length === 0) return;
@@ -290,13 +290,7 @@
     const radiusXMultiplier = parseFloat(section.dataset.radiusX);
     const radiusYMultiplier = parseFloat(section.dataset.radiusY);
 
-    let currentAngle = 0;
-    let isDragging = false;
-    let startX = 0;
-    let startAngle = 0;
-    let animationFrameId;
-    let isExpanded = false;
-    let activeCard = null;
+    let currentAngle = 0, isDragging = false, startX = 0, startAngle = 0, animationFrameId, isExpanded = false, activeCard = null;
     const speed = 360 / ({{ section.settings.animation_duration }} * 60);
 
     let containerWidth, containerHeight;
@@ -324,19 +318,19 @@
         let scale = (y / containerHeight) * 2.4; 
         scale = Math.max(0.1, Math.min(2.0, scale));
 
-        // FIX: Reverted to the original, correct positioning calculation
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         
-        let opacity = (scale - 0.1) / (2.0 - 0.1);
-        opacity = 0.4 + opacity * 0.6;
-        item.style.opacity = Math.max(0.4, Math.min(1, opacity));
-
-        itemOriginalStates.set(item, item.style.transform);
+        // MODIFICATION: Dynamic opacity calculation
+        const normalizedScale = (scale - 0.1) / (2.0 - 0.1); // Normalize scale from 0 to 1
+        item.style.opacity = 0.3 + (normalizedScale * 0.7); // Map to opacity 0.3 to 1.0
+        
+        itemOriginalStates.set(item, {transform: item.style.transform, opacity: item.style.opacity});
         
         const zIndex = 10 + Math.round(scale * 100);
         item.style.zIndex = zIndex;
         
-        if (scale < 0.6 || opacity < 0.7) {
+        // MODIFICATION: Increased clickable range
+        if (scale < 0.4) {
           item.classList.add('is-unclickable');
         } else {
           item.classList.remove('is-unclickable');
@@ -358,27 +352,20 @@
       activeCard = clickedCard;
       section.classList.add('orbit-section--expanded');
       activeCard.classList.add('is-active');
-
       const productIndex = parseInt(activeCard.dataset.productIndex);
       const data = productData[productIndex];
-
       expandedTitle.textContent = data.title;
       const scrollerContent = (data.short_description ? `<p>${data.short_description}</p>` : '') + (data.features || '');
       expandedScroller.innerHTML = scrollerContent + scrollerContent;
       expandedButton.href = data.url;
-
       const cardWidth = activeCard.offsetWidth;
       const cardHeight = activeCard.offsetHeight;
-      
       const targetCardX = (containerWidth / 2) - cardWidth;
       const targetCardY = (containerHeight / 2) - (cardHeight / 2);
-      
       activeCard.style.transform = `translate(${targetCardX}px, ${targetCardY}px) scale(1)`;
       activeCard.style.zIndex = 1001;
-
       expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
       expandedInfo.style.top = `${targetCardY}px`;
-      
       expandedView.classList.add('is-active');
     }
     
@@ -386,17 +373,18 @@
       if (!isExpanded) return;
       isExpanded = false;
       section.classList.remove('orbit-section--expanded');
-      
       expandedView.classList.remove('is-active');
-
       if (activeCard) {
-        activeCard.style.transform = itemOriginalStates.get(activeCard) || '';
+        const originalState = itemOriginalStates.get(activeCard);
+        if (originalState) {
+          activeCard.style.transform = originalState.transform;
+          activeCard.style.opacity = originalState.opacity;
+        }
         activeCard.classList.remove('is-active');
         activeCard = null;
       }
       updatePositions();
     }
-
     container.addEventListener('click', (e) => {
       const clickedCard = e.target.closest('.orbit-product-card');
       if (clickedCard && !clickedCard.classList.contains('is-unclickable') && !isDragging && !isExpanded) {
@@ -404,13 +392,11 @@
         openExpandedView(clickedCard);
       }
     });
-
     section.addEventListener('click', (e) => {
       if (isExpanded && !e.target.closest('.orbit-product-card.is-active') && !e.target.closest('.expanded-view__info')) {
         closeExpandedView();
       }
     });
-
     let resizeTimeout;
     const onResize = () => {
         clearTimeout(resizeTimeout);
@@ -420,7 +406,6 @@
             updatePositions();
         }, 150);
     };
-    
     let hasDragged = false;
     const startDrag = (e) => {
       if (isExpanded) return;
@@ -446,7 +431,6 @@
       section.style.cursor = 'grab';
       setTimeout(() => { hasDragged = false; }, 0);
     };
-
     section.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
     window.addEventListener('mouseup', stopDrag);
@@ -455,7 +439,6 @@
     window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('resize', onResize);
-
     updateDimensions();
     updatePositions();
     animate();
