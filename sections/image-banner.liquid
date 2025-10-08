@@ -42,12 +42,12 @@
     width: 100%;
     height: 100%;
     z-index: 10;
-    transition: z-index 0s linear 0.5s; /* Delay z-index change on close */
+    transition: opacity 0.4s ease;
   }
-  /* MODIFICATION: Elevate the entire orbit when a card is expanded */
-  .orbit-container.is-expanded {
+  .orbit-section--expanded .orbit-container {
+    opacity: 0.2;
+    pointer-events: none;
     z-index: 1600;
-    transition-delay: 0s;
   }
   .orbit-product-card {
     position: absolute;
