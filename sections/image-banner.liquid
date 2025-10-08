@@ -79,24 +79,23 @@
   data-radius-y="{{ orbit_radius_y_multiplier }}"
 >
   <div class="orbit-container">
-    {%- if section.settings.product_list.size > 0 -%}
-      {%- for product in section.settings.product_list -%}
-        <div class="orbit-item">
-          {%- liquid
-            assign image = product.featured_image
-            assign image_height = 300 | divided_by: image.aspect_ratio | round
-          -%}
-          <img
-            src="{{ image | image_url: width: 300 }}"
-            alt="{{ image.alt | escape }}"
-            class="orbit-item__image"
-            loading="lazy"
-            width="300"
-            height="{{ image_height }}"
-          >
-        </div>
-      {%- endfor -%}
+    {%- for product in section.settings.product_list -%}
+      <div class="orbit-item">
+        {%- liquid
+          assign image = product.featured_image
+          assign image_height = 300 | divided_by: image.aspect_ratio | round
+        -%}
+        <img
+          src="{{ image | image_url: width: 300 }}"
+          alt="{{ image.alt | escape }}"
+          class="orbit-item__image"
+          loading="lazy"
+          width="300"
+          height="{{ image_height }}"
+        >
+      </div>
     {%- else -%}
+      {%- comment -%} This code runs ONLY if no products are selected {%- endcomment -%}
       {%- for i in (1..6) -%}
         <div class="orbit-item">
           <img
@@ -108,7 +107,7 @@
           >
         </div>
       {%- endfor -%}
-    {%- endif -%}
+    {%- endfor -%}
   </div>
 </div>
 
