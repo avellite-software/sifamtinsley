@@ -186,16 +186,31 @@
   }
   @media screen and (max-width: 768px) {
     .orbit-section-{{ section.id }} { min-height: 500px; }
-    .expanded-view__info {
-      width: calc(100% - 40px); /* Full width with padding */
-      left: 20px !important;
-      right: 20px !important;
-      top: auto !important; /* Let JS handle top position */
-      transform: translateY(50px) scale(0.95); /* Animate from bottom */
-      opacity: 0;
+    .expanded-view {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
     }
-    .expanded-view.is-active .expanded-view__info {
-      transform: translateY(0) scale(1);
+    .expanded-view__card,
+    .expanded-view__info {
+      position: static; /* Let flexbox handle positioning */
+      transform: none !important; /* Reset transforms */
+      opacity: 1;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .expanded-view__card {
+      width: 250px; /* Match mobile card size */
+    }
+    .expanded-view__info {
+      padding: 20px;
+    }
+    .expanded-view__title {
+      font-size: 1.5rem;
     }
   }
 </style>
