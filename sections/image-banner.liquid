@@ -1,16 +1,28 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V3 Changes:
-    - Corrected orbit path to be visible in the bottom-right.
-    - Reversed default animation direction.
-    - Improved scaling logic based on position.
-    - Added debug background colors for visualization.
+  - V4 Changes:
+    - Added easy-to-edit Liquid variables at the top to control the orbit's shape and position.
 {% endcomment %}
+
+{%- liquid
+  comment
+    HOW TO ADJUST THE ORBIT:
+    - orbit_center_x_multiplier: Controls the horizontal center. A smaller number (e.g., -0.5) moves the orbit's center further to the left.
+    - orbit_center_y_multiplier: Controls the vertical center. A smaller number (e.g., -1.0) moves the orbit's center further up.
+    - orbit_radius_x_multiplier: Controls the orbit's width. A larger number makes the path wider.
+    - orbit_radius_y_multiplier: Controls the orbit's height. A larger number makes the path taller.
+  endcomment
+  assign orbit_center_x_multiplier = -0.2
+  assign orbit_center_y_multiplier = -0.8
+  assign orbit_radius_x_multiplier = 1.2
+  assign orbit_radius_y_multiplier = 1.8
+-%}
 
 <style>
   .orbit-section-{{ section.id }} {
     --animation-duration: {{ section.settings.animation_duration }}s;
-    background-color: #f5f5f5;
+    background-color: #111;
+    border: 2px solid cyan;
     position: relative;
     width: 100%;
     min-height: 600px;
@@ -21,7 +33,6 @@
   .orbit-section-{{ section.id }}:active {
     cursor: grabbing;
   }
-
   .orbit-container {
     position: absolute;
     top: 0;
@@ -29,15 +40,15 @@
     width: 100%;
     height: 100%;
   }
-
   .orbit-item {
     position: absolute;
     top: 0;
     left: 0;
     will-change: transform, opacity;
     transform-origin: center center;
+    background-color: rgba(255, 0, 150, 0.5);
+    border-radius: 50%;
   }
-
   .orbit-item__image {
     display: block;
     max-width: 150px;
@@ -45,23 +56,6 @@
     pointer-events: none;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
   }
-
-  /*
-    DEBUG COLORS:
-    These are the harsh colors you requested for development.
-    You can remove these two rules when you are done.
-  */
-  .orbit-section-{{ section.id }} {
-    background-color: #111;
-    border: 2px solid cyan;
-  }
-  .orbit-item {
-    background-color: rgba(255, 0, 150, 0.5);
-    border-radius: 50%;
-  }
-  /* --- END DEBUG COLORS --- */
-
-
   @media screen and (max-width: 768px) {
     .orbit-section-{{ section.id }} {
       min-height: 500px;
@@ -72,18 +66,17 @@
   }
 </style>
 
-<div class="orbit-section-{{ section.id }}" data-section-id="{{ section.id }}">
+<div
+  class="orbit-section-{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-center-x="{{ orbit_center_x_multiplier }}"
+  data-center-y="{{ orbit_center_y_multiplier }}"
+  data-radius-x="{{ orbit_radius_x_multiplier }}"
+  data-radius-y="{{ orbit_radius_y_multiplier }}"
+>
   <div class="orbit-container">
-    {%- liquid
-      assign product_list = section.settings.product_list
-      assign has_products = false
-      if product_list.size > 0
-        assign has_products = true
-      endif
-    -%}
-
-    {%- if has_products -%}
-      {%- for product in product_list -%}
+    {%- if section.settings.product_list.size > 0 -%}
+      {%- for product in section.settings.product_list -%}
         <div class="orbit-item">
           {%- liquid
             assign image = product.featured_image
@@ -124,25 +117,28 @@
     const items = Array.from(container.querySelectorAll('.orbit-item'));
     if (items.length === 0) return;
 
-    // --- 1. Orbit & Animation Parameters ---
+    // --- 1. Read Orbit Parameters from HTML data-attributes ---
+    const centerXMultiplier = parseFloat(section.dataset.centerX);
+    const centerYMultiplier = parseFloat(section.dataset.centerY);
+    const radiusXMultiplier = parseFloat(section.dataset.radiusX);
+    const radiusYMultiplier = parseFloat(section.dataset.radiusY);
+
     let currentAngle = 0;
     let isDragging = false;
     let startX = 0;
     let startAngle = 0;
     let animationFrameId;
-
     const speed = 360 / ({{ section.settings.animation_duration }} * 60);
 
-    // --- 2. Positioning Function ---
     const updatePositions = () => {
       const containerWidth = container.offsetWidth;
       const containerHeight = container.offsetHeight;
 
-      // MODIFICATION: New ellipse parameters to create the bottom-right arc
-      const ellipseCenterX = containerWidth * 0.2;
-      const ellipseCenterY = -containerHeight * 0.8;
-      const ellipseRadiusX = containerWidth * 1.2;
-      const ellipseRadiusY = containerHeight * 1.8;
+      // Use the multipliers from the data-attributes to define the ellipse
+      const ellipseCenterX = containerWidth * centerXMultiplier;
+      const ellipseCenterY = containerHeight * centerYMultiplier;
+      const ellipseRadiusX = containerWidth * radiusXMultiplier;
+      const ellipseRadiusY = containerHeight * radiusYMultiplier;
 
       items.forEach((item, index) => {
         const itemAngleOffset = (360 / items.length) * index;
@@ -152,43 +148,32 @@
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        // MODIFICATION: New scaling and opacity logic
-        // Calculate visibility based on whether the item is within the screen bounds
         let opacity = 0;
         if (x > -150 && x < containerWidth + 150 && y > -150 && y < containerHeight + 150) {
-            // Simple fade based on horizontal position for entry/exit
             const fadeInPoint = containerWidth * 0.1;
             const fadeOutPoint = containerWidth * 0.9;
-            
-            if (x < fadeInPoint) {
-                opacity = x / fadeInPoint;
-            } else if (x > fadeOutPoint) {
-                opacity = (containerWidth - x) / (containerWidth - fadeOutPoint);
-            } else {
-                opacity = 1;
-            }
+            if (x < fadeInPoint) { opacity = x / fadeInPoint; }
+            else if (x > fadeOutPoint) { opacity = (containerWidth - x) / (containerWidth - fadeOutPoint); }
+            else { opacity = 1; }
         }
         
-        // Scale is now based on vertical position (lower is bigger)
         let scale = (y / containerHeight) * 1.2;
-        scale = Math.max(0.1, Math.min(1.0, scale)); // Clamp scale between 0.1 and 1.0
+        scale = Math.max(0.1, Math.min(1.0, scale));
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-        item.style.opacity = Math.max(0, opacity); // Clamp opacity
+        item.style.opacity = Math.max(0, opacity);
         item.style.zIndex = Math.round(scale * 100);
       });
     };
 
-    // --- 3. Animation Loop ---
     const animate = () => {
       if (!isDragging) {
-        currentAngle -= speed; // MODIFICATION: Changed to -= to reverse direction
+        currentAngle -= speed;
         updatePositions();
       }
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // --- 4. Drag Interaction Logic ---
     const startDrag = (e) => {
       isDragging = true;
       startX = e.pageX || e.touches[0].pageX;
@@ -201,10 +186,8 @@
       e.preventDefault();
       const currentX = e.pageX || e.touches[0].pageX;
       const deltaX = currentX - startX;
-      
       const angleChange = (deltaX / container.offsetWidth) * 180;
       currentAngle = startAngle + angleChange;
-      
       updatePositions();
     };
 
@@ -214,22 +197,16 @@
       section.style.cursor = 'grab';
     };
 
-    // Mouse events
     section.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
     window.addEventListener('mouseup', stopDrag);
-    section.addEventListener('mouseleave', stopDrag); // Stop if mouse leaves section
-    
-    // Touch events
+    section.addEventListener('mouseleave', stopDrag);
     section.addEventListener('touchstart', startDrag, { passive: true });
     window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', stopDrag);
 
-    // Initial call and start animation
     updatePositions();
     animate();
-
-    // Re-calculate on resize
     window.addEventListener('resize', updatePositions);
   });
 </script>
