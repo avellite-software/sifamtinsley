@@ -1,7 +1,7 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V5 Changes:
-    - Increased the base size of the orbiting product images.
+  - V6 Changes:
+    - Removed the opacity fade-in/fade-out effect. Items are now always visible.
 {% endcomment %}
 
 {%- liquid
@@ -13,9 +13,9 @@
     - orbit_radius_y_multiplier: Controls the orbit's height. A larger number makes the path taller.
   endcomment
   assign orbit_center_x_multiplier = -0.2
-  assign orbit_center_y_multiplier = -0.6
-  assign orbit_radius_x_multiplier = 1.8
-  assign orbit_radius_y_multiplier = 1.2
+  assign orbit_center_y_multiplier = -1.2
+  assign orbit_radius_x_multiplier = 1.2
+  assign orbit_radius_y_multiplier = 1.8
 -%}
 
 <style>
@@ -51,7 +51,7 @@
   }
   .orbit-item__image {
     display: block;
-    max-width: 450px; /* MODIFIED: Increased from 150px */
+    max-width: 450px;
     height: auto;
     pointer-events: none;
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
@@ -61,7 +61,7 @@
       min-height: 500px;
     }
     .orbit-item__image {
-      max-width: 250px; /* MODIFIED: Proportionally increased from 100px */
+      max-width: 250px;
     }
   }
 </style>
@@ -134,7 +134,6 @@
       const containerWidth = container.offsetWidth;
       const containerHeight = container.offsetHeight;
 
-      // Use the multipliers from the data-attributes to define the ellipse
       const ellipseCenterX = containerWidth * centerXMultiplier;
       const ellipseCenterY = containerHeight * centerYMultiplier;
       const ellipseRadiusX = containerWidth * radiusXMultiplier;
@@ -148,20 +147,12 @@
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        let opacity = 0;
-        if (x > -150 && x < containerWidth + 150 && y > -150 && y < containerHeight + 150) {
-            const fadeInPoint = containerWidth * 0.1;
-            const fadeOutPoint = containerWidth * 0.9;
-            if (x < fadeInPoint) { opacity = x / fadeInPoint; }
-            else if (x > fadeOutPoint) { opacity = (containerWidth - x) / (containerWidth - fadeOutPoint); }
-            else { opacity = 1; }
-        }
-        
+        // Scale is based on vertical position (lower is bigger)
         let scale = (y / containerHeight) * 1.2;
         scale = Math.max(0.1, Math.min(1.0, scale));
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-        item.style.opacity = Math.max(0, opacity);
+        item.style.opacity = 1; // MODIFICATION: Opacity is now always 1
         item.style.zIndex = Math.round(scale * 100);
       });
     };
