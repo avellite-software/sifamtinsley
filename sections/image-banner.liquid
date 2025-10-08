@@ -1,11 +1,8 @@
 {% comment %}
   Section: Interactive Product Orbit
-  - V12 - Full Feature Implementation & Bug Fixes:
-    - Based on user-provided correct code.
-    - Added full click-to-expand functionality.
-    - Corrected dynamic opacity.
-    - Increased clickable range.
-    - Adjusted mobile breakpoint.
+  - V13 - Final Polish:
+    - Corrected dynamic opacity to map correctly from 1.0 down to 0.3.
+    - Updated glass overlay title styles (color and size).
 {% endcomment %}
 
 {%- liquid
@@ -48,8 +45,8 @@
   }
   .orbit-product-card {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
     width: 450px;
     will-change: transform, opacity;
     transform-origin: center center;
@@ -115,7 +112,13 @@
   }
   .glass-overlay--right { right: 40px; width: 300px; }
   .glass-overlay--left { left: 40px; width: 450px; }
-  .glass-overlay__title { font-size: 1.5rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; }
+  .glass-overlay__title {
+    font-size: 1.8rem; /* MODIFIED */
+    font-weight: 700;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+    color: #fff; /* MODIFIED */
+  }
   .glass-overlay__text.rte p { margin: 0; line-height: 1.6; opacity: 0.9; }
 
   .expanded-view {
@@ -159,7 +162,7 @@
   .expanded-view__button { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #c1151b; color: #fff; border-radius: 4px; text-decoration: none; font-weight: 600; }
   @keyframes marquee { 0% { transform: translateY(0%); } 100% { transform: translateY(-100%); } }
 
-  @media screen and (max-width: 1000px) { /* ADJUSTED BREAKPOINT */
+  @media screen and (max-width: 1000px) {
     .orbit-product-card { width: 250px; }
   }
   @media screen and (max-width: 990px) {
@@ -305,31 +308,38 @@
       const ellipseRadiusX = containerWidth * radiusXMultiplier;
       const ellipseRadiusY = containerHeight * radiusYMultiplier;
 
+      // Define the min/max y values for the full orbit path
+      const minY = ellipseCenterY - ellipseRadiusY;
+      const maxY = ellipseCenterY + ellipseRadiusY;
+      const yRange = maxY - minY;
+
       items.forEach((item, index) => {
         if (item === activeCard) return;
-
         const itemAngleOffset = (360 / items.length) * index;
         const totalAngle = (currentAngle + itemAngleOffset) % 360;
         const angleInRadians = (totalAngle * Math.PI) / 180;
-
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
         
-        let scale = (y / containerHeight) * 2.4; 
+        let scale = (y / containerHeight) * 2.4;
         scale = Math.max(0.1, Math.min(2.0, scale));
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         
-        // MODIFICATION: Dynamic opacity calculation
-        const normalizedScale = (scale - 0.1) / (2.0 - 0.1); // Normalize scale from 0 to 1
-        item.style.opacity = 0.3 + (normalizedScale * 0.7); // Map to opacity 0.3 to 1.0
-        
+        // MODIFICATION: New dynamic opacity calculation
+        if (yRange > 0) {
+          const normalizedY = (y - minY) / yRange; // Normalize Y position from 0 (top of orbit) to 1 (bottom of orbit)
+          const opacity = 0.3 + (normalizedY * 0.7); // Map to opacity range 0.3 to 1.0
+          item.style.opacity = Math.max(0.3, Math.min(1.0, opacity));
+        } else {
+          item.style.opacity = 1;
+        }
+
         itemOriginalStates.set(item, {transform: item.style.transform, opacity: item.style.opacity});
         
         const zIndex = 10 + Math.round(scale * 100);
         item.style.zIndex = zIndex;
         
-        // MODIFICATION: Increased clickable range
         if (scale < 0.4) {
           item.classList.add('is-unclickable');
         } else {
@@ -368,7 +378,6 @@
       expandedInfo.style.top = `${targetCardY}px`;
       expandedView.classList.add('is-active');
     }
-    
     function closeExpandedView() {
       if (!isExpanded) return;
       isExpanded = false;
