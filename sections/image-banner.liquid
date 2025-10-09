@@ -23,16 +23,22 @@
 -%}
 
 <style>
+  @font-face {
+    font-family: 'DigitalClockFont';
+    src: url('{{ "DSEG14Classic-Light.woff2" | asset_url }}') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
   .orbit-section-{{ section.id }} {
     --animation-duration: {{ section.settings.animation_duration }}s;
     position: relative;
     width: 100%;
-    min-height: 700px;
+    min-height: 70vh;
     overflow: hidden;
     cursor: grab;
     user-select: none;
     background-color: #111;
-    background-image: radial-gradient(circle at bottom right, #c1151b 0%, transparent 60%);
+    background-image: radial-gradient(circle at 130% 100%, #c1151b 0%, transparent 100%);
     border-bottom-right-radius: 50px;
   }
   .orbit-section-{{ section.id }}:active {
@@ -52,6 +58,13 @@
     pointer-events: none;
     z-index: 1600;
   }
+
+  .orbit-section--expanded .overlays-wrapper {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .orbit-product-card {
     position: absolute;
     top: 0;
@@ -63,6 +76,7 @@
     z-index: 1;
     pointer-events: auto;
     cursor: pointer;
+    text-decoration: none;
   }
   .orbit-section--expanded .orbit-product-card:not(.is-active) {
     opacity: 0 !important;
@@ -77,16 +91,49 @@
     width: 100%;
     aspect-ratio: 1/1;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    background-color: #fff;
+  }
+  .orbit-product-card::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1%; /* Keep this small */
+    height: 1%; /* Keep this small */
+    border-radius: 50%;
+    /* Adjust these values as needed for size and intensity */
+    box-shadow: 0 0 10vmin 10vmin rgba(255, 255, 255, 0.15);
+    z-index: 0; /* Ensures it stays behind the card content */
+    pointer-events: none; /* Prevents it from interfering with clicks */
   }
   .orbit-product-card__image {
+    position: relative;
+    z-index: 2;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     pointer-events: none;
+  }
+  .orbit-product-card__title {
+    color: #fff;
+    font-family: 'DigitalClockFont', sans-serif; /* We will set this up next */
+    font-size: 3.2rem;
+    font-weight: 700;
+    text-align: left;
+    padding: 0px;
+    margin: 0;
+    text-decoration: none;
+    white-space: nowrap;
+    /* Glowing effect */
+    text-shadow: 0 0 5px rgba(255,255,255,0.7), 0 0 10px #ffffffff, 0 0 15px #ffffffff;
+  }
+
+  .orbit-product-card__category {
+    font-size: 1.9rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: nowrap;
   }
   .orbit-product-card.is-unclickable {
     pointer-events: none;
@@ -107,6 +154,18 @@
     position: absolute;
     top: 40px;
     padding: 25px;
+    border-radius: 12px;
+    color: #fff;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 180px;
+  }
+  .glass-overlay-2 {
+    position: absolute;
+    top: 40px;
+    padding: 25px;
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -120,8 +179,9 @@
     height: 180px;
   }
   .glass-overlay--right { right: 40px; width: 300px; }
-  .glass-overlay--left { left: 40px; width: 450px; }
+  .glass-overlay--left { width: 450px; }
   .glass-overlay__title { font-size: 1.8rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; color: #fff; }
+  .glass-overlay__title-2 { font-size: 3.8rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; color: #fff; }
   .glass-overlay__text.rte p { margin: 0; line-height: 1.6; opacity: 0.9; }
 
   .expanded-view {
@@ -150,24 +210,32 @@
   .expanded-view__info {
     position: absolute;
     width: 600px;
-    background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     padding: 30px;
     opacity: 0;
     transform: scale(0.95);
     transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s, opacity 0.4s ease 0.1s;
+
+    /* --- ADD THESE GLASS STYLES --- */
+    color: #000000ff;
+    background-color: rgba(255, 255, 255, 1);
   }
   .expanded-view.is-active .expanded-view__info {
     transform: scale(1);
     opacity: 1;
   }
-  .expanded-view__title { font-size: 2rem; font-weight: 700; margin: 0 0 1rem; color: #1c1c1c; }
+  .expanded-view__title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: #000000ff;
+  }
   .expanded-view__button { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #c1151b; color: #fff; border-radius: 4px; text-decoration: none; font-weight: 600; }
 
   .carousel-container { position: relative; height: 120px; overflow: hidden; margin-bottom: 20px; }
   .carousel-content-wrapper { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
-  .carousel-item { width:200px; min-width: 100%; flex-shrink: 0; padding-right: 20px; box-sizing: border-box; font-size: 1rem; line-height: 1.6; color: #333; overflow-y: auto; white-space: normal; word-wrap: break-word; }
+  .carousel-item { width:200px; min-width: 100%; flex-shrink: 0; padding-right: 20px; box-sizing: border-box; font-size: 1rem; line-height: 1.6; color: #000000ff; overflow-y: auto; white-space: normal; word-wrap: break-word; }
   .carousel-item p, .carousel-item li { margin-bottom: 1em; }
   .carousel-controls { display: flex; justify-content: flex-start; align-items: center; gap: 10px; margin-top: 15px; }
   .carousel-control-btn { background: #eee; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 0.9rem; color: #333; transition: background 0.2s; }
@@ -189,7 +257,11 @@
   }
   @media screen and (max-width: 768px) {
     .is-active { display: none; }
+<<<<<<< Updated upstream
     .orbit-section-{{ section.id }} { min-height: 500px; }
+=======
+    .orbit-section-{{ section.id }} { min-height: 40%; }
+>>>>>>> Stashed changes
     .expanded-view {
       display: flex;
       flex-direction: column;
@@ -226,10 +298,15 @@
   data-center-y="{{ orbit_center_y_multiplier }}"
   data-radius-x="{{ orbit_radius_x_multiplier }}"
   data-radius-y="{{ orbit_radius_y_multiplier }}"
+  data-glass-left="true"
 >
   <div class="orbit-container">
     {%- for product in section.settings.product_list -%}
       <a href="{{ product.url }}" class="orbit-product-card" data-product-index="{{ forloop.index0 }}">
+        <h3 class="orbit-product-card__title">{{ product.title }}</h3>
+        {%- if product.metafields.custom.category.value != blank -%}
+          <span class="orbit-product-card__category">{{ product.metafields.custom.category.value }}</span>
+        {%- endif -%}
         <div class="orbit-product-card__inner">
           <span class="card-index">{{ forloop.index }}/{{ forloop.length }}</span>
           {% if product.featured_image %}
@@ -272,7 +349,7 @@
 
   <div class="overlays-wrapper">
     {%- if section.settings.glass_right_title != blank or section.settings.glass_right_text != blank -%}
-      <div class="glass-overlay glass-overlay--right">
+      <div class="glass-overlay-2 glass-overlay--right">
         {%- if section.settings.glass_right_title != blank -%}
           <h3 class="glass-overlay__title">{{ section.settings.glass_right_title }}</h3>
         {%- endif -%}
@@ -284,7 +361,7 @@
     {%- if section.settings.glass_left_title != blank or section.settings.glass_left_text != blank -%}
       <div class="glass-overlay glass-overlay--left">
         {%- if section.settings.glass_left_title != blank -%}
-          <h3 class="glass-overlay__title">{{ section.settings.glass_left_title }}</h3>
+          <h3 class="glass-overlay__title-2">{{ section.settings.glass_left_title }}</h3>
         {%- endif -%}
         {%- if section.settings.glass_left_text != blank -%}
           <div class="glass-overlay__text rte">{{ section.settings.glass_left_text }}</div>
@@ -317,6 +394,26 @@
   document.addEventListener('DOMContentLoaded', () => {
     const section = document.querySelector('.orbit-section-{{ section.id }}');
     if (!section) return;
+    // --- NEW: Glass Box Alignment Logic ---
+    const alignGlassBox = () => {
+      const glassLeft = section.querySelector('.glass-overlay--left');
+      if (!glassLeft) return;
+
+      const mainContentWidth = 1200; // Your site's max-width
+      const screenWidth = window.innerWidth;
+      
+      if (screenWidth > mainContentWidth) {
+        const gutter = (screenWidth - mainContentWidth) / 2;
+        glassLeft.style.left = `${gutter}px`;
+      } else {
+        // On smaller screens, use a default padding
+        glassLeft.style.left = '20px';
+      }
+    };
+    
+    // Run alignment on load
+    alignGlassBox();
+
     const container = section.querySelector('.orbit-container');
     const items = Array.from(container.querySelectorAll('.orbit-product-card'));
     if (items.length === 0) return;
@@ -474,7 +571,11 @@
       expandedButton.href = data.url;
       const cardWidth = activeCard.offsetWidth;
       const cardHeight = activeCard.offsetHeight;
+      const infoHeight = expandedInfo.offsetHeight; // New line
       let targetCardX, targetCardY;
+
+      const targetInfoY = (containerHeight / 2) - (infoHeight / 2); // New line: Center info box vertically
+
       if (window.innerWidth <= 768) {
         targetCardX = (containerWidth / 2) - (cardWidth / 2);
         targetCardY = containerHeight * 0.15;
@@ -483,12 +584,12 @@
         targetCardX = 40;
         targetCardY = (containerHeight / 2) - (cardHeight / 2);
         expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
-        expandedInfo.style.top = `${targetCardY}px`;
+        expandedInfo.style.top = `${targetInfoY}px`; // Use new Y position
       } else {
         targetCardX = (containerWidth / 2) - cardWidth;
         targetCardY = (containerHeight / 2) - (cardHeight / 2);
         expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
-        expandedInfo.style.top = `${targetCardY}px`;
+        expandedInfo.style.top = `${targetInfoY}px`; // Use new Y position
       }
       activeCard.style.transform = `translate(${targetCardX}px, ${targetCardY}px) scale(1)`;
       activeCard.style.zIndex = 1001;
@@ -514,11 +615,18 @@
       updatePositions();
     }
     
-    // --- Event Listeners ---
     container.addEventListener('click', (e) => {
       const clickedCard = e.target.closest('.orbit-product-card');
-      // MODIFICATION: Check !hasDragged to differentiate a click from a drag.
-      if (clickedCard && !clickedCard.classList.contains('is-unclickable') && !hasDragged && !isExpanded) {
+      if (!clickedCard) return; // Exit if the click wasn't on a card
+
+      // If a drag just finished, prevent the default link navigation and do nothing else.
+      if (hasDragged) {
+        e.preventDefault();
+        return;
+      }
+
+      // Otherwise, if it was a simple click, run the expand logic.
+      if (!clickedCard.classList.contains('is-unclickable') && !isExpanded) {
         e.preventDefault();
         openExpandedView(clickedCard);
       }
@@ -537,11 +645,19 @@
             updateDimensions();
             closeExpandedView();
             updatePositions();
+            alignGlassBox();
         }, 150);
     };
     
     const startDrag = (e) => {
-      if (isExpanded) return;
+      // Prevent drag from starting if the view is expanded or if the click is on the info box
+      if (isExpanded || e.target.closest('.expanded-view__info')) return;
+
+      // If the click is on a product card link, prevent it from navigating
+      if (e.target.closest('.orbit-product-card')) {
+        e.preventDefault();
+      }
+
       isDragging = true;
       hasDragged = false;
       startX = e.pageX || e.touches[0].pageX;
