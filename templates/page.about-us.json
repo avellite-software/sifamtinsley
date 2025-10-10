@@ -22,7 +22,7 @@
       "name": "Presenter Banner",
       "settings": {
         "title": "About Us",
-        "description": "",
+        "description": "<p> </p>",
         "height": "medium",
         "background_type": "color",
         "background_color": "#ffffff",
