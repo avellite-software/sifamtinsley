@@ -21,17 +21,41 @@
       "type": "presenter-banner",
       "name": "Presenter Banner",
       "settings": {
-        "title": "",
-        "description": "",
+        "title": "About Us",
+        "description": "<p> </p>",
         "height": "medium",
         "background_type": "color",
         "background_color": "#ffffff",
         "overlay_opacity": 50
       }
+    },
+    "rich_text_eqtk9D": {
+      "type": "rich-text",
+      "blocks": {
+        "text_rVRkjp": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "text_rVRkjp"
+      ],
+      "name": "t:sections.rich-text.presets.name",
+      "settings": {
+        "desktop_content_position": "left",
+        "content_alignment": "left",
+        "color_scheme": "",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
     }
   },
   "order": [
     "main",
-    "presenter_banner_yJfT3j"
+    "presenter_banner_yJfT3j",
+    "rich_text_eqtk9D"
   ]
 }
