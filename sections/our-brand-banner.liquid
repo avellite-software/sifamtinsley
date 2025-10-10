@@ -1,0 +1,161 @@
+{% comment %}
+  Section: Our Brands
+  - A simple two-column section to display linked brand logos.
+{% endcomment %}
+
+{%- style -%}
+  .our-brands__{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .our-brands__title {
+    margin: 0 0 2rem;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .our-brands__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .brand-item__link {
+    display: block;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+  }
+  .brand-item__link:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .brand-item__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Prevents logos from stretching */
+    max-height: 120px; /* Adjust as needed */
+  }
+
+  @media screen and (max-width: 768px) {
+    .our-brands__grid {
+      grid-template-columns: 1fr; /* Stack on mobile */
+    }
+  }
+{%- endstyle -%}
+
+<div class="our-brands__{{ section.id }}">
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <h2 class="our-brands__title">{{ section.settings.title | escape }}</h2>
+    {%- endif -%}
+
+    <div class="our-brands__grid">
+      {%- if section.settings.image_1 != blank -%}
+        <div class="our-brands__grid-item">
+          <a href="{{ section.settings.link_1 | default: '#' }}" class="brand-item__link">
+            {{
+              section.settings.image_1
+              | image_url: width: 500
+              | image_tag: loading: 'lazy', class: 'brand-item__image'
+            }}
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.image_2 != blank -%}
+        <div class="our-brands__grid-item">
+          <a href="{{ section.settings.link_2 | default: '#' }}" class="brand-item__link">
+            {{
+              section.settings.image_2
+              | image_url: width: 500
+              | image_tag: loading: 'lazy', class: 'brand-item__image'
+            }}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Our Brands",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Our Brands"
+    },
+    {
+      "type": "header",
+      "content": "Brand 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Brand 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Brands"
+    }
+  ]
+}
+{% endschema %}
