@@ -1,0 +1,201 @@
+{% comment %}
+  Section: Presenter Banner
+  - A universal banner section with dynamic title/description fallbacks.
+{% endcomment %}
+
+{%- style -%}
+  .presenter-section-{{ section.id }} {
+    display: flex;
+    align-items: center; /* This vertically aligns the content */
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Height Options */
+  .presenter-section--small { min-height: 200px; }
+  .presenter-section--medium { min-height: 300px; }
+  .presenter-section--large { min-height: 400px; }
+
+  /* Background Image Overlay */
+  .presenter-section--image-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    z-index: 1;
+  }
+
+  .presenter-section__content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .presenter-section__content {
+    text-align: left;
+    color: #fff;
+  }
+
+  .presenter-section__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  .presenter-section__description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 60ch; /* Limits the width for better readability */
+  }
+  .presenter-section__description p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .presenter-section__title {
+      font-size: 2rem;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign background_type = section.settings.background_type
+  assign bg_color = section.settings.background_color
+  assign bg_image = section.settings.background_image
+
+  assign section_classes = 'presenter-section presenter-section--' | append: section.settings.height
+  if background_type == 'image' and bg_image != blank
+    assign section_classes = section_classes | append: ' presenter-section--image-bg'
+  endif
+
+  assign presenter_title = section.settings.title
+  if presenter_title == blank
+    if product.title != blank
+      assign presenter_title = product.title
+    elsif collection.title != blank
+      assign presenter_title = collection.title
+    elsif page.title != blank
+      assign presenter_title = page.title
+    else
+      assign presenter_title = 'Welcome'
+    endif
+  endif
+
+  assign presenter_description = section.settings.description
+  if presenter_description == blank and page_description != blank
+    assign presenter_description = '<p>' | append: page_description | append: '</p>'
+  endif
+-%}
+
+<div
+  id="presenter-{{ section.id }}"
+  class="{{ section_classes }}"
+  style="
+    {% if background_type == 'image' and bg_image != blank %}
+      background-image: url('{{ bg_image | image_url: width: 1920 }}');
+    {% else %}
+      background-color: {{ bg_color }};
+    {% endif %}
+  "
+>
+  <div class="presenter-section__content-wrapper">
+    <div class="presenter-section__content">
+      {%- if presenter_title != blank -%}
+        <h1 class="presenter-section__title">{{ presenter_title }}</h1>
+      {%- endif -%}
+
+      {%- if presenter_description != blank -%}
+        <div class="presenter-section__description rte">
+          {{ presenter_description }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Presenter Banner",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "info": "Leave blank to use the current page's title (e.g., Product name, Collection name)."
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "info": "Leave blank to use the current page's SEO description."
+    },
+    {
+      "type": "header",
+      "content": "Layout & Style"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Section height",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background type",
+      "options": [
+        { "value": "color", "label": "Color" },
+        { "value": "image", "label": "Image" }
+      ],
+      "default": "color"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 90,
+      "step": 10,
+      "unit": "%",
+      "label": "Image overlay opacity",
+      "info": "Increases contrast for text readability on images.",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "Presenter Banner"
+    }
+  ]
+}
+{% endschema %}
