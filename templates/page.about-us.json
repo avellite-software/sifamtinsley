@@ -11,13 +11,27 @@
   "sections": {
     "main": {
       "type": "main-page",
+      "disabled": true,
       "settings": {
         "padding_top": 28,
         "padding_bottom": 28
       }
+    },
+    "presenter_banner_yJfT3j": {
+      "type": "presenter-banner",
+      "name": "Presenter Banner",
+      "settings": {
+        "title": "",
+        "description": "",
+        "height": "medium",
+        "background_type": "color",
+        "background_color": "#1c1c1c",
+        "overlay_opacity": 50
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "presenter_banner_yJfT3j"
   ]
 }
