@@ -55,7 +55,7 @@
 
   .presenter-section__content {
     text-align: left;
-    color: #000000ff;
+    color: {{ section.settings.text_color }};
   }
 
   .presenter-section__title {
@@ -187,6 +187,12 @@
       "id": "background_color",
       "label": "Background color",
       "default": "#1c1c1c"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
     },
     {
       "type": "image_picker",
