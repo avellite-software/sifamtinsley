@@ -21,7 +21,7 @@
       "type": "presenter-banner",
       "name": "Presenter Banner",
       "settings": {
-        "title": "",
+        "title": "About Us",
         "description": "",
         "height": "medium",
         "background_type": "color",
