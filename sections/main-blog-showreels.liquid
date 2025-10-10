@@ -52,10 +52,6 @@
 </style>
 
 <div class="blog-page-section page-width">
-  <div class="blog-page-header">
-    <h1 class="blog-page-title">{{ blog.title | escape }}</h1>
-  </div>
-
   {%- paginate blog.articles by section.settings.posts_per_page -%}
     <div class="blog-post-grid">
       {%- for article in blog.articles -%}
