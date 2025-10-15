@@ -29,10 +29,51 @@
         "text_color": "#121212",
         "overlay_opacity": 50
       }
+    },
+    "image_with_text_3FnLEw": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_pxXqaY": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>Tinsley Precision Instrumentation</strong>",
+            "heading_size": "h1"
+          }
+        },
+        "text_DtWjJ3": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>Precision Measurement Equipment</strong></p><p>With a wide range of products ranging from transformer testers to submarine cable equipment, Tinsley is sure to have what you're looking for. If you have a special requirement, please get in touch with us.<br/><br/></p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "heading_pxXqaY",
+        "text_DtWjJ3"
+      ],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "image": "shopify://shop_images/tinsley-215x81.jpg",
+        "image_fit": "contain",
+        "height": "adapt",
+        "desktop_image_width": "small",
+        "layout": "text_first",
+        "image_behavior": "none",
+        "content_layout": "no-overlap",
+        "desktop_content_position": "top",
+        "desktop_content_alignment": "left",
+        "mobile_content_alignment": "left",
+        "section_color_scheme": "",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
     "main",
-    "presenter_banner_99zLNR"
+    "presenter_banner_99zLNR",
+    "image_with_text_3FnLEw"
   ]
 }
