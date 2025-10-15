@@ -69,11 +69,35 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "rich_text_HBftHN": {
+      "type": "rich-text",
+      "blocks": {
+        "text_PG8yB8": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>Network of International Agents</strong><br/>Tinsley has an agent or agents in countries all over the world. So whether you live in Macedonia or Mexico, Turkey or Taiwan, there'll always be an agent close by who can help you with your requirement.</p><p><strong>Pioneering Work at Tinsley</strong><br/>There have been many major developments at Tinsley throughout the last century - many of our products are historically significant.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "text_PG8yB8"
+      ],
+      "name": "t:sections.rich-text.presets.name",
+      "settings": {
+        "desktop_content_position": "left",
+        "content_alignment": "left",
+        "color_scheme": "",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
     }
   },
   "order": [
     "main",
     "presenter_banner_99zLNR",
-    "image_with_text_3FnLEw"
+    "image_with_text_3FnLEw",
+    "rich_text_HBftHN"
   ]
 }
