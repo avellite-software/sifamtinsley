@@ -22,8 +22,8 @@
       "name": "Presenter Banner",
       "settings": {
         "title": "",
-        "description": "",
-        "height": "medium",
+        "description": "<p> </p>",
+        "height": "small",
         "background_type": "color",
         "background_color": "#f5f5f5",
         "text_color": "#121212",
