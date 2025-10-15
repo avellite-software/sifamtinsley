@@ -23,7 +23,7 @@
       "settings": {
         "title": "About Us",
         "description": "<p> </p>",
-        "height": "medium",
+        "height": "small",
         "background_type": "color",
         "background_color": "#ffffff",
         "text_color": "#ffffff",
