@@ -55,6 +55,7 @@
       "name": "t:sections.image-with-text.presets.name",
       "settings": {
         "image": "shopify://shop_images/sifam-248x75.jpg",
+        "image_fit": "cover",
         "height": "adapt",
         "desktop_image_width": "medium",
         "layout": "text_first",
@@ -75,7 +76,7 @@
         "text_jKziif": {
           "type": "text",
           "settings": {
-            "text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
+            "text": "<h3><strong>Control Knobs?</strong></h3><p><a href=\"http://www.sifam.co.uk/\" target=\"_blank\">Sifam.co.uk</a> offers what is probably the world's most extensive range of <a href=\"http://www.sifam.co.uk/\" target=\"_blank\">Control Knobs</a> from one manufacturer. Sifam.co.uk is owned by Devlin.</p>"
           }
         }
       },
@@ -84,8 +85,8 @@
       ],
       "name": "t:sections.rich-text.presets.name",
       "settings": {
-        "desktop_content_position": "center",
-        "content_alignment": "center",
+        "desktop_content_position": "left",
+        "content_alignment": "left",
         "color_scheme": "",
         "full_width": true,
         "padding_top": 40,
