@@ -11,10 +11,24 @@
   "sections": {
     "banner": {
       "type": "main-collection-banner",
+      "disabled": true,
       "settings": {
         "show_collection_description": true,
         "show_collection_image": false,
         "color_scheme": "scheme-1"
+      }
+    },
+    "presenter_banner_NT4KNq": {
+      "type": "presenter-banner",
+      "name": "Presenter Banner",
+      "settings": {
+        "title": "",
+        "description": "",
+        "height": "small",
+        "background_type": "color",
+        "background_color": "#f5f5f5",
+        "text_color": "#FFFFFF",
+        "overlay_opacity": 50
       }
     },
     "product-grid": {
@@ -33,6 +47,7 @@
   },
   "order": [
     "banner",
+    "presenter_banner_NT4KNq",
     "product-grid"
   ]
 }
