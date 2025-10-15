@@ -58,7 +58,7 @@
       "name": "Simple Image Banner",
       "settings": {
         "image": "shopify://shop_images/newsletter-small-banner-1024x187.jpg",
-        "link": "",
+        "link": "shopify://pages/newsletter-sign-up",
         "padding_top": 36,
         "padding_bottom": 36
       }
