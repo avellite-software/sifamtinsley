@@ -29,10 +29,49 @@
         "text_color": "#121212",
         "overlay_opacity": 50
       }
+    },
+    "image_with_text_7EwP7U": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_pN3gzM": {
+          "type": "heading",
+          "settings": {
+            "heading": "Sifam Meters",
+            "heading_size": "h1"
+          }
+        },
+        "text_icP8JB": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "heading_pN3gzM",
+        "text_icP8JB"
+      ],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "height": "adapt",
+        "desktop_image_width": "medium",
+        "layout": "image_first",
+        "image_behavior": "none",
+        "content_layout": "no-overlap",
+        "desktop_content_position": "top",
+        "desktop_content_alignment": "left",
+        "mobile_content_alignment": "left",
+        "section_color_scheme": "",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
     "main",
-    "presenter_banner_99zLNR"
+    "presenter_banner_99zLNR",
+    "image_with_text_7EwP7U"
   ]
 }
