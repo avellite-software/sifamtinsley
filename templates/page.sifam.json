@@ -36,14 +36,14 @@
         "heading_pN3gzM": {
           "type": "heading",
           "settings": {
-            "heading": "Sifam Meters",
+            "heading": "<strong>Sifam Meters</strong>",
             "heading_size": "h1"
           }
         },
         "text_icP8JB": {
           "type": "text",
           "settings": {
-            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
+            "text": "<p><strong>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</strong></p>",
             "text_style": "body"
           }
         }
