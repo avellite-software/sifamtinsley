@@ -22,17 +22,96 @@
       "name": "Presenter Banner",
       "settings": {
         "title": "",
-        "description": "",
-        "height": "medium",
+        "description": "<p> </p>",
+        "height": "small",
         "background_type": "color",
         "background_color": "#f5f5f5",
         "text_color": "#121212",
         "overlay_opacity": 50
       }
+    },
+    "image_with_text_3FnLEw": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_pxXqaY": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>Tinsley Precision Instrumentation</strong>",
+            "heading_size": "h1"
+          }
+        },
+        "text_DtWjJ3": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>Precision Measurement Equipment</strong></p><p>With a wide range of products ranging from transformer testers to submarine cable equipment, Tinsley is sure to have what you're looking for. If you have a special requirement, please get in touch with us.<br/><br/></p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "heading_pxXqaY",
+        "text_DtWjJ3"
+      ],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "image": "shopify://shop_images/tinsley-215x81.jpg",
+        "image_fit": "contain",
+        "height": "adapt",
+        "desktop_image_width": "small",
+        "layout": "text_first",
+        "image_behavior": "none",
+        "content_layout": "no-overlap",
+        "desktop_content_position": "top",
+        "desktop_content_alignment": "left",
+        "mobile_content_alignment": "left",
+        "section_color_scheme": "",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "rich_text_HBftHN": {
+      "type": "rich-text",
+      "blocks": {
+        "text_PG8yB8": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>Network of International Agents</strong><br/></p><p>Tinsley has an agent or agents in countries all over the world. So whether you live in Macedonia or Mexico, Turkey or Taiwan, there'll always be an agent close by who can help you with your requirement.</p><p></p><p><strong>Pioneering Work at Tinsley</strong><br/></p><p>There have been many major developments at Tinsley throughout the last century - many of our products are historically significant.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "text_PG8yB8"
+      ],
+      "name": "t:sections.rich-text.presets.name",
+      "settings": {
+        "desktop_content_position": "left",
+        "content_alignment": "left",
+        "color_scheme": "",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "sifam_tinsley_banner_dFKPyL": {
+      "type": "sifam-tinsley-banner",
+      "name": "Sifam Tinsley Banner",
+      "settings": {
+        "title": "Our Partners",
+        "image_1": "shopify://shop_images/tinsley-215x81.jpg",
+        "link_1": "https://tinsley.co.uk/",
+        "image_2": "shopify://shop_images/sifam-248x75.jpg",
+        "link_2": "http://www.sifam.com/",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
     "main",
-    "presenter_banner_99zLNR"
+    "presenter_banner_99zLNR",
+    "image_with_text_3FnLEw",
+    "rich_text_HBftHN",
+    "sifam_tinsley_banner_dFKPyL"
   ]
 }
