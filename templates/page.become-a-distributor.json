@@ -120,6 +120,7 @@
         "column_7j6kMm",
         "column_7whDWG"
       ],
+      "disabled": true,
       "name": "t:sections.multicolumn.presets.name",
       "settings": {
         "title": "",
@@ -160,9 +161,9 @@
   "order": [
     "main",
     "presenter_banner_mjRMHY",
-    "rich_text_jxrHce",
     "simple_image_banner_eaNjtD",
-    "multicolumn_BVkcrR",
-    "distributor_form_f7E6mj"
+    "rich_text_jxrHce",
+    "distributor_form_f7E6mj",
+    "multicolumn_BVkcrR"
   ]
 }
