@@ -139,6 +139,22 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "distributor_form_f7E6mj": {
+      "type": "distributor-form",
+      "name": "Custom Form",
+      "settings": {
+        "heading": "Contact Us",
+        "description": "<p>Use this form to get in touch with our team.</p>",
+        "name_label": "Name",
+        "email_label": "Email Address",
+        "phone_label": "Phone Number",
+        "company_label": "Company Name",
+        "terms_label": "I agree to the terms of use.",
+        "button_label": "Send Message",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
@@ -146,6 +162,7 @@
     "presenter_banner_mjRMHY",
     "rich_text_jxrHce",
     "simple_image_banner_eaNjtD",
-    "multicolumn_BVkcrR"
+    "multicolumn_BVkcrR",
+    "distributor_form_f7E6mj"
   ]
 }
