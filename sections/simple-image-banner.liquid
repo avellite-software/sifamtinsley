@@ -27,7 +27,6 @@
 {%- if section.settings.image != blank -%}
   <div
     class="simple-banner__{{ section.id }} page-width"
-    style="border-radius: {{ section.settings.border_radius }}"
   >
     {%- if section.settings.link != blank -%}
       <a href="{{ section.settings.link }}" class="simple-banner__link">
@@ -41,7 +40,15 @@
     {{
       image
       | image_url: width: 2000
-      | image_tag: loading: 'lazy', class: 'simple-banner__image', height: image_height, sizes: '100vw', widths: widths
+      | image_tag:
+        loading: 'lazy',
+        class: 'simple-banner__image',
+        height: image_height,
+        sizes: '100vw',
+        widths: widths,
+        style: 'border-radius: '
+      | append: section.settings.border_radius
+      | append: 'px;'
     }}
 
     {%- if section.settings.link != blank -%}
