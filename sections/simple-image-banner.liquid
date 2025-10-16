@@ -25,7 +25,10 @@
 {%- endstyle -%}
 
 {%- if section.settings.image != blank -%}
-  <div class="simple-banner__{{ section.id }} page-width">
+  <div
+    class="simple-banner__{{ section.id }} page-width"
+    style="border-radius: {{ section.settings.border_radius }}"
+  >
     {%- if section.settings.link != blank -%}
       <a href="{{ section.settings.link }}" class="simple-banner__link">
     {%- endif -%}
@@ -53,6 +56,16 @@
   "tag": "section",
   "class": "section",
   "settings": [
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 12
+    },
     {
       "type": "image_picker",
       "id": "image",
