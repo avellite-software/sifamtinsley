@@ -9,12 +9,34 @@
  */
 {
   "sections": {
+    "presenter_banner_nngAiG": {
+      "type": "presenter-banner",
+      "name": "Presenter Banner",
+      "settings": {
+        "title": "Showreels",
+        "description": "",
+        "height": "small",
+        "background_type": "color",
+        "background_color": "#F5f5f5",
+        "text_color": "#000000",
+        "image_fit": "cover",
+        "overlay_opacity": 50
+      }
+    },
     "main": {
       "type": "main-blog-showreels",
-      "settings": {}
+      "settings": {
+        "posts_per_page": 6,
+        "show_image": true,
+        "show_date": true,
+        "show_author": false,
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
+    "presenter_banner_nngAiG",
     "main"
   ]
 }
