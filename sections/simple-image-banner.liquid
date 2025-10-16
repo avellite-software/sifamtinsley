@@ -36,6 +36,7 @@
       assign image = section.settings.image
       assign image_height = image.width | divided_by: image.aspect_ratio
       assign widths = '375, 550, 750, 1100, 1500, 1780, 2000'
+      assign image_style = 'border-radius: ' | append: section.settings.border_radius | append: 'px;'
     -%}
     {{
       image
@@ -46,9 +47,7 @@
         height: image_height,
         sizes: '100vw',
         widths: widths,
-        style: 'border-radius: '
-      | append: section.settings.border_radius
-      | append: 'px;'
+        style: image_style
     }}
 
     {%- if section.settings.link != blank -%}
