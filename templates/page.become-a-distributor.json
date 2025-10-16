@@ -31,6 +31,16 @@
         "overlay_opacity": 90
       }
     },
+    "simple_image_banner_eaNjtD": {
+      "type": "simple-image-banner",
+      "name": "Simple Image Banner",
+      "settings": {
+        "image": "shopify://shop_images/banner-distributor.jpg",
+        "link": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
     "rich_text_jxrHce": {
       "type": "rich-text",
       "blocks": {
@@ -71,12 +81,19 @@
         "padding_bottom": 52
       }
     },
-    "simple_image_banner_eaNjtD": {
-      "type": "simple-image-banner",
-      "name": "Simple Image Banner",
+    "distributor_form_f7E6mj": {
+      "type": "distributor-form",
+      "name": "Custom Form",
       "settings": {
-        "image": "shopify://shop_images/banner-distributor.jpg",
-        "link": "",
+        "heading": "Interested in becoming our distributor and joining a growing network?",
+        "description": "<h5></h5><h5>Fill out our form with your details and one of our dedicated sales team will get back to you. Alternatively call us on <strong>01376 335271</strong> to discuss how you could become our next distributor.</h5><p><strong>Our location:<br/></strong>Sifam Tinsley Instrumentation Ltd<br/>1 Warner Drive, Springwood Industrial Estate,<br/>Braintree, Essex CM7 2YW</p><h5> </h5><p><strong>Our Braintree Office Business Hours:</strong><br/>Monday to Thursday 8am – 5pm<br/>Friday 8am – 12.30pm</p>",
+        "name_label": "Name*",
+        "email_label": "Email Address*",
+        "phone_label": "Phone Number*",
+        "company_label": "Company Name*",
+        "terms_label": "By checking this box, you confirm that you have read and are agreeing to our terms of use regarding the storage of the data submitted through this form and that you'd like to be added to our database to receive emails and special offers and news from us.",
+        "button_label": "Send",
+        "button_font_size": 16,
         "padding_top": 36,
         "padding_bottom": 36
       }
@@ -137,22 +154,6 @@
         "color_scheme": "",
         "columns_mobile": "1",
         "swipe_on_mobile": false,
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
-    },
-    "distributor_form_f7E6mj": {
-      "type": "distributor-form",
-      "name": "Custom Form",
-      "settings": {
-        "heading": "Interested in becoming our distributor and joining a growing network?",
-        "description": "<h5></h5><h5>Fill out our form with your details and one of our dedicated sales team will get back to you. Alternatively call us on <strong>01376 335271</strong> to discuss how you could become our next distributor.</h5><p><strong>Our location:<br/></strong>Sifam Tinsley Instrumentation Ltd<br/>1 Warner Drive, Springwood Industrial Estate,<br/>Braintree, Essex CM7 2YW</p><h5> </h5><p><strong>Our Braintree Office Business Hours:</strong><br/>Monday to Thursday 8am – 5pm<br/>Friday 8am – 12.30pm</p>",
-        "name_label": "Name*",
-        "email_label": "Email Address*",
-        "phone_label": "Phone Number*",
-        "company_label": "Company Name*",
-        "terms_label": "By checking this box, you confirm that you have read and are agreeing to our terms of use regarding the storage of the data submitted through this form and that you'd like to be added to our database to receive emails and special offers and news from us.",
-        "button_label": "Send Message",
         "padding_top": 36,
         "padding_bottom": 36
       }
