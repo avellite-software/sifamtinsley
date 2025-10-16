@@ -118,6 +118,8 @@
   style="
     {% if background_type == 'image' and bg_image != blank %}
       background-image: url('{{ bg_image | image_url: width: 1920 }}');
+      background-size: {{ section.settings.image_fit }};
+      background-repeat: no-repeat;
     {% else %}
       background-color: {{ bg_color }};
     {% endif %}
@@ -201,6 +203,27 @@
       "type": "image_picker",
       "id": "background_image",
       "label": "Background image"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Background image fit",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover"
+        },
+        {
+          "value": "contain",
+          "label": "Contain"
+        },
+        {
+          "value": "auto",
+          "label": "Original size (Auto)"
+        }
+      ],
+      "default": "cover",
+      "info": "'Cover' fills the space (may crop). 'Contain' shows the full image (may leave empty space)."
     },
     {
       "type": "range",
