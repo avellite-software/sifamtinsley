@@ -27,7 +27,8 @@
         "background_type": "color",
         "background_color": "#f5f5f5",
         "text_color": "#121212",
-        "overlay_opacity": 50
+        "background_image": "shopify://shop_images/banner-distributor.jpg",
+        "overlay_opacity": 40
       }
     },
     "rich_text_jxrHce": {
