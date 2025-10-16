@@ -24,25 +24,42 @@
         "title": "",
         "description": "",
         "height": "small",
-        "background_type": "image",
-        "background_color": "rgba(0,0,0,0)",
+        "background_type": "color",
+        "background_color": "#f5f5f5",
         "text_color": "#121212",
-        "background_image": "shopify://shop_images/banner-distributor.jpg",
+        "image_fit": "cover",
         "overlay_opacity": 90
       }
     },
     "rich_text_jxrHce": {
       "type": "rich-text",
       "blocks": {
+        "heading_VPaCNp": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>Join our network</strong>",
+            "heading_size": "h2"
+          }
+        },
         "text_FMmGbz": {
           "type": "text",
+          "name": "Description",
           "settings": {
-            "text": "<h1><strong>Join our network</strong></h1><p><strong>As an established brand name for over 75 years; Sifam Tinsley Instrumentation has an unrivalled pedigree in the industry and we are looking to expand our network.</strong></p><p><strong>With our dedicated research and development facility based in the UK we can ensure that the latest technology is utilised in our electronic products, along with our traditional analogue range which continues to perform through the test of time, short lead times, quality & reliability are all part of the Sifam Tinsley ethos, backed-up with customer service, engineering and technical support our customers expect from one of the leading brands in the industry.</strong></p>"
+            "text": "<h1></h1><p><strong>As an established brand name for over 75 years; Sifam Tinsley Instrumentation has an unrivalled pedigree in the industry and we are looking to expand our network.</strong></p><p><strong>With our dedicated research and development facility based in the UK we can ensure that the latest technology is utilised in our electronic products, along with our traditional analogue range which continues to perform through the test of time, short lead times, quality & reliability are all part of the Sifam Tinsley ethos, backed-up with customer service, engineering and technical support our customers expect from one of the leading brands in the industry.</strong></p>"
+          }
+        },
+        "text_eHyWUU": {
+          "type": "text",
+          "name": "Bullet Points",
+          "settings": {
+            "text": "<h3><strong>Benefits of becoming our distributor include:</strong></h3><ul><li><strong>75+ years industry experience and knowledge</strong></li><li><strong>On-demand access to our complete product range</strong></li><li><strong>Manufactured in the UK with fast turnaround</strong></li><li><strong>Global distribution</strong></li><li><strong>Value added service</strong></li><li><strong>Marketing support</strong></li><li><strong>Superior technical expertise & support</strong></li></ul>"
           }
         }
       },
       "block_order": [
-        "text_FMmGbz"
+        "heading_VPaCNp",
+        "text_FMmGbz",
+        "text_eHyWUU"
       ],
       "name": "t:sections.rich-text.presets.name",
       "settings": {
