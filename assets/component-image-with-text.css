@@ -113,6 +113,7 @@
 }
 
 .image-with-text .image-with-text__media-item>* {
+  border: none;
   border-radius: var(--media-radius);
   overflow: hidden;
   box-shadow: var(--media-shadow-horizontal-offset) var(--media-shadow-vertical-offset) var(--media-shadow-blur-radius) rgba(var(--color-shadow), var(--media-shadow-opacity));
