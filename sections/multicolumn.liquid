@@ -9,8 +9,7 @@
 
   /* */
   .section-{{ section.id }} .multicolumn-card {
-    background-color: {{ section.settings.card_background_color }};
-    border-radius: {{ section.settings.border_radius }}px;
+
     overflow: hidden; /* Ensures content respects the border radius */
   }
 
@@ -92,7 +91,13 @@
               style="--animation-order: {{ forloop.index }};"
             {% endif %}
           >
-            <div class="multicolumn-card content-container">
+            <div
+              class="multicolumn-card content-container"
+              style="
+                border-radius: {{ section.settings.border_radius }}px;
+                background-color: {{ section.settings.card_background_color }};
+              "
+            >
               {%- if block.settings.image != blank -%}
                 {% if section.settings.image_ratio == 'adapt' or section.settings.image_ratio == 'circle' %}
                   {% assign spaced_image = true %}
