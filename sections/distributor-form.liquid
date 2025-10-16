@@ -1,6 +1,6 @@
 {% comment %}
   Section: Custom Form
-  - A customizable form with a placeholder for custom submission logic.
+  - V2: Restructured into a two-column layout with a setting for button font size.
 {% endcomment %}
 
 {%- style -%}
@@ -9,9 +9,15 @@
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
+  .custom-form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Creates a 2-column layout */
+    gap: 4rem;
+    align-items: start; /* Aligns items to the top of their columns */
+  }
+
   .custom-form__header {
-    text-align: center;
-    margin-bottom: 2.5rem;
+    text-align: left; /* Aligns text to the left */
   }
   .custom-form__heading {
     font-size: 2.5rem;
@@ -21,8 +27,7 @@
   .custom-form__description {
     font-size: 1.1rem;
     line-height: 1.6;
-    max-width: 60ch;
-    margin: 0 auto;
+    margin: 0;
   }
   .custom-form__description p {
     margin: 0;
@@ -73,16 +78,16 @@
   }
 
   .custom-form__button-wrapper {
-    text-align: center;
+    text-align: right;
     margin-top: 1rem;
   }
   .custom-form__submit {
     background-color: #c1151b;
     color: #fff;
     border: none;
-    border-radius: 12px; /* As requested */
+    border-radius: 12px;
     padding: 15px 35px;
-    font-size: 1rem;
+    font-size: {{ section.settings.button_font_size }}px; /* New setting */
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -95,75 +100,86 @@
     cursor: not-allowed;
   }
 
-  /* Status Messages */
   .form-status-message {
     padding: 1rem;
     border-radius: 4px;
     margin-top: 1rem;
     text-align: center;
   }
-  .form-status--success {
-    background-color: #dff0d8;
-    color: #3c763d;
-    border: 1px solid #d6e9c6;
-  }
-  .form-status--error {
-    background-color: #f2dede;
-    color: #a94442;
-    border: 1px solid #ebccd1;
+  .form-status--success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+  .form-status--error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+
+  @media screen and (max-width: 768px) {
+    .custom-form-layout {
+      grid-template-columns: 1fr; /* Stacks to a single column on mobile */
+      gap: 2.5rem;
+    }
+    .custom-form__header {
+      text-align: center;
+    }
   }
 {%- endstyle -%}
 
-<div class="custom-form-section__{{ section.id }} page-width page-width--narrow">
-  <div class="custom-form__header">
-    {%- if section.settings.heading != blank -%}
-      <h2 class="custom-form__heading">{{ section.settings.heading }}</h2>
-    {%- endif -%}
-    {%- if section.settings.description != blank -%}
-      <div class="custom-form__description rte">{{ section.settings.description }}</div>
-    {%- endif -%}
+<div class="custom-form-section__{{ section.id }} page-width">
+  <div class="custom-form-layout">
+    <div class="custom-form__header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="custom-form__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.description != blank -%}
+        <div class="custom-form__description rte">{{ section.settings.description }}</div>
+      {%- endif -%}
+    </div>
+
+    <form id="CustomForm--{{ section.id }}" class="custom-form">
+      <div class="custom-form__field">
+        <label class="custom-form__label" for="CustomForm-Name-{{ section.id }}">
+          {{- section.settings.name_label -}}
+        </label>
+        <input type="text" class="custom-form__input" id="CustomForm-Name-{{ section.id }}" name="name" required>
+      </div>
+
+      <div class="custom-form__field">
+        <label class="custom-form__label" for="CustomForm-Email-{{ section.id }}">
+          {{- section.settings.email_label -}}
+        </label>
+        <input type="email" class="custom-form__input" id="CustomForm-Email-{{ section.id }}" name="email" required>
+      </div>
+
+      <div class="custom-form__field">
+        <label class="custom-form__label" for="CustomForm-Phone-{{ section.id }}">
+          {{- section.settings.phone_label -}}
+        </label>
+        <input type="tel" class="custom-form__input" id="CustomForm-Phone-{{ section.id }}" name="phone">
+      </div>
+
+      <div class="custom-form__field">
+        <label class="custom-form__label" for="CustomForm-Company-{{ section.id }}">
+          {{- section.settings.company_label -}}
+        </label>
+        <input type="text" class="custom-form__input" id="CustomForm-Company-{{ section.id }}" name="company">
+      </div>
+
+      <div class="custom-form__terms">
+        <input
+          type="checkbox"
+          class="custom-form__checkbox"
+          id="CustomForm-Terms-{{ section.id }}"
+          name="terms"
+          required
+        >
+        <label class="custom-form__terms-label" for="CustomForm-Terms-{{ section.id }}">
+          {{- section.settings.terms_label -}}
+        </label>
+      </div>
+
+      <div class="custom-form__button-wrapper">
+        <button type="submit" class="custom-form__submit">{{ section.settings.button_label }}</button>
+      </div>
+
+      <div class="form-status-message" style="display: none;"></div>
+    </form>
   </div>
-
-  <form id="CustomForm--{{ section.id }}" class="custom-form">
-    <div class="custom-form__field">
-      <label class="custom-form__label" for="CustomForm-Name-{{ section.id }}">{{ section.settings.name_label }}</label>
-      <input type="text" class="custom-form__input" id="CustomForm-Name-{{ section.id }}" name="name" required>
-    </div>
-
-    <div class="custom-form__field">
-      <label class="custom-form__label" for="CustomForm-Email-{{ section.id }}">
-        {{- section.settings.email_label -}}
-      </label>
-      <input type="email" class="custom-form__input" id="CustomForm-Email-{{ section.id }}" name="email" required>
-    </div>
-
-    <div class="custom-form__field">
-      <label class="custom-form__label" for="CustomForm-Phone-{{ section.id }}">
-        {{- section.settings.phone_label -}}
-      </label>
-      <input type="tel" class="custom-form__input" id="CustomForm-Phone-{{ section.id }}" name="phone">
-    </div>
-
-    <div class="custom-form__field">
-      <label class="custom-form__label" for="CustomForm-Company-{{ section.id }}">
-        {{- section.settings.company_label -}}
-      </label>
-      <input type="text" class="custom-form__input" id="CustomForm-Company-{{ section.id }}" name="company">
-    </div>
-
-    <div class="custom-form__terms">
-      <input type="checkbox" class="custom-form__checkbox" id="CustomForm-Terms-{{ section.id }}" name="terms" required>
-      <label class="custom-form__terms-label" for="CustomForm-Terms-{{ section.id }}">
-        {{- section.settings.terms_label -}}
-      </label>
-    </div>
-
-    <div class="custom-form__button-wrapper">
-      <button type="submit" class="custom-form__submit">{{ section.settings.button_label }}</button>
-    </div>
-
-    <div class="form-status-message" style="display: none;"></div>
-  </form>
 </div>
 
 <script>
@@ -172,33 +188,24 @@
     const statusMessage = form.querySelector('.form-status-message');
 
     form.addEventListener('submit', (event) => {
-      // Prevent the default browser form submission
       event.preventDefault();
 
       const submitButton = form.querySelector('button[type="submit"]');
-      submitButton.disabled = true; // Disable button to prevent multiple clicks
+      submitButton.disabled = true;
       submitButton.textContent = 'Sending...';
 
       // --- START: CUSTOM SUBMISSION LOGIC ---
-      // This is where you'll add your code to send the form data.
-      // For example, you might use the fetch() API to send it to a
-      // third-party service, a serverless function, or another endpoint.
-
-      // 1. Get form data
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
-      console.log('Form data:', data); // For debugging
+      console.log('Form data:', data);
 
-      // 2. Example: Mock API call with a timeout
-      // Replace this with your actual fetch() request.
       setTimeout(() => {
-        // This is a MOCK response. Change `isSuccess` to false to test the error state.
         const isSuccess = true;
 
         if (isSuccess) {
           statusMessage.textContent = 'Thank you! Your message has been sent.';
           statusMessage.className = 'form-status-message form-status--success';
-          form.reset(); // Clear the form fields
+          form.reset();
         } else {
           statusMessage.textContent = 'Sorry, there was an error. Please try again.';
           statusMessage.className = 'form-status-message form-status--error';
@@ -207,8 +214,7 @@
         statusMessage.style.display = 'block';
         submitButton.disabled = false;
         submitButton.textContent = '{{ section.settings.button_label | escape }}';
-      }, 1500); // Mock 1.5 second delay
-
+      }, 1500);
       // --- END: CUSTOM SUBMISSION LOGIC ---
     });
   });
@@ -216,7 +222,7 @@
 
 {% schema %}
 {
-  "name": "Custom Form",
+  "name": "Distributor Form",
   "tag": "section",
   "class": "section",
   "settings": [
@@ -240,41 +246,30 @@
       "type": "header",
       "content": "Form Field Labels"
     },
+    { "type": "text", "id": "name_label", "label": "Name Label", "default": "Name" },
+    { "type": "text", "id": "email_label", "label": "Email Label", "default": "Email Address" },
+    { "type": "text", "id": "phone_label", "label": "Phone Label", "default": "Phone Number" },
+    { "type": "text", "id": "company_label", "label": "Company Name Label", "default": "Company Name" },
+    { "type": "text", "id": "terms_label", "label": "Terms Checkbox Label", "default": "I agree to the terms of use." },
     {
-      "type": "text",
-      "id": "name_label",
-      "label": "Name Label",
-      "default": "Name"
-    },
-    {
-      "type": "text",
-      "id": "email_label",
-      "label": "Email Label",
-      "default": "Email Address"
-    },
-    {
-      "type": "text",
-      "id": "phone_label",
-      "label": "Phone Label",
-      "default": "Phone Number"
-    },
-    {
-      "type": "text",
-      "id": "company_label",
-      "label": "Company Name Label",
-      "default": "Company Name"
-    },
-    {
-      "type": "text",
-      "id": "terms_label",
-      "label": "Terms Checkbox Label",
-      "default": "I agree to the terms of use."
+      "type": "header",
+      "content": "Button"
     },
     {
       "type": "text",
       "id": "button_label",
       "label": "Button Label",
       "default": "Send Message"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Button Font Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
     },
     {
       "type": "header",
