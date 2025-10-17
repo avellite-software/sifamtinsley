@@ -37,14 +37,14 @@
         "heading_Yaib8y": {
           "type": "heading",
           "settings": {
-            "heading": "Image with text",
+            "heading": "Alan Cutmore",
             "heading_size": "h1"
           }
         },
         "text_4m338X": {
           "type": "text",
           "settings": {
-            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
+            "text": "<h3>Commercial Director</h3><p>Commercial Director/Partner responsible for management activities and overall company strategy working alongside UK group senior management team. Studied at the University of East London gaining a 2.1 BA(Hons) in Business Management as well as a Diploma in Purchasing and Supply from the University of North London. Active member of the Chartered Institute of Purchasing & Supply(MCIPS)Worked in various management roles at FT100/250 listed companies, Laird,GKN,Synthomer. Recently worked at Elektron Technology PLC in a senior management role participating  in board level strategy and acquisition’s. Joined Sifam Tinsley Instrumentation in November 2013.</p>",
             "text_style": "body"
           }
         }
@@ -55,9 +55,10 @@
       ],
       "name": "t:sections.image-with-text.presets.name",
       "settings": {
-        "image_fit": "cover",
-        "height": "adapt",
-        "desktop_image_width": "medium",
+        "image": "shopify://shop_images/alan.jpg",
+        "image_fit": "contain",
+        "height": "small",
+        "desktop_image_width": "small",
         "layout": "image_first",
         "image_behavior": "none",
         "content_layout": "no-overlap",
@@ -76,37 +77,69 @@
         "heading_CGyk8B": {
           "type": "heading",
           "settings": {
-            "heading": "Image with text",
+            "heading": "Mr Robin Staines",
             "heading_size": "h1"
           }
         },
         "text_TV8mmJ": {
           "type": "text",
           "settings": {
-            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
+            "text": "<h3>Managing Director/Partner UK Group- Sifam Tinsley Instrumentation</h3><p>Managing Director and Partner for Sifam Tinsley Instrumentation Limited responsible for the development and growth of Sifam Tinsley Instrumentation working with our strategic partners located in Asian, European and UK facility. Rob studied at Danbury Institute of Management attaining a Diploma and Certificate in Business studies. With over 30 years experience in Senior Manufacturing / Operational roles notably with Crompton Instruments, Invensys Controls, Tyco Electronics and most recently with Elektron Technology PLC as Group Head of Operations. Rob is based at the new UK location in Braintree Essex.</p>",
             "text_style": "body"
-          }
-        },
-        "button_DPfCMt": {
-          "type": "button",
-          "settings": {
-            "button_label": "Button label",
-            "button_link": "",
-            "button_style_secondary": false
           }
         }
       },
       "block_order": [
         "heading_CGyk8B",
-        "text_TV8mmJ",
-        "button_DPfCMt"
+        "text_TV8mmJ"
       ],
       "name": "t:sections.image-with-text.presets.name",
       "settings": {
+        "image": "shopify://shop_images/rob.jpg",
         "image_fit": "cover",
-        "height": "adapt",
-        "desktop_image_width": "medium",
+        "height": "small",
+        "desktop_image_width": "small",
         "layout": "text_first",
+        "image_behavior": "none",
+        "content_layout": "no-overlap",
+        "desktop_content_position": "top",
+        "desktop_content_alignment": "left",
+        "mobile_content_alignment": "left",
+        "section_color_scheme": "",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "image_with_text_BTfbKW": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_qY93fq": {
+          "type": "heading",
+          "settings": {
+            "heading": "Darren Byford",
+            "heading_size": "h1"
+          }
+        },
+        "text_hzct6G": {
+          "type": "text",
+          "settings": {
+            "text": "<h3>Business Development Manager</h3><p>24 Years’ experience in the electrical instrumentation industry and gained an Electronic and communication degree at the University of Anglia Ruskin 2.1 BEng (Hons). Began work at Crompton Instruments in 1991 while at university progressed through the business with various strategic roles to become EMEA product manager. Joined Sifam Tinsley February 2016 as part of the senior management team with the reasonability.</p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "heading_qY93fq",
+        "text_hzct6G"
+      ],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "image": "shopify://shop_images/darren_byford.jpg",
+        "image_fit": "cover",
+        "height": "small",
+        "desktop_image_width": "small",
+        "layout": "image_first",
         "image_behavior": "none",
         "content_layout": "no-overlap",
         "desktop_content_position": "top",
@@ -123,6 +156,7 @@
     "main",
     "presenter_banner_eQ6NQL",
     "image_with_text_pwXYf3",
-    "image_with_text_gGL4RD"
+    "image_with_text_gGL4RD",
+    "image_with_text_BTfbKW"
   ]
 }
