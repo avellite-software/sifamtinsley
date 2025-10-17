@@ -22,11 +22,12 @@
       "name": "Presenter Banner",
       "settings": {
         "title": "",
-        "description": "",
-        "height": "medium",
+        "description": "<p> </p>",
+        "height": "small",
         "background_type": "color",
         "background_color": "#f5f5f5",
-        "text_color": "#FFFFFF",
+        "text_color": "#ffffff",
+        "image_fit": "cover",
         "overlay_opacity": 50
       }
     }
