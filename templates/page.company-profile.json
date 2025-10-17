@@ -26,9 +26,33 @@
         "height": "small",
         "background_type": "color",
         "background_color": "#f5f5f5",
-        "text_color": "#ffffff",
+        "text_color": "#121212",
         "image_fit": "cover",
         "overlay_opacity": 50
+      }
+    },
+    "rich_text_FUcatY": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_Gw9R77": {
+          "type": "heading",
+          "settings": {
+            "heading": "Meet The Team",
+            "heading_size": "h1"
+          }
+        }
+      },
+      "block_order": [
+        "heading_Gw9R77"
+      ],
+      "name": "t:sections.rich-text.presets.name",
+      "settings": {
+        "desktop_content_position": "left",
+        "content_alignment": "left",
+        "color_scheme": "",
+        "full_width": true,
+        "padding_top": 24,
+        "padding_bottom": 24
       }
     },
     "image_with_text_pwXYf3": {
@@ -155,6 +179,7 @@
   "order": [
     "main",
     "presenter_banner_eQ6NQL",
+    "rich_text_FUcatY",
     "image_with_text_pwXYf3",
     "image_with_text_gGL4RD",
     "image_with_text_BTfbKW"
