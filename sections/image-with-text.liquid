@@ -9,8 +9,14 @@
   .image-with-text__media img {
     object-fit: {{ section.settings.image_fit }};
     height: 100%;
+    width: 100%;
     object-position: center;
     border: none;
+  }
+
+  .image-with-text__media {
+    border-radius: {{ section.settings.image_border_radius }}px;
+    overflow: hidden; /* This is crucial to clip the image corners */
   }
 
   @media screen and (min-width: 750px) {
@@ -158,6 +164,16 @@
       ],
       "default": "cover",
       "info": "'Cover' fills the entire space (may crop). 'Contain' shows the full image (may leave empty space)."
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 12
     },
     {
       "type": "select",
