@@ -1,0 +1,273 @@
+{% comment %}
+  Section: Main Downloads Page
+  - Creates an accordion list for all site downloads.
+  - The first item is a specified "Extra Downloads" metaobject.
+  - All other items are collections, with product downloads listed.
+{% endcomment %}
+
+{%- style -%}
+  .downloads-section__{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .downloads-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .downloads-header__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .accordion-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .accordion-item {
+    border-bottom: 1px solid #e5e5e5;
+  }
+  .accordion-item:last-child {
+    border-bottom: none;
+  }
+
+  .accordion-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background-color 0.2s;
+  }
+  .accordion-trigger:hover {
+    background-color: #f1f1f1;
+  }
+  .accordion-trigger__icon {
+    transition: transform 0.3s ease;
+    width: 1.25em;
+    height: 1.25em;
+  }
+  .accordion-trigger.is-active .accordion-trigger__icon {
+    transform: rotate(180deg);
+  }
+
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease;
+    background-color: #fff;
+  }
+  .accordion-content.is-open {
+    padding: 1.5rem;
+    max-height: 2000px; /* Set a large max-height for expansion */
+    overflow-y: auto; /* Add scroll if content is huge */
+  }
+
+  .downloads-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .downloads-file-list li {
+    margin-bottom: 0.75rem;
+  }
+  .downloads-file-list a {
+    text-decoration: none;
+    color: #c1151b;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .downloads-file-list a:hover {
+    text-decoration: underline;
+  }
+  .product-file-item__name {
+    font-weight: 700;
+    color: #333;
+  }
+{%- endstyle -%}
+
+<div class="downloads-section__{{ section.id }} page-width">
+  <div class="downloads-header">
+    {%- if section.settings.heading != blank -%}
+      <h1 class="downloads-header__title">{{ section.settings.heading }}</h1>
+    {%- endif -%}
+  </div>
+
+  <div class="accordion-container">
+    {% comment %} --- 1. Extra Downloads Box --- {% endcomment %}
+    {%- liquid
+      assign extra_downloads_entry = section.settings.extra_downloads_entry
+      if extra_downloads_entry != blank
+        assign extra_files = extra_downloads_entry.extra_files.value
+      endif
+    -%}
+    {%- if extra_files.size > 0 -%}
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span>{{ section.settings.extra_downloads_title }}</span>
+          <span class="accordion-trigger__icon" aria-hidden="true">&darr;</span>
+        </button>
+        <div class="accordion-content">
+          <ul class="downloads-file-list">
+            {%- for file in extra_files -%}
+              <li>
+                <a href="{{ file.url }}" target="_blank">
+                  {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {% comment %} --- 2. Product Category Boxes --- {% endcomment %}
+    {%- for collection in collections -%}
+      {%- if collection.all_products_count > 0 -%}
+        {%- liquid
+          assign has_downloads_in_collection = false
+          for product in collection.products
+            if product.metafields.custom.downloads.value != blank
+              assign has_downloads_in_collection = true
+              break
+            endif
+          endfor
+        -%}
+
+        {%- if has_downloads_in_collection -%}
+          <div class="accordion-item">
+            <button class="accordion-trigger" aria-expanded="false">
+              <span>{{ collection.title }}</span>
+              <span class="accordion-trigger__icon" aria-hidden="true">&darr;</span>
+            </button>
+            <div class="accordion-content">
+              <ul class="downloads-file-list">
+                {%- for product in collection.products -%}
+                  {%- assign downloads_content = product.metafields.custom.downloads.value -%}
+                  {%- if downloads_content != blank -%}
+                    {%- for file in downloads_content -%}
+                      <li>
+                        <span class="product-file-item__name">{{ product.title }} - </span>
+                        <a href="{{ file.url }}" target="_blank">
+                          {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
+                        </a>
+                      </li>
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const accordionTriggers = document.querySelectorAll('.accordion-trigger');
+
+    accordionTriggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const content = trigger.nextElementSibling;
+        const isOpen = trigger.classList.contains('is-active');
+
+        // Optional: Close other open accordions
+        // accordionTriggers.forEach(t => {
+        //   t.classList.remove('is-active');
+        //   t.setAttribute('aria-expanded', 'false');
+        //   t.nextElementSibling.style.maxHeight = null;
+        //   t.nextElementSibling.classList.remove('is-open');
+        // });
+
+        if (isOpen) {
+          trigger.classList.remove('is-active');
+          trigger.setAttribute('aria-expanded', 'false');
+          content.style.maxHeight = null;
+          content.classList.remove('is-open');
+        } else {
+          trigger.classList.add('is-active');
+          trigger.setAttribute('aria-expanded', 'true');
+          content.classList.add('is-open');
+          content.style.maxHeight = content.scrollHeight + 'px';
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Main Downloads Page",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Downloads"
+    },
+    {
+      "type": "header",
+      "content": "Extra Downloads"
+    },
+    {
+      "type": "text",
+      "id": "extra_downloads_title",
+      "label": "First Box Title",
+      "default": "Extra Downloads"
+    },
+    {
+      "type": "metaobject",
+      "id": "extra_downloads_entry",
+      "label": "Extra Downloads Entry",
+      "metaobject_type": "extra_downloads",
+      "info": "Select the metaobject entry that contains your list of extra files."
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Main Downloads Page"
+    }
+  ]
+}
+{% endschema %}
