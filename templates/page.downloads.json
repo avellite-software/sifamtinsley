@@ -23,16 +23,29 @@
       "settings": {
         "title": "",
         "description": "",
-        "height": "medium",
+        "height": "small",
         "background_type": "color",
         "background_color": "#f5f5f5",
         "text_color": "#121212",
+        "image_fit": "cover",
         "overlay_opacity": 50
+      }
+    },
+    "main_downloads_page_teFz73": {
+      "type": "main-downloads-page",
+      "name": "Main Downloads Page",
+      "settings": {
+        "heading": "Downloads",
+        "extra_downloads_title": "Extra Downloads",
+        "extra_downloads_entry": "catalogue",
+        "padding_top": 36,
+        "padding_bottom": 36
       }
     }
   },
   "order": [
     "main",
-    "presenter_banner_99zLNR"
+    "presenter_banner_99zLNR",
+    "main_downloads_page_teFz73"
   ]
 }
