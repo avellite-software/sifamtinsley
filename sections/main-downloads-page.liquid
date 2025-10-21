@@ -65,7 +65,6 @@
   .accordion-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease;
     background-color: #fff;
   }
   .accordion-content.is-open {
@@ -107,34 +106,34 @@
   </div>
 
   <div class="accordion-container">
-    {% comment %} --- 1. Extra Downloads Box --- {% endcomment %}
     {%- liquid
-      assign extra_downloads_entry = section.settings.extra_downloads_entry
-      if extra_downloads_entry != blank
-        assign extra_files = extra_downloads_entry.extra_files.value
+      assign extra_downloads_handle = section.settings.extra_downloads_entry
+      if extra_downloads_handle != blank
+        assign extra_downloads_entry = shop.metaobjects[extra_downloads_handle]
+        if extra_downloads_entry != blank
+          assign extra_files = extra_downloads_entry.extra_files
+        endif
       endif
     -%}
-    {%- if extra_files.size > 0 -%}
-      <div class="accordion-item">
-        <button class="accordion-trigger" aria-expanded="false">
-          <span>{{ section.settings.extra_downloads_title }}</span>
-          <span class="accordion-trigger__icon" aria-hidden="true">&darr;</span>
-        </button>
-        <div class="accordion-content">
-          <ul class="downloads-file-list">
-            {%- for file in extra_files -%}
-              <li>
-                <a href="{{ file.url }}" target="_blank">
-                  {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
-                </a>
-              </li>
-            {%- endfor -%}
-          </ul>
-        </div>
-      </div>
-    {%- endif -%}
 
-    {% comment %} --- 2. Product Category Boxes --- {% endcomment %}
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">
+        <span>{{ section.settings.extra_downloads_title }}</span>
+        <span class="accordion-trigger__icon" aria-hidden="true">&darr;</span>
+      </button>
+      <div class="accordion-content">
+        <ul class="downloads-file-list">
+          {%- for file in extra_downloads_handle.extra_files.value -%}
+            <li>
+              <a href="{{ file.url }}" target="_blank">
+                {{ file.url | split: '/' | last | split: '?' | first | replace: '%20', ' ' }}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+
     {%- for collection in collections -%}
       {%- if collection.all_products_count > 0 -%}
         {%- liquid
@@ -197,13 +196,11 @@
         if (isOpen) {
           trigger.classList.remove('is-active');
           trigger.setAttribute('aria-expanded', 'false');
-          content.style.maxHeight = null;
           content.classList.remove('is-open');
         } else {
           trigger.classList.add('is-active');
           trigger.setAttribute('aria-expanded', 'true');
           content.classList.add('is-open');
-          content.style.maxHeight = content.scrollHeight + 'px';
         }
       });
     });
