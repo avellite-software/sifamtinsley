@@ -1,4 +1,3 @@
-{{ 'collage.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 
@@ -16,52 +15,72 @@
   }
 
   /*
-   * NEW DYNAMIC COLLAGE GRID
-   * This grid automatically adapts based on the number of blocks.
-  */
+   * NEW CUSTOM COLLAGE STYLES
+   */
+  .collage-wrapper-title {
+    margin-top: 0;
+    margin-bottom: 3rem;
+  }
+
   .collage-{{ section.id }} {
     display: grid;
-    gap: 1.5rem; /* Gap between grid items */
+    gap: 1.5rem;
+  }
+
+  .collage__item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .collage__item:hover {
+    transform: scale(1.03) translateY(-5px);
+  }
+
+  .collage-card {
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: {{ section.settings.card_shadow }};
+  }
+
+  /* This makes the inner card transparent to show the background */
+  .collage-card .card {
+    background-color: transparent !important;
+    border: none;
+    box-shadow: none;
+  }
+  .collage-card .card__inner {
+    background-color: transparent !important;
+    border: none;
+    box-shadow: none;
+  }
+  .collage-card .card__inner:after {
+    display: none;
   }
 
   /* --- Layout for 1 Item --- */
-  .collage--1-items {
-    grid-template-columns: 1fr;
-  }
+  .collage--1-items { grid-template-columns: 1fr; }
 
   /* --- Layout for 2 Items --- */
-  .collage--2-items {
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 400px;
-  }
+  .collage--2-items { grid-template-columns: 1fr 1fr; }
 
   /* --- Layout for 3 Items --- */
-  .collage--3-items {
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 350px;
-  }
+  .collage--3-items { grid-template-columns: repeat(3, 1fr); }
 
   /* --- Layout for 4 Items --- */
-  .collage--4-items {
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 350px;
-  }
+  .collage--4-items { grid-template-columns: repeat(2, 1fr); }
 
   /* --- Layout for 5 Items --- */
   .collage--5-items {
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 300px;
+    grid-auto-rows: minmax(250px, auto);
   }
   .collage--5-items .collage__item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
-  .collage--5-items .collage__item:nth-child(2) { grid-column: span 2; grid-row: span 1; }
-  .collage--5-items .collage__item:nth-child(3) { grid-column: span 2; grid-row: span 1; }
-  .collage--5-items .collage__item:nth-child(4) { grid-column: span 2; grid-row: span 1; }
-  .collage--5-items .collage__item:nth-child(5) { grid-column: span 2; grid-row: span 1; }
+  .collage--5-items .collage__item:nth-child(2) { grid-column: span 2; }
+  .collage--5-items .collage__item:nth-child(3) { grid-column: span 2; }
 
   /* --- Layout for 6 Items (Matches your image) --- */
   .collage--6-items {
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 250px;
+    grid-auto-rows: minmax(250px, auto);
   }
   .collage--6-items .collage__item:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 2; }
   .collage--6-items .collage__item:nth-child(2) { grid-column: 1 / 2; grid-row: 2 / 4; }
@@ -73,7 +92,7 @@
   /* --- Layout for 7 Items --- */
   .collage--7-items {
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 250px;
+    grid-auto-rows: minmax(250px, auto);
   }
   .collage--7-items .collage__item:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; }
   .collage--7-items .collage__item:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; }
@@ -87,9 +106,7 @@
   @media screen and (max-width: 749px) {
     .collage-{{ section.id }} {
       grid-template-columns: 1fr 1fr;
-      grid-auto-rows: 250px;
     }
-    /* Make all items stack nicely on mobile */
     .collage--1-items .collage__item,
     .collage--2-items .collage__item,
     .collage--3-items .collage__item,
@@ -97,14 +114,14 @@
     .collage--5-items .collage__item,
     .collage--6-items .collage__item,
     .collage--7-items .collage__item {
-      grid-column: span 1;
-      grid-row: span 1;
+      grid-column: span 1 !important;
+      grid-row: span 1 !important;
     }
-    /* Make the first item larger on mobile */
+    .collage--1-items .collage__item:first-child,
     .collage--3-items .collage__item:first-child,
     .collage--5-items .collage__item:first-child,
     .collage--7-items .collage__item:first-child {
-      grid-column: span 2;
+      grid-column: span 2 !important;
     }
   }
 {%- endstyle -%}
@@ -132,16 +149,8 @@
             style="--animation-order: {{ forloop.index }};"
           {% endif %}
         >
-          {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
-
-          {% comment %}
-            This new collage-card wrapper applies the card-specific background color.
-            The `card` component inside it will be transparent.
-          {% endcomment %}
-          <div
-            class="collage-card color-{{ section.settings.card_color_scheme }} gradient"
-            style="height: 100%; border-radius: 12px; overflow: hidden;"
-          >
+          <div class="collage-card color-{{ section.settings.card_color_scheme }} gradient">
+            {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
             {%- case block.type -%}
               {%- when 'product' -%}
                 {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
@@ -149,7 +158,7 @@
                   card_product: block.settings.product,
                   media_aspect_ratio: 'adapt',
                   show_secondary_image: block.settings.second_image,
-                  extend_height: true,
+                  show_price: false,
                   placeholder_image: placeholder_image,
                   skip_styles: skip_card_product_styles,
                   card_color_scheme: 'none'
@@ -162,7 +171,6 @@
                   card_collection: block.settings.collection,
                   media_aspect_ratio: 'adapt',
                   columns: 2,
-                  extend_height: true,
                   placeholder_image: placeholder_image,
                   card_color_scheme: 'none'
                 %}
@@ -187,18 +195,22 @@
       "type": "inline_richtext",
       "id": "heading",
       "default": "Collage",
-      "label": "t:sections.collage.settings.heading.label"
+      "label": "Heading"
     },
     {
       "type": "select",
       "id": "heading_size",
       "options": [
-        { "value": "h2", "label": "t:sections.all.heading_size.options__1.label" },
-        { "value": "h1", "label": "t:sections.all.heading_size.options__2.label" },
-        { "value": "h0", "label": "t:sections.all.heading_size.options__3.label" }
+        { "value": "h2", "label": "Small" },
+        { "value": "h1", "label": "Medium" },
+        { "value": "h0", "label": "Large" }
       ],
       "default": "h1",
-      "label": "t:sections.all.heading_size.label"
+      "label": "Heading size"
+    },
+    {
+      "type": "header",
+      "content": "Colors & Style"
     },
     {
       "type": "color_scheme",
@@ -213,8 +225,15 @@
       "default": "scheme-2"
     },
     {
+      "type": "text",
+      "id": "card_shadow",
+      "label": "Card Box Shadow",
+      "default": "0 8px 20px rgba(0, 0, 0, 0.07)",
+      "info": "Use standard CSS box-shadow format."
+    },
+    {
       "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
+      "content": "Section Padding"
     },
     {
       "type": "range",
@@ -223,7 +242,7 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
+      "label": "Top padding",
       "default": 36
     },
     {
@@ -233,36 +252,36 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
+      "label": "Bottom padding",
       "default": 36
     }
   ],
   "blocks": [
     {
       "type": "product",
-      "name": "t:sections.collage.blocks.product.name",
+      "name": "Product",
       "settings": [
         {
           "type": "product",
           "id": "product",
-          "label": "t:sections.collage.blocks.product.settings.product.label"
+          "label": "Product"
         },
         {
           "type": "checkbox",
           "id": "second_image",
           "default": false,
-          "label": "t:sections.collage.blocks.product.settings.second_image.label"
+          "label": "Show second image on hover"
         }
       ]
     },
     {
       "type": "collection",
-      "name": "t:sections.collage.blocks.collection.name",
+      "name": "Collection",
       "settings": [
         {
           "type": "collection",
           "id": "collection",
-          "label": "t:sections.collage.blocks.collection.settings.collection.label"
+          "label": "Collection"
         }
       ]
     }
