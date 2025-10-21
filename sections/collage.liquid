@@ -1,8 +1,6 @@
 {{ 'collage.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
-{{ 'component-modal-video.css' | asset_url | stylesheet_tag }}
-{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -16,20 +14,118 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  /*
+   * NEW DYNAMIC COLLAGE GRID
+   * This grid automatically adapts based on the number of blocks.
+  */
+  .collage-{{ section.id }} {
+    display: grid;
+    gap: 1.5rem; /* Gap between grid items */
+  }
+
+  /* --- Layout for 1 Item --- */
+  .collage--1-items {
+    grid-template-columns: 1fr;
+  }
+
+  /* --- Layout for 2 Items --- */
+  .collage--2-items {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 400px;
+  }
+
+  /* --- Layout for 3 Items --- */
+  .collage--3-items {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 350px;
+  }
+
+  /* --- Layout for 4 Items --- */
+  .collage--4-items {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 350px;
+  }
+
+  /* --- Layout for 5 Items --- */
+  .collage--5-items {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 300px;
+  }
+  .collage--5-items .collage__item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+  .collage--5-items .collage__item:nth-child(2) { grid-column: span 2; grid-row: span 1; }
+  .collage--5-items .collage__item:nth-child(3) { grid-column: span 2; grid-row: span 1; }
+  .collage--5-items .collage__item:nth-child(4) { grid-column: span 2; grid-row: span 1; }
+  .collage--5-items .collage__item:nth-child(5) { grid-column: span 2; grid-row: span 1; }
+
+  /* --- Layout for 6 Items (Matches your image) --- */
+  .collage--6-items {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 250px;
+  }
+  .collage--6-items .collage__item:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 2; }
+  .collage--6-items .collage__item:nth-child(2) { grid-column: 1 / 2; grid-row: 2 / 4; }
+  .collage--6-items .collage__item:nth-child(3) { grid-column: 2 / 4; grid-row: 1 / 3; }
+  .collage--6-items .collage__item:nth-child(4) { grid-column: 4 / 5; grid-row: 1 / 2; }
+  .collage--6-items .collage__item:nth-child(5) { grid-column: 4 / 5; grid-row: 2 / 3; }
+  .collage--6-items .collage__item:nth-child(6) { grid-column: 2 / 5; grid-row: 3 / 4; }
+
+  /* --- Layout for 7 Items --- */
+  .collage--7-items {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 250px;
+  }
+  .collage--7-items .collage__item:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; }
+  .collage--7-items .collage__item:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; }
+  .collage--7-items .collage__item:nth-child(3) { grid-column: 4 / 5; grid-row: 1 / 2; }
+  .collage--7-items .collage__item:nth-child(4) { grid-column: 3 / 4; grid-row: 2 / 3; }
+  .collage--7-items .collage__item:nth-child(5) { grid-column: 4 / 5; grid-row: 2 / 3; }
+  .collage--7-items .collage__item:nth-child(6) { grid-column: 1 / 3; grid-row: 3 / 4; }
+  .collage--7-items .collage__item:nth-child(7) { grid-column: 3 / 5; grid-row: 3 / 4; }
+
+  /* --- Responsive Stacking --- */
+  @media screen and (max-width: 749px) {
+    .collage-{{ section.id }} {
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: 250px;
+    }
+    /* Make all items stack nicely on mobile */
+    .collage--1-items .collage__item,
+    .collage--2-items .collage__item,
+    .collage--3-items .collage__item,
+    .collage--4-items .collage__item,
+    .collage--5-items .collage__item,
+    .collage--6-items .collage__item,
+    .collage--7-items .collage__item {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
+    /* Make the first item larger on mobile */
+    .collage--3-items .collage__item:first-child,
+    .collage--5-items .collage__item:first-child,
+    .collage--7-items .collage__item:first-child {
+      grid-column: span 2;
+    }
+  }
 {%- endstyle -%}
 
-<div class="color-{{ section.settings.color_scheme }} gradient isolate">
+<div class="color-{{ section.settings.background_color_scheme }} gradient isolate">
   <div class="page-width section-{{ section.id }}-padding">
     {%- if section.settings.heading != blank -%}
       <h2 class="collage-wrapper-title inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
         {{ section.settings.heading }}
       </h2>
     {%- endif -%}
-    <div class="collage{% if section.settings.mobile_layout == 'collage' %} collage--mobile{% endif %}">
-      {% assign skip_card_product_styles = false %}
+
+    {%- liquid
+      assign block_count = section.blocks.size
+      assign skip_card_product_styles = false
+    -%}
+
+    <div class="collage collage-{{ section.id }} collage--{{ block_count }}-items">
       {%- for block in section.blocks -%}
         <div
-          class="collage__item collage__item--{{ block.type }} collage__item--{{ section.settings.desktop_layout }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+          class="collage__item collage__item--{{ block.type }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
           {{ block.shopify_attributes }}
           {% if settings.animations_reveal_on_scroll %}
             data-cascade
@@ -37,178 +133,41 @@
           {% endif %}
         >
           {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
-          {%- case block.type -%}
-            {%- when 'image' -%}
-              <div class="collage-card {% if section.settings.card_styles == 'none' %}global-media-settings{% else %}card-wrapper {{ section.settings.card_styles }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
-                <div
-                  class="media media--transparent ratio"
-                  {% if block.settings.image != blank %}
-                    style="--ratio-percent: {{ 1 | divided_by: block.settings.image.aspect_ratio | times: 100 }}%"
-                  {% else %}
-                    style="--ratio-percent: 100%"
-                  {% endif %}
-                >
-                  {%- if block.settings.image != blank -%}
-                    {%- liquid
-                      if section.settings.desktop_layout == 'left'
-                        assign large_block = forloop.first
-                      else
-                        assign large_block = forloop.last
-                      endif
 
-                      assign grid_space_desktop = settings.spacing_grid_horizontal | divided_by: 2 | append: 'px'
-                      assign grid_space_mobile = settings.spacing_grid_horizontal | divided_by: 4 | append: 'px'
-                    -%}
-                    {%- if large_block -%}
-                      {%- capture sizes -%}
-                        {% if section.blocks.size == 1 -%}(min-width: {{ settings.page_width }}px) calc({{ settings.page_width }}px - 100px){% else %}(min-width: {{ settings.page_width }}px) calc(({{ settings.page_width }}px - 100px) * 2 / 3 - {{ grid_space_desktop }}){% endif %},
-                        {% if section.blocks.size == 1 -%}(min-width: 750px) calc(100vw - 100px){% else %}(min-width: 750px) calc((100vw - 100px) * 2 / 3 - {{ grid_space_desktop }}){% endif %},
-                        {% if section.blocks.size == 2 and section.settings.mobile_layout == 'collage' -%}calc((100vw - 30px) / 2){% else %}calc(100vw - 30px){% endif %}
-                        {%- endcapture -%}
-                      {{
-                        block.settings.image
-                        | image_url: width: 3200
-                        | image_tag:
-                          sizes: sizes,
-                          widths: '50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
-                      }}
-                    {%- else -%}
-                      {%- capture sizes -%}
-                           (min-width: {{ settings.page_width }}px) calc(({{ settings.page_width }}px - 100px) * 1 / 3 - {{ grid_space_desktop }}),
-                           (min-width: 750px) calc((100vw - 100px) * 1 / 3 - {{ grid_space_desktop }}),
-                           {% if section.settings.mobile_layout == 'collage' %}calc((100vw - 30px) / 2 - {{ grid_space_mobile }}){% else %}calc(100vw - 30px){% endif %}
-                        {%- endcapture -%}
-                      {{
-                        block.settings.image
-                        | image_url: width: 3200
-                        | image_tag:
-                          sizes: sizes,
-                          widths: '50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
-                      }}
-                    {%- endif -%}
-                  {%- else -%}
-                    {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
-                  {%- endif -%}
-                </div>
-              </div>
-            {%- when 'product' -%}
-              {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
-              {% render 'card-product',
-                card_product: block.settings.product,
-                media_aspect_ratio: 'adapt',
-                show_secondary_image: block.settings.second_image,
-                extend_height: true,
-                placeholder_image: placeholder_image,
-                skip_styles: skip_card_product_styles
-              %}
-              {% assign skip_card_product_styles = true %}
-            {%- when 'collection' -%}
-              {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
-              {% render 'card-collection',
-                card_collection: block.settings.collection,
-                media_aspect_ratio: 'adapt',
-                columns: 2,
-                extend_height: true,
-                wrapper_class: section.settings.card_styles,
-                placeholder_image: placeholder_image
-              %}
-            {%- when 'video' -%}
-              <div class="collage-card {% if section.settings.card_styles == 'none' %}global-media-settings{% else %}{{ section.settings.card_styles }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
-                <modal-opener data-modal="#PopupModal-{{ block.id }}">
-                  <div class="deferred-media">
-                    <button
-                      class="deferred-media__poster full-unstyled-link"
-                      type="button"
-                      aria-label="{{ 'sections.video.load_video' | t: description: block.settings.description | escape }}"
-                      aria-haspopup="dialog"
-                      data-media-id="{{ block.settings.video_url.id }}"
-                    >
-                      <div
-                        class="media media--transparent ratio"
-                        {% if block.settings.cover_image != blank %}
-                          style="--ratio-percent: {{ 1 | divided_by: block.settings.cover_image.aspect_ratio | times: 100 }}%"
-                        {% else %}
-                          style="--ratio-percent: 100%"
-                        {% endif %}
-                      >
-                        <span class="deferred-media__poster-button motion-reduce">
-                          <span class="svg-wrapper">
-                            {{- 'icon-play.svg' | inline_asset_content -}}
-                          </span>
-                        </span>
+          {% comment %}
+            This new collage-card wrapper applies the card-specific background color.
+            The `card` component inside it will be transparent.
+          {% endcomment %}
+          <div
+            class="collage-card color-{{ section.settings.card_color_scheme }} gradient"
+            style="height: 100%; border-radius: 12px; overflow: hidden;"
+          >
+            {%- case block.type -%}
+              {%- when 'product' -%}
+                {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
+                {% render 'card-product',
+                  card_product: block.settings.product,
+                  media_aspect_ratio: 'adapt',
+                  show_secondary_image: block.settings.second_image,
+                  extend_height: true,
+                  placeholder_image: placeholder_image,
+                  skip_styles: skip_card_product_styles,
+                  card_color_scheme: 'none'
+                %}
+                {% assign skip_card_product_styles = true %}
 
-                        {%- if block.settings.cover_image != blank -%}
-                          {%- capture sizes -%}
-                            (min-width: {{ settings.page_width }}px)
-                            {% if section.blocks.size == 1 -%}
-                              calc({{ settings.page_width }}px - 100px)
-                            {%- else -%}
-                              {{- settings.page_width | minus: 100 | times: 0.67 | round }}px
-                            {%- endif -%}
-                            , (min-width: 750px)
-                            {%- if section.blocks.size == 1 %} calc(100vw - 100px){% else %} 500px{% endif -%}
-                            , calc(100vw - 30px)
-                          {%- endcapture -%}
-                          {{
-                            block.settings.cover_image
-                            | image_url: width: 3000
-                            | image_tag: sizes: sizes, widths: '550, 720, 990, 1100, 1500, 2200, 3000'
-                          }}
-                        {%- else -%}
-                          {{ 'hero-apparel-3' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
-                        {%- endif -%}
-                      </div>
-                    </button>
-                  </div>
-                </modal-opener>
-                <modal-dialog
-                  id="PopupModal-{{ block.id }}"
-                  class="modal-video media-modal color-{{ settings.color_schemes | first }}"
-                >
-                  <div
-                    class="modal-video__content"
-                    role="dialog"
-                    aria-label="{{ block.settings.description | escape }}"
-                    aria-modal="true"
-                    tabindex="-1"
-                  >
-                    <button
-                      id="ModalClose-{{ block.id }}"
-                      type="button"
-                      class="modal-video__toggle"
-                      aria-label="{{ 'accessibility.close' | t }}"
-                    >
-                      <span class="svg-wrapper">
-                        {{- 'icon-close.svg' | inline_asset_content -}}
-                      </span>
-                    </button>
-                    <div class="modal-video__content-info">
-                      <deferred-media class="modal-video__video template-popup">
-                        <template>
-                          {%- if block.settings.video_url.type == 'youtube' -%}
-                            <iframe
-                              src="https://www.youtube.com/embed/{{ block.settings.video_url.id }}?enablejsapi=1"
-                              class="js-youtube"
-                              allow="autoplay; encrypted-media"
-                              allowfullscreen
-                              title="{{ block.settings.description | escape }}"
-                            ></iframe>
-                          {%- else -%}
-                            <iframe
-                              src="https://player.vimeo.com/video/{{ block.settings.video_url.id }}"
-                              class="js-vimeo"
-                              allow="autoplay; encrypted-media"
-                              allowfullscreen
-                              title="{{ block.settings.description | escape }}"
-                            ></iframe>
-                          {%- endif -%}
-                        </template>
-                      </deferred-media>
-                    </div>
-                  </div>
-                </modal-dialog>
-              </div>
-          {%- endcase -%}
+              {%- when 'collection' -%}
+                {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+                {% render 'card-collection',
+                  card_collection: block.settings.collection,
+                  media_aspect_ratio: 'adapt',
+                  columns: 2,
+                  extend_height: true,
+                  placeholder_image: placeholder_image,
+                  card_color_scheme: 'none'
+                %}
+            {%- endcase -%}
+          </div>
         </div>
       {%- endfor -%}
     </div>
@@ -217,7 +176,7 @@
 
 {% schema %}
 {
-  "name": "t:sections.collage.name",
+  "name": "Advanced Collage",
   "tag": "section",
   "class": "section",
   "disabled_on": {
@@ -227,96 +186,31 @@
     {
       "type": "inline_richtext",
       "id": "heading",
-      "default": "t:sections.collage.settings.heading.default",
+      "default": "Collage",
       "label": "t:sections.collage.settings.heading.label"
     },
     {
       "type": "select",
       "id": "heading_size",
       "options": [
-        {
-          "value": "h2",
-          "label": "t:sections.all.heading_size.options__1.label"
-        },
-        {
-          "value": "h1",
-          "label": "t:sections.all.heading_size.options__2.label"
-        },
-        {
-          "value": "h0",
-          "label": "t:sections.all.heading_size.options__3.label"
-        },
-        {
-          "value": "hxl",
-          "label": "t:sections.all.heading_size.options__4.label"
-        },
-        {
-          "value": "hxxl",
-          "label": "t:sections.all.heading_size.options__5.label"
-        }
+        { "value": "h2", "label": "t:sections.all.heading_size.options__1.label" },
+        { "value": "h1", "label": "t:sections.all.heading_size.options__2.label" },
+        { "value": "h0", "label": "t:sections.all.heading_size.options__3.label" }
       ],
       "default": "h1",
       "label": "t:sections.all.heading_size.label"
     },
     {
-      "type": "header",
-      "content": "t:sections.collage.settings.header_layout.content"
-    },       
-    {
-      "type": "select",
-      "id": "desktop_layout",
-      "options": [
-        {
-          "value": "left",
-          "label": "t:sections.collage.settings.desktop_layout.options__1.label"
-        },
-        {
-          "value": "right",
-          "label": "t:sections.collage.settings.desktop_layout.options__2.label"
-        }
-      ],
-      "default": "left",
-      "label": "t:sections.collage.settings.desktop_layout.label"
-    },
-    {
-      "type": "select",
-      "id": "mobile_layout",
-      "options": [
-        {
-          "value": "collage",
-          "label": "t:sections.collage.settings.mobile_layout.options__1.label"
-        },
-        {
-          "value": "column",
-          "label": "t:sections.collage.settings.mobile_layout.options__2.label"
-        }
-      ],
-      "default": "column",
-      "label": "t:sections.collage.settings.mobile_layout.label"
-    },
-    {
-      "type": "select",
-      "id": "card_styles",
-      "options": [
-        {
-          "value": "none",
-          "label": "t:sections.collage.settings.card_styles.options__1.label"
-        },
-        {
-          "value": "product-card-wrapper",
-          "label": "t:sections.collage.settings.card_styles.options__2.label"
-        }
-      ],
-      "default": "product-card-wrapper",
-      "info": "t:sections.collage.settings.card_styles.info",
-      "label": "t:sections.collage.settings.card_styles.label"
+      "type": "color_scheme",
+      "id": "background_color_scheme",
+      "label": "Section background",
+      "default": "scheme-1"
     },
     {
       "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:sections.all.colors.label",
-      "info": "t:sections.all.colors.has_cards_info",
-      "default": "scheme-1"
+      "id": "card_color_scheme",
+      "label": "Card background",
+      "default": "scheme-2"
     },
     {
       "type": "header",
@@ -345,17 +239,6 @@
   ],
   "blocks": [
     {
-      "type": "image",
-      "name": "t:sections.collage.blocks.image.name",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "t:sections.collage.blocks.image.settings.image.label"
-        }
-      ]
-    },
-    {
       "type": "product",
       "name": "t:sections.collage.blocks.product.name",
       "settings": [
@@ -382,49 +265,19 @@
           "label": "t:sections.collage.blocks.collection.settings.collection.label"
         }
       ]
-    },
-    {
-      "type": "video",
-      "name": "t:sections.collage.blocks.video.name",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "cover_image",
-          "label": "t:sections.collage.blocks.video.settings.cover_image.label"
-        },
-        {
-          "type": "video_url",
-          "id": "video_url",
-          "accept": ["youtube", "vimeo"],
-          "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
-          "label": "t:sections.collage.blocks.video.settings.video_url.label",
-          "placeholder": "t:sections.collage.blocks.video.settings.video_url.placeholder",
-          "info": "t:sections.collage.blocks.video.settings.video_url.info"
-        },
-        {
-          "type": "text",
-          "id": "description",
-          "default": "t:sections.collage.blocks.video.settings.description.default",
-          "label": "t:sections.collage.blocks.video.settings.description.label",
-          "info": "t:sections.collage.blocks.video.settings.description.info"
-        }
-      ]
     }
   ],
-  "max_blocks": 3,
+  "max_blocks": 7,
   "presets": [
     {
-      "name": "t:sections.collage.presets.name",
+      "name": "Advanced Collage",
       "blocks": [
-        {
-          "type": "image"
-        },
-        {
-          "type": "product"
-        },
-        {
-          "type": "collection"
-        }
+        { "type": "product" },
+        { "type": "collection" },
+        { "type": "product" },
+        { "type": "collection" },
+        { "type": "product" },
+        { "type": "collection" }
       ]
     }
   ]
