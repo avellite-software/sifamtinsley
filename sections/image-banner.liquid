@@ -65,6 +65,11 @@
     pointer-events: none;
   }
 
+  .overlays-wrapper {
+    max-width: 1200px;
+    margin: auto;
+  }
+
   .orbit-product-card {
     position: absolute;
     top: 0;
@@ -416,6 +421,7 @@
       const screenWidth = window.innerWidth;
       
       if (screenWidth > mainContentWidth) {
+        // This calculation relies on containerWidth, which is set in updateDimensions()
         const gutter = (screenWidth - mainContentWidth) / 2;
         if (glassLeft) {
           glassLeft.style.left = `${gutter}px`;
@@ -519,6 +525,7 @@
       animationFrameId = requestAnimationFrame(animate);
     };
 
+    // --- Carousel and Expanded View Functions ---
     function startAutoPlay() {
         if (carouselWrapper.children.length < 2 || autoPlayPausedByUser) return;
         stopAutoPlay();
@@ -643,7 +650,7 @@
             updateDimensions();
             closeExpandedView();
             updatePositions();
-            alignGlassBox();
+            alignGlassBox(); // Re-align the glass box on resize
         }, 150);
     };
     
@@ -684,21 +691,37 @@
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('resize', onResize);
 
-    // --- Startup Sequence ---
-    alignGlassBox(); // Align glass boxes on load
+    // --- MODIFICATION: Updated Startup Sequence ---
+    
+    // 1. Add class to disable transitions
     container.classList.add('orbit-is-initializing');
+    
+    // 2. Set dimensions, align glass boxes, and calculate all positions
     updateDimensions();
+    alignGlassBox();
     updatePositions();
     
+    // 3. Set display: block on all items. They are now in the correct
+    //    position, but are still invisible (opacity: 0).
+    items.forEach(item => {
+      item.style.display = 'block';
+    });
+    
+    // 4. Use a small timeout to force the browser to render this "snapped" state
     setTimeout(() => {
+      // 5. Re-enable transitions
       container.classList.remove('orbit-is-initializing');
+      
+      // 6. Now, apply the calculated opacities. The CSS transition
+      //    (opacity: 1s ease) will take over and fade them all in.
       items.forEach(item => {
-        item.style.display = 'block';
         const state = itemOriginalStates.get(item);
         if (state) {
           item.style.opacity = state.opacity;
         }
       });
+      
+      // 7. Start the animation loop
       animate();
     }, 100);
   });
