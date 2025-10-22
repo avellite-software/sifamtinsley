@@ -38,7 +38,7 @@
     cursor: grab;
     user-select: none;
     background-color: #111;
-    background-image: radial-gradient(circle at 130% 100%, #c1151b 0%, transparent 100%);
+    background-image: radial-gradient(circle at 130% 100%, #8c0d11 0%, transparent 80%);
     border-bottom-right-radius: 50px;
   }
   .orbit-section-{{ section.id }}:active {
@@ -72,11 +72,13 @@
     width: 450px;
     will-change: transform, opacity;
     transform-origin: center center;
-    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 1s ease;
     z-index: 1;
     pointer-events: auto;
     cursor: pointer;
     text-decoration: none;
+    display: none;
+    opacity: 0;
   }
   .orbit-section--expanded .orbit-product-card:not(.is-active) {
     opacity: 0 !important;
@@ -164,7 +166,6 @@
   }
   .glass-overlay-2 {
     position: absolute;
-    top: 40px;
     padding: 25px;
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -178,11 +179,24 @@
     justify-content: center;
     height: 180px;
   }
-  .glass-overlay--right { right: 40px; width: 300px; }
+  .glass-overlay--right { right: 40px; width: 300px; bottom: 40px; }
   .glass-overlay--left { width: 450px; }
-  .glass-overlay__title { font-size: 1.8rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; color: #fff; }
-  .glass-overlay__title-2 { font-size: 3.8rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; color: #fff; }
-  .glass-overlay__text.rte p { margin: 0; line-height: 1.6; opacity: 0.9; }
+  .glass-overlay__title { font-size: 1.8rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; color: #fff; font-size: {{ section.settings.glass_right_title_size }}px; text-shadow: {{ section.settings.glass_right_title_shadow }}; }
+  .glass-overlay__title-2 { font-size: 3.8rem; font-weight: 700; margin: 0 0 1rem; line-height: 1.2; color: #fff; font-size: {{ section.settings.glass_left_title_size }}px; text-shadow: {{ section.settings.glass_left_title_shadow }};}
+  .glass-overlay-2 .glass-overlay__text.rte p {
+    margin: 0;
+    line-height: 1.6;
+    opacity: 0.9;
+    font-size: {{ section.settings.glass_right_body_size }}px;
+    text-shadow: {{ section.settings.glass_right_body_shadow }};
+  }
+  .glass-overlay.glass-overlay--left .glass-overlay__text.rte p {
+    margin: 0;
+    line-height: 1.6;
+    opacity: 0.9;
+    font-size: {{ section.settings.glass_left_body_size }}px;
+    text-shadow: {{ section.settings.glass_left_body_shadow }};
+  }
 
   .expanded-view {
     position: absolute;
@@ -391,26 +405,35 @@
   document.addEventListener('DOMContentLoaded', () => {
     const section = document.querySelector('.orbit-section-{{ section.id }}');
     if (!section) return;
-    // --- NEW: Glass Box Alignment Logic ---
+
+    // --- Glass Box Alignment ---
     const alignGlassBox = () => {
       const glassLeft = section.querySelector('.glass-overlay--left');
-      if (!glassLeft) return;
+      const glassRight = section.querySelector('.glass-overlay--right');
+      if (!glassLeft && !glassRight) return;
 
       const mainContentWidth = 1200; // Your site's max-width
       const screenWidth = window.innerWidth;
       
       if (screenWidth > mainContentWidth) {
         const gutter = (screenWidth - mainContentWidth) / 2;
-        glassLeft.style.left = `${gutter}px`;
+        if (glassLeft) {
+          glassLeft.style.left = `${gutter}px`;
+        }
+        if (glassRight) {
+          glassRight.style.right = `${gutter}px`;
+        }
       } else {
         // On smaller screens, use a default padding
-        glassLeft.style.left = '20px';
+        if (glassLeft) {
+          glassLeft.style.left = '20px';
+        }
+        if (glassRight) {
+          glassRight.style.right = '20px';
+        }
       }
     };
     
-    // Run alignment on load
-    alignGlassBox();
-
     const container = section.querySelector('.orbit-container');
     const items = Array.from(container.querySelectorAll('.orbit-product-card'));
     if (items.length === 0) return;
@@ -443,9 +466,7 @@
     const speed = 360 / ({{ section.settings.animation_duration }} * 60);
     let containerWidth, containerHeight;
     
-    let currentSlide = 0;
-    let autoPlayInterval;
-    let autoPlayPausedByUser = false;
+    let currentSlide = 0, autoPlayInterval, autoPlayPausedByUser = false;
     const AUTO_PLAY_DELAY = 10000;
 
     function updateDimensions() {
@@ -458,7 +479,6 @@
       const ellipseCenterY = containerHeight * centerYMultiplier;
       const ellipseRadiusX = containerWidth * radiusXMultiplier;
       const ellipseRadiusY = containerHeight * radiusYMultiplier;
-      
       const minY = ellipseCenterY - ellipseRadiusY;
       const yRange = (ellipseCenterY + ellipseRadiusY) - minY;
 
@@ -469,30 +489,25 @@
         const angleInRadians = (totalAngle * Math.PI) / 180;
         const x = ellipseCenterX + ellipseRadiusX * Math.cos(angleInRadians);
         const y = ellipseCenterY + ellipseRadiusY * Math.sin(angleInRadians);
-        
         let scale = (y / containerHeight) * 2.4; 
         scale = Math.max(0.1, Math.min(2.0, scale));
 
         item.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         
+        let calculatedOpacity = 1;
         if (yRange > 0) {
           const normalizedY = (y - minY) / yRange;
-          const opacity = 0.3 + (normalizedY * 0.7);
-          item.style.opacity = Math.max(0.3, Math.min(1.0, opacity));
-        } else {
-          item.style.opacity = 1;
+          calculatedOpacity = Math.max(0.3, Math.min(1.0, 0.3 + (normalizedY * 0.7)));
+        }
+        
+        itemOriginalStates.set(item, {transform: item.style.transform, opacity: calculatedOpacity});
+        
+        if (item.style.display === 'block') {
+          item.style.opacity = calculatedOpacity;
         }
 
-        itemOriginalStates.set(item, {transform: item.style.transform, opacity: item.style.opacity});
-        
-        const zIndex = 10 + Math.round(scale * 100);
-        item.style.zIndex = zIndex;
-        
-        if (scale < 0.4) {
-          item.classList.add('is-unclickable');
-        } else {
-          item.classList.remove('is-unclickable');
-        }
+        item.style.zIndex = 10 + Math.round(scale * 100);
+        item.classList.toggle('is-unclickable', scale < 0.4);
       });
     };
 
@@ -511,9 +526,7 @@
         carouselControls.querySelector('.icon-play').style.display = 'none';
         carouselControls.querySelector('.icon-pause').style.display = 'inline-block';
     }
-
     function stopAutoPlay() { clearInterval(autoPlayInterval); }
-
     function showCarouselSlide(index) {
         const slides = Array.from(carouselWrapper.children);
         if (slides.length === 0) return;
@@ -523,7 +536,6 @@
             btn.classList.toggle('active', parseInt(btn.dataset.slide) === currentSlide);
         });
     }
-
     function initCarousel(data) {
         carouselWrapper.innerHTML = '';
         const slides = [];
@@ -537,7 +549,6 @@
         showCarouselSlide(0);
         startAutoPlay();
     }
-    
     carouselControls.addEventListener('click', (e) => {
         const targetBtn = e.target.closest('.carousel-control-btn');
         if (!targetBtn) return;
@@ -553,13 +564,12 @@
             if (!autoPlayPausedByUser) startAutoPlay();
         }
     });
-
     function openExpandedView(clickedCard) {
       if (isExpanded) return;
       isExpanded = true;
       activeCard = clickedCard;
       section.classList.add('orbit-section--expanded');
-      container.classList.add('is-expanded');
+      container.classList.add('is-expanded-layer');
       activeCard.classList.add('is-active');
       const productIndex = parseInt(activeCard.dataset.productIndex);
       const data = productData[productIndex];
@@ -568,11 +578,9 @@
       expandedButton.href = data.url;
       const cardWidth = activeCard.offsetWidth;
       const cardHeight = activeCard.offsetHeight;
-      const infoHeight = expandedInfo.offsetHeight; // New line
       let targetCardX, targetCardY;
-
-      const targetInfoY = (containerHeight / 2) - (infoHeight / 2); // New line: Center info box vertically
-
+      const infoHeight = expandedInfo.offsetHeight;
+      const targetInfoY = (containerHeight / 2) - (infoHeight / 2);
       if (window.innerWidth <= 768) {
         targetCardX = (containerWidth / 2) - (cardWidth / 2);
         targetCardY = containerHeight * 0.15;
@@ -581,23 +589,22 @@
         targetCardX = 40;
         targetCardY = (containerHeight / 2) - (cardHeight / 2);
         expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
-        expandedInfo.style.top = `${targetInfoY}px`; // Use new Y position
+        expandedInfo.style.top = `${targetInfoY}px`;
       } else {
         targetCardX = (containerWidth / 2) - cardWidth;
         targetCardY = (containerHeight / 2) - (cardHeight / 2);
         expandedInfo.style.left = `${targetCardX + cardWidth + 40}px`;
-        expandedInfo.style.top = `${targetInfoY}px`; // Use new Y position
+        expandedInfo.style.top = `${targetInfoY}px`;
       }
       activeCard.style.transform = `translate(${targetCardX}px, ${targetCardY}px) scale(1)`;
-      activeCard.style.zIndex = 1001;
+      activeCard.style.zIndex = 1601;
       expandedView.classList.add('is-active');
     }
-    
     function closeExpandedView() {
       if (!isExpanded) return;
       isExpanded = false;
       section.classList.remove('orbit-section--expanded');
-      container.classList.remove('is-expanded');
+      container.classList.remove('is-expanded-layer');
       expandedView.classList.remove('is-active');
       stopAutoPlay();
       if (activeCard) {
@@ -612,17 +619,11 @@
       updatePositions();
     }
     
+    // --- Event Listeners ---
     container.addEventListener('click', (e) => {
       const clickedCard = e.target.closest('.orbit-product-card');
-      if (!clickedCard) return; // Exit if the click wasn't on a card
-
-      // If a drag just finished, prevent the default link navigation and do nothing else.
-      if (hasDragged) {
-        e.preventDefault();
-        return;
-      }
-
-      // Otherwise, if it was a simple click, run the expand logic.
+      if (!clickedCard) return;
+      if (hasDragged) { e.preventDefault(); return; }
       if (!clickedCard.classList.contains('is-unclickable') && !isExpanded) {
         e.preventDefault();
         openExpandedView(clickedCard);
@@ -630,7 +631,7 @@
     });
 
     section.addEventListener('click', (e) => {
-      if (isExpanded && !e.target.closest('.orbit-product-card.is-active') && !e.target.closest('.expanded-view__info')) {
+      if (isExpanded && e.target === expandedView) {
         closeExpandedView();
       }
     });
@@ -647,20 +648,15 @@
     };
     
     const startDrag = (e) => {
-      // Prevent drag from starting if the view is expanded or if the click is on the info box
-      if (isExpanded || e.target.closest('.expanded-view__info')) return;
-
-      // If the click is on a product card link, prevent it from navigating
-      if (e.target.closest('.orbit-product-card')) {
-        e.preventDefault();
-      }
-
+      if (isExpanded || e.target.closest('.expanded-view__info') || e.target.closest('.glass-overlay') || e.target.closest('.glass-overlay-2')) return;
+      if (e.target.closest('.orbit-product-card')) { e.preventDefault(); }
       isDragging = true;
       hasDragged = false;
       startX = e.pageX || e.touches[0].pageX;
       startAngle = currentAngle;
       section.style.cursor = 'grabbing';
     };
+    
     const onDrag = (e) => {
       if (isExpanded || !isDragging) return;
       e.preventDefault();
@@ -671,11 +667,11 @@
       currentAngle = startAngle + angleChange;
       updatePositions();
     };
+    
     const stopDrag = () => {
       if (!isDragging) return;
       isDragging = false;
       section.style.cursor = 'grab';
-      // Use setTimeout to reset hasDragged *after* the click event has a chance to fire
       setTimeout(() => { hasDragged = false; }, 0);
     };
 
@@ -688,9 +684,23 @@
     window.addEventListener('touchend', stopDrag);
     window.addEventListener('resize', onResize);
 
+    // --- Startup Sequence ---
+    alignGlassBox(); // Align glass boxes on load
+    container.classList.add('orbit-is-initializing');
     updateDimensions();
     updatePositions();
-    animate();
+    
+    setTimeout(() => {
+      container.classList.remove('orbit-is-initializing');
+      items.forEach(item => {
+        item.style.display = 'block';
+        const state = itemOriginalStates.get(item);
+        if (state) {
+          item.style.opacity = state.opacity;
+        }
+      });
+      animate();
+    }, 100);
   });
 </script>
 
@@ -727,10 +737,43 @@
       "default": "Featured Products"
     },
     {
+      "type": "range",
+      "id": "glass_right_title_size",
+      "label": "Title Font Size (Right)",
+      "min": 18,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "text",
+      "id": "glass_right_title_shadow",
+      "label": "Title Text Shadow (Right)",
+      "default": "0 0 5px rgba(0,0,0,0.5)",
+      "info": "Example: 0 0 5px rgba(0,0,0,0.5) or none"
+    },
+    {
       "type": "richtext",
       "id": "glass_right_text",
       "label": "Text",
       "default": "<p>Drag to explore our latest innovations and featured items.</p>"
+    },
+    {
+      "type": "range",
+      "id": "glass_right_body_size",
+      "label": "Body Font Size (Right)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "text",
+      "id": "glass_right_body_shadow",
+      "label": "Body Text Shadow (Right)",
+      "default": "none"
     },
     {
       "type": "header",
@@ -743,10 +786,42 @@
       "default": "New Arrivals"
     },
     {
+      "type": "range",
+      "id": "glass_left_title_size",
+      "label": "Title Font Size (Left)",
+      "min": 18,
+      "max": 64,
+      "step": 1,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "text",
+      "id": "glass_left_title_shadow",
+      "label": "Title Text Shadow (Left)",
+      "default": "0 0 5px rgba(0,0,0,0.5)"
+    },
+    {
       "type": "richtext",
       "id": "glass_left_text",
       "label": "Text",
       "default": "<p>Discover our newest collection of cutting-edge technology.</p>"
+    },
+    {
+      "type": "range",
+      "id": "glass_left_body_size",
+      "label": "Body Font Size (Left)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "text",
+      "id": "glass_left_body_shadow",
+      "label": "Body Text Shadow (Left)",
+      "default": "none"
     }
   ],
   "presets": [
