@@ -21,9 +21,17 @@
         ],
         "animation_duration": 80,
         "glass_right_title": "Featured Products",
+        "glass_right_title_size": 25,
+        "glass_right_title_shadow": "0 0 5px rgba(255,255,255,0.3)",
         "glass_right_text": "<p>Drag to explore our latest innovations and featured items.</p>",
+        "glass_right_body_size": 16,
+        "glass_right_body_shadow": "none0 0 5px rgba(255,255,255,0.3)",
         "glass_left_title": "Precision Instrumentation",
-        "glass_left_text": "<p><strong>An established brand name for over 75 years; Sifam Tinsley Instrumentation has an unrivaled pedigree in the industry. </strong></p>"
+        "glass_left_title_size": 45,
+        "glass_left_title_shadow": "0 0 5px rgba(255,255,255,0.3)",
+        "glass_left_text": "<p><strong>An established brand name for over 75 years; Sifam Tinsley Instrumentation has an unrivaled pedigree in the industry. </strong></p>",
+        "glass_left_body_size": 16,
+        "glass_left_body_shadow": "none0 0 5px rgba(255,255,255,0.3)"
       }
     },
     "presenter_text_and_box_jFHKEL": {
