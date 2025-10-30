@@ -47,8 +47,23 @@
 
     <div class="header-left">
       <div class="circle-dropdown-container">
-        <button class="circle-dropdown-trigger">
-          <span class="circle-dropdown-text">Our Brands</span>
+        <button class="circle-dropdown-trigger" aria-label="Our Brands Menu">
+          <div class="brands-icon-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="-2 -2 28 28"
+              class="brands-icon-layer-2"
+            >
+              <path
+                fill="none"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M17 14V20M14 17H20M15.6 10H18.4C18.9601 10 19.2401 10 19.454 9.89101C19.6422 9.79513 19.7951 9.64215 19.891 9.45399C20 9.24008 20 8.96005 20 8.4V5.6C20 5.03995 20 4.75992 19.891 4.54601C19.7951 4.35785 19.6422 4.20487 19.454 4.10899C19.2401 4 18.9601 4 18.4 4H15.6C15.0399 4 14.7599 4 14.546 4.10899C14.3578 4.20487 14.2049 4.35785 14.109 4.54601C14 4.75992 14 5.03995 14 5.6V8.4C14 8.96005 14 9.24008 14.109 9.45399C14.2049 9.64215 14.3578 9.79513 14.546 9.89101C14.7599 10 15.0399 10 15.6 10ZM5.6 10H8.4C8.96005 10 9.24008 10 9.45399 9.89101C9.64215 9.79513 9.79513 9.64215 9.89101 9.45399C10 9.24008 10 8.96005 10 8.4V5.6C10 5.03995 10 4.75992 9.89101 4.54601C9.79513 4.35785 9.64215 4.20487 9.45399 4.10899C9.24008 4 8.96005 4 8.4 4H5.6C5.03995 4 4.75992 4 4.54601 4.10899C4.35785 4.20487 4.20487 4.35785 4.10899 4.54601C4 4.75992 4 5.03995 4 5.6V8.4C4 8.96005 4 9.24008 4.10899 9.45399C4.20487 9.64215 4.35785 9.79513 4.54601 9.89101C4.75992 10 5.03995 10 5.6 10ZM5.6 20H8.4C8.96005 20 9.24008 20 9.45399 19.891C9.64215 19.7951 9.79513 19.6422 9.89101 19.454C10 19.2401 10 18.9601 10 18.4V15.6C10 15.0399 10 14.7599 9.89101 14.546C9.79513 14.3578 9.64215 14.2049 9.45399 14.109C9.24008 14 8.96005 14 8.4 14H5.6C5.03995 14 4.75992 14 4.54601 14.109C4.35785 14.2049 4.20487 14.3578 4.10899 14.546C4 14.7599 4 15.0399 4 15.6V18.4C4 18.9601 4 19.2401 4.10899 19.454C4.20487 19.6422 4.35785 19.7951 4.54601 19.891C4.75992 20 5.03995 20 5.6 20Z"
+              />
+            </svg>
+          </div>
         </button>
         <div class="circle-dropdown-content">
           {%- for link in section.settings.brands_menu.links -%}
@@ -86,11 +101,7 @@
             {%- endif -%}
           </a>
           {%- if link.links != empty -%}
-            <div class="dropdown-content">
-              {%- for child_link in link.links -%}
-                <a href="{{ child_link.url }}">{{ child_link.title }}</a>
-              {%- endfor -%}
-            </div>
+            {% render 'megamenu-content', parent_link: link, main_menu: section.settings.main_menu %}
           {%- endif -%}
         </div>
       {%- endfor -%}
@@ -100,23 +111,25 @@
           {{ section.settings.contact_button_text }}
         </a>
       {%- endif -%}
-
-      <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
-        {%- if cart == empty -%}
-          <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
-        {%- else -%}
-          <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
-        {%- endif -%}
-        <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-        {%- if cart != empty -%}
-          <div class="cart-count-bubble">
-            {%- if cart.item_count < 100 -%}
-              <span aria-hidden="true">{{ cart.item_count }}</span>
-            {%- endif -%}
-            <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
-          </div>
-        {%- endif -%}
-      </a>
+      <div style="display:none">
+        <!-- Hidden until future confirmation of cart usage on this site -->
+        <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
+          {%- if cart == empty -%}
+            <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
+          {%- else -%}
+            <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+          {%- if cart != empty -%}
+            <div class="cart-count-bubble">
+              {%- if cart.item_count < 100 -%}
+                <span aria-hidden="true">{{ cart.item_count }}</span>
+              {%- endif -%}
+              <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
+            </div>
+          {%- endif -%}
+        </a>
+      </div>
     </div>
 
     <button type="button" class="mobile-nav-toggle" aria-label="Open menu">
@@ -239,27 +252,75 @@
     display: flex;
     align-items: center;
     gap: 32px;
-    padding-left: 130px;
+    padding-left: 145px;
     position: relative;
     z-index: 1;
   }
   .circle-dropdown-container {
     position: absolute;
     left: 0;
-    top: 0;
+    top: -20px;
     z-index: 2;
     width: 110px;
-    height: 100%;
+    height: 95px;
   }
   .circle-dropdown-trigger {
     background: none;
     border: none;
-    color: #fff;
-    font-size: 22px;
-    font-weight: bold;
     cursor: pointer;
     position: absolute;
     z-index: 2;
+    top: 50%; /* Center vertically within its container */
+    left: 50%; /* Center horizontally within its container */
+    transform: translate(-50%, -50%); /* Adjust for its own size */
+    width: 60px; /* Set a fixed size for the button/icon area */
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  /* New styles for the icon wrapper and layers */
+  .brands-icon-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex; /* For centering SVGs */
+    align-items: center;
+    justify-content: center;
+  }
+  .brands-icon-wrapper svg {
+    position: absolute;
+
+    fill: #fff; /* White color for the icon */
+    transition: transform 0.4s ease-out; /* Smooth rotation */
+  }
+
+  .brands-icon-layer-1 {
+    width: 35px; /* Size of the icon */
+    height: 35px;
+    transform: rotate(0deg);
+  }
+  .brands-icon-layer-2 {
+    width: 50px; /* Size of the icon */
+    height: 50px;
+    transform: rotate(0deg);
+  }
+
+  /* Rotation on active state */
+  .custom-header.is-circle-menu-active .brands-icon-layer-1 {
+    transform: rotate(-45deg); /* Layer 1 rotates counter-clockwise */
+  }
+  .custom-header.is-circle-menu-active .brands-icon-layer-2 {
+    transform: rotate(45deg); /* Layer 2 rotates clockwise */
+  }
+
+  .custom-header.is-circle-menu-active .circle-dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition-delay: 0.1s;
   }
   .circle-dropdown-content {
     display: flex;
@@ -284,7 +345,7 @@
     transition-delay: 0.1s;
   }
   .circle-dropdown-content a {
-    padding: 12px 20px;
+    padding: 21px 20px;
     text-decoration: none;
     font-size: 15px;
     transition: background 0.2s;
@@ -307,6 +368,7 @@
   }
   .search-form {
     display: flex;
+    gap: 10px;
     align-items: center;
     width: 100%;
     max-width: 600px;
@@ -438,6 +500,16 @@
     .header-center {
       display: none;
     }
+
+    .circle-dropdown-container,
+    .header-shape-clipper--default,
+    .header-shape-clipper--animated {
+      display: none;
+    }
+
+    .header-left {
+      padding-left: 20px;
+    }
   }
   @media screen and (max-width: 1000px) {
     .custom-header {
@@ -552,7 +624,11 @@
     const headerSpacer = document.querySelector('.header-spacer');
     if (headerWrapper && headerSpacer) {
       const setSpacerHeight = () => {
-        headerSpacer.style.height = `${headerWrapper.offsetHeight}px`;
+        const headerHeight = headerWrapper.offsetHeight;
+        headerSpacer.style.height = `${headerHeight}px`;
+
+        // NEW LINE: This tells the CSS where to position the megamenu
+        document.documentElement.style.setProperty('--header-total-height', `${headerHeight}px`);
       };
       setSpacerHeight();
       window.addEventListener('resize', setSpacerHeight);
@@ -567,6 +643,7 @@
       const circleTrigger = circleDropdownContainer.querySelector('.circle-dropdown-trigger');
       circleTrigger.addEventListener('click', (event) => {
         event.stopPropagation();
+        document.querySelector('.header-right .dropdown.is-open')?.classList.remove('is-open');
         header.classList.toggle('is-circle-menu-active');
       });
     }
@@ -635,7 +712,7 @@
       if (!dropdownLink) return;
 
       const parentDropdown = dropdownLink.closest('.dropdown');
-      const submenu = parentDropdown.querySelector('.dropdown-content');
+      const submenu = parentDropdown.querySelector('.megamenu-wrapper');
 
       if (!submenu) return;
 

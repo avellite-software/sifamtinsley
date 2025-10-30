@@ -1,0 +1,274 @@
+{% comment %}
+  This snippet renders the full-width megamenu dropdown.
+  - V5 Changes:
+    - Megamenu cards are now flexible but have a max-width
+      to prevent over-stretching on lines with few items.
+{% endcomment %}
+
+<div class="megamenu-wrapper">
+  <div class="megamenu__backgrounds">
+    <div class="megamenu__nav-bg"><div></div></div>
+    <div class="megamenu__content-bg"><div></div></div>
+  </div>
+
+  <div class="megamenu__layout-container page-width">
+    <div class="megamenu__nav">
+      <a href="{{ parent_link.url }}" class="megamenu__nav-link is-active">
+        {{ parent_link.title }}
+      </a>
+    </div>
+
+    {% comment %} --- RIGHT 3/4 COLUMN (Content Grid) --- {% endcomment %}
+    <div class="megamenu__content-grid">
+      {%- for child_link in parent_link.links -%}
+        {%- liquid
+          assign is_link_box = false
+          if child_link.url != blank and child_link.links == empty
+            assign is_link_box = true
+          endif
+
+          assign box_classes = 'megamenu__column-box'
+          assign special_content = ''
+
+          if parent_link.title == 'Products'
+            assign box_classes = box_classes | append: ' megamenu__column-box--product'
+            if child_link.image != blank
+              assign special_content = child_link.image | image_url: width: 100 | image_tag: loading: 'lazy', class: 'megamenu__product-image'
+            endif
+
+          elsif child_link.object_type == 'page'
+            assign box_classes = box_classes | append: ' megamenu__column-box--page'
+            assign page_object = pages[child_link.handle]
+            assign page_image = page_object.metafields.custom.page_image.value
+
+            assign image_to_use = ''
+            if page_image != blank
+              assign image_to_use = page_image | image_url: width: 400 | image_tag: loading: 'lazy', class: 'megamenu__page-image'
+            else
+              assign fallback_image_url = 'https://cdn.shopify.com/s/files/1/0949/2745/4595/files/sifam_tinsley_instrumentation_limited_logo.jpg?v=1759850304'
+              assign image_to_use = fallback_image_url | image_tag: loading: 'lazy', class: 'megamenu__page-image'
+            endif
+            assign special_content = '<div class="megamenu__page-image-wrapper">' | append: image_to_use | append: '</div>'
+          endif
+        -%}
+
+        {% comment %} Box is an <a> tag if it's a direct link for full clickability {% endcomment %}
+        {%- if is_link_box -%}
+          <a href="{{ child_link.url }}" class="{{ box_classes }}">
+            {{ special_content }}
+            <h3 class="megamenu__title">{{ child_link.title }}</h3>
+          </a>
+        {%- else -%}
+          <div class="{{ box_classes }}">
+            {{ special_content }}
+            <h3 class="megamenu__title">{{ child_link.title }}</h3>
+            {%- if child_link.links != empty -%}
+              <ul class="megamenu__list">
+                {%- for grandchild_link in child_link.links -%}
+                  <li>
+                    <a href="{{ grandchild_link.url }}">{{ grandchild_link.title }}</a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+<style>
+  .megamenu-wrapper {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--header-total-height, 96px); /* Set by JS in header-wrapper */
+    border-top: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 5;
+    min-height: 400px;
+  }
+
+  .dropdown.is-open .megamenu-wrapper {
+    display: block;
+  }
+
+  .megamenu__backgrounds {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: calc((100vw - 1200px) / 2 + 300px) 1fr;
+    z-index: 0;
+  }
+
+  @supports not (grid-template-columns: calc((100vw - 1200px) / 2 + 300px) 1fr) {
+    .megamenu__backgrounds {
+      grid-template-columns: 25% 75%;
+    }
+  }
+
+  .megamenu__nav-bg {
+    background-color: #f3f3f3;
+    border-right: 1px solid #eee;
+  }
+  .megamenu__content-bg {
+    background: #fff;
+  }
+
+  .megamenu__layout-container {
+    display: grid;
+    grid-template-columns: 1fr 3fr; /* 25% / 75% split */
+    min-height: 400px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative; /* Sits on top of the background */
+    z-index: 1;
+  }
+
+  /* --- Left Column (Nav) --- */
+  .megamenu__nav {
+    padding: 2.5rem 0;
+  }
+
+  .megamenu__nav-link {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    padding: 0.75rem 2rem 0.75rem 1.5rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    position: relative;
+  }
+
+  .megamenu__nav-link:hover {
+    background-color: #eee;
+  }
+
+  .megamenu__nav-link.is-active {
+    background-color: #e1e1e1;
+    color: #000000;
+    font-weight: 700;
+    box-shadow: -100vw 0 0 #525252ff;
+  }
+
+  /* --- Right Column (Content) --- */
+  .megamenu__content-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-content: flex-start;
+    padding: 2.5rem;
+  }
+
+  .megamenu__column-box {
+    flex: 1 1 250px; /* Grow/shrink from 250px base */
+    max-width: 265px; /* Prevent over-stretching */
+    min-width: 200px;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: block;
+    text-decoration: none;
+  }
+
+  .megamenu__column-box:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .megamenu__column-box:hover .megamenu__title {
+    color: #c1151b;
+  }
+
+  .megamenu__title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1c1c1c;
+    transition: color 0.2s ease;
+  }
+
+  .megamenu__title--link {
+    text-decoration: none;
+  }
+
+  .megamenu__column-box:hover .megamenu__title--link {
+    color: #c1151b;
+  }
+
+  .megamenu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .megamenu__list a {
+    text-decoration: none;
+    color: #333;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+  }
+  .megamenu__list a:hover {
+    color: #c1151b;
+  }
+  /* --- Special Case: Page Box (Image Top) --- */
+  .megamenu__column-box--page {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem; /* Adjust padding to make room for image */
+  }
+  .megamenu__page-image-wrapper {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #f9f9f9;
+  }
+  .megamenu__page-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .megamenu__column-box--page .megamenu__title {
+    margin: 0; /* Remove bottom margin since lists are hidden */
+  }
+
+  /* --- Special Case: Product Box (Image Right) --- */
+  .megamenu__column-box--product {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .megamenu__product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+  .megamenu__column-box--product .megamenu__title {
+    margin: 0; /* Remove bottom margin since lists are hidden */
+    text-align: left;
+    flex-grow: 1;
+  }
+
+  /* --- Ensure hover works on new layouts --- */
+  .megamenu__column-box--product:hover .megamenu__title,
+  .megamenu__column-box--page:hover .megamenu__title {
+    color: #c1151b;
+  }
+</style>

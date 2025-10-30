@@ -21,26 +21,38 @@
     margin: 0;
     font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
   }
+
+  /* This wrapper hides the overflow */
+  .news-scroller-wrapper {
+    /* REMOVE "overflow: hidden;" */
+    padding: 20px 0;
+    max-width: 100%;
+  }
+
   .news-scroller-container {
     display: flex;
     gap: 20px;
-    overflow-x: auto;
-    padding: 20px;
-    cursor: grab;
+    padding: 0 20px;
     user-select: none;
+    overflow-x: auto;
+    cursor: pointer;
+
+    /* --- Add these lines back --- */
+
+    /* Hides scrollbar for Firefox */
     scrollbar-width: none;
+
+    /* Hides scrollbar for IE/Edge */
     -ms-overflow-style: none;
   }
-  /* Center items if there are too few to scroll */
-  .news-scroller-container.not-scrollable {
-    justify-content: center;
-  }
+
+  /* Hides scrollbar for Chrome, Safari, and Opera */
   .news-scroller-container::-webkit-scrollbar {
     display: none;
   }
-  .news-scroller-container.is-dragging {
-    cursor: grabbing;
-  }
+
+
+  /* --- Card Styles (Unchanged) --- */
   .news-card {
     flex: 0 0 320px;
     background-color: #fff;
@@ -53,7 +65,7 @@
   }
   .news-card-image-link {
     display: block;
-    aspect-ratio: 1 / 1; /* Square aspect ratio */
+    aspect-ratio: 1 / 1;
   }
   .news-card-image {
     width: 100%;
@@ -134,10 +146,6 @@
     .news-card {
       flex-basis: 280px;
     }
-    .news-scroller-container {
-      padding: 20px 15px;
-      gap: 15px;
-    }
   }
 </style>
 
@@ -147,61 +155,61 @@
       <h2 class="news-scroller-heading">{{ section.settings.heading | escape }}</h2>
     {% endif %}
   </div>
-
-  <div class="news-scroller-container" data-section-id="{{ section.id }}">
-    {%- liquid
-      assign blog = blogs[section.settings.blog]
-    -%}
-    {%- for article in blog.articles limit: section.settings.posts_to_show -%}
-      <div class="news-card">
-        {%- if article.image -%}
-          <a href="{{ article.url }}" class="news-card-image-link">
-            {{
-              article.image
-              | image_url: width: 320, height: 320, crop: 'center'
-              | image_tag: loading: 'lazy', class: 'news-card-image'
-            }}
-          </a>
-        {%- else -%}
-          <div class="news-card-image-link">
-            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
-          </div>
-        {%- endif -%}
-        <div class="news-card-content">
-          <div class="news-card-meta">
-            {%- if section.settings.show_date -%}
-              <span>{{ article.published_at | time_tag: format: 'date' }}</span>
-            {%- endif -%}
-            {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
-            {%- if section.settings.show_author -%}
-              <span>by {{ article.author }}</span>
-            {%- endif -%}
-          </div>
-          <h3 class="news-card-title">
-            <a href="{{ article.url }}" style="color: inherit; text-decoration: none;">{{ article.title }}</a>
-          </h3>
-          <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
-          <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
-        </div>
-      </div>
-    {%- else -%}
-      {%- for i in (1..4) -%}
+  <div class="news-scroller-wrapper">
+    <div class="news-scroller-container" data-section-id="{{ section.id }}">
+      {%- liquid
+        assign blog = blogs[section.settings.blog]
+      -%}
+      {%- for article in blog.articles limit: section.settings.posts_to_show -%}
         <div class="news-card">
-          <div class="news-card-image-link">
-            {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
-          </div>
+          {%- if article.image -%}
+            <a href="{{ article.url }}" class="news-card-image-link">
+              {{
+                article.image
+                | image_url: width: 320, height: 320, crop: 'center'
+                | image_tag: loading: 'lazy', class: 'news-card-image'
+              }}
+            </a>
+          {%- else -%}
+            <div class="news-card-image-link">
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+            </div>
+          {%- endif -%}
           <div class="news-card-content">
-            <h3 class="news-card-title">Example News Article</h3>
-            <p class="news-card-excerpt">
-              This is where the article excerpt will appear. Select a blog in the theme editor to show your posts.
-            </p>
-            <a href="#" class="news-card-read-more">Read More</a>
+            <div class="news-card-meta">
+              {%- if section.settings.show_date -%}
+                <span>{{ article.published_at | time_tag: format: 'date' }}</span>
+              {%- endif -%}
+              {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
+              {%- if section.settings.show_author -%}
+                <span>by {{ article.author }}</span>
+              {%- endif -%}
+            </div>
+            <h3 class="news-card-title">
+              <a href="{{ article.url }}" style="color: inherit; text-decoration: none;">{{ article.title }}</a>
+            </h3>
+            <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
+            <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
           </div>
         </div>
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <div class="news-card">
+            <div class="news-card-image-link">
+              {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+            </div>
+            <div class="news-card-content">
+              <h3 class="news-card-title">Example News Article</h3>
+              <p class="news-card-excerpt">
+                This is where the article excerpt will appear. Select a blog in the theme editor to show your posts.
+              </p>
+              <a href="#" class="news-card-read-more">Read More</a>
+            </div>
+          </div>
+        {%- endfor -%}
       {%- endfor -%}
-    {%- endfor -%}
+    </div>
   </div>
-
   {%- if blog != blank and section.settings.show_see_all_button -%}
     <div class="news-scroller-footer">
       <a href="{{ blog.url }}" class="news-scroller-see-all">
@@ -296,106 +304,167 @@
 {% if section.settings.autoscroll %}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('--- News Scroller V5 (Diagnostics) ---');
       const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
-      if (!scroller) return;
 
+      if (!scroller) {
+        console.error('Error: Scroller container not found. Make sure data-section-id matches:', '{{ section.id }}');
+        return;
+      }
+      console.log('Scroller element found:', scroller);
+
+      // Use a short timeout to let browser render first
       setTimeout(() => {
-        // Check if the content is wide enough to need scrolling
-        const isScrollable = scroller.scrollWidth > 1200;
-        
-        if (!isScrollable) {
-          scroller.classList.add('not-scrollable');
+        console.log('Running setup...');
+        const originalItems = Array.from(scroller.children);
+        if (originalItems.length === 0) {
+          console.warn('Scroller has no child items. Exiting.');
           return;
         }
-        
-        scroller.classList.add('is-scrollable');
-        
-        // --- 1. Measure BEFORE duplicating for cross-browser reliability ---
-        const originalContentWidth = scroller.scrollWidth;
-        const originalItems = Array.from(scroller.children);
+        console.log('Found', originalItems.length, 'original items.');
 
-        if (originalItems.length === 0) return;
-
-        // --- 2. Duplicate items for infinite loop effect ---
-        originalItems.forEach(item => {
-          const clonedItem = item.cloneNode(true);
-          clonedItem.setAttribute('aria-hidden', 'true');
-          
-          clonedItem.querySelectorAll('a').forEach(link => {
-              link.setAttribute('tabindex', '-1');
-              link.style.pointerEvents = 'none';
-          });
-
-          scroller.appendChild(clonedItem);
+        // --- 1. Measure Content ---
+        const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
+        let originalContentWidth = 0;
+        originalItems.forEach((item) => {
+          originalContentWidth += item.offsetWidth;
         });
+        originalContentWidth += (originalItems.length - 1) * gap;
+        console.log('Gap:', gap, '| Original Content Width:', originalContentWidth);
 
-        // --- 3. Auto-Scroll Logic ---
-        let animationFrameId;
-        let isPaused = false;
-        const durationInSeconds = {{ section.settings.autoscroll_duration }};
-        const speed = originalContentWidth / (durationInSeconds * 60);
+        // --- 2. Check if Scrolling is Needed (using V3 logic) ---
+        const isScrollable = originalContentWidth > 1200;
+        console.log('Is Scrollable? (width > 1200):', isScrollable);
 
-        function scrollStep() {
-          if (isPaused) return;
-
-          // Use a more robust 'if' check for the loop
-          if (scroller.scrollLeft >= originalContentWidth) {
-            scroller.scrollLeft -= originalContentWidth;
-          } else {
-            scroller.scrollLeft += speed;
-          }
-          
-          animationFrameId = requestAnimationFrame(scrollStep);
+        if (!isScrollable) {
+          scroller.classList.add('not-scrollable');
+          console.log('Content is not wide enough to scroll. Exiting.');
+          return; // Exit if no scrolling is needed
         }
 
-        // --- 4. Click-and-Drag Scrolling Logic ---
+        // --- 3. Duplicate Items for Infinite Loop ---
+        originalItems.forEach((item) => {
+          const clonedItem = item.cloneNode(true);
+          clonedItem.setAttribute('aria-hidden', 'true');
+          scroller.appendChild(clonedItem);
+        });
+        console.log('Duplicated items for infinite loop. Total children:', scroller.children.length);
+
+        // --- 4. JS-based Auto-scroll Setup ---
+        const totalAnimatedWidth = originalContentWidth + gap;
+        const totalDuration = parseFloat('{{ section.settings.autoscroll_duration }}');
+        const pixelsPerSecond = totalAnimatedWidth / totalDuration;
+        let lastTimestamp = 0;
+        console.log(
+          'Auto-scroll setup: Duration:',
+          totalDuration + 's',
+          '| Total Width:',
+          totalAnimatedWidth + 'px',
+          '| Speed:',
+          pixelsPerSecond + 'px/s'
+        );
+
+        // --- 5. Click-and-Drag State (from your example) ---
         let isDown = false;
         let startX;
         let scrollLeft;
         let hasDragged = false;
+        let isHovering = false;
 
         scroller.addEventListener('mousedown', (e) => {
-          if (e.target.closest('a')) return;
-          
-          e.preventDefault();
+          e.preventDefault(); // Prevents text selection/image drag
           isDown = true;
-          isPaused = true;
           hasDragged = false;
           scroller.classList.add('is-dragging');
-          startX = e.pageX - scroller.offsetLeft;
+          scroller.style.cursor = 'grabbing';
+          startX = e.pageX; // Use pageX for consistency
           scrollLeft = scroller.scrollLeft;
-          cancelAnimationFrame(animationFrameId);
+          console.log('%cDrag Start', 'color: orange;', 'startX:', startX, 'scrollLeft:', scrollLeft);
         });
 
-        const stopDragging = () => {
-          if (!isDown) return;
+        const stopDragging = (eventName) => {
+          if (!isDown) return; // Prevent multiple logs
           isDown = false;
-          isPaused = false;
           scroller.classList.remove('is-dragging');
-          requestAnimationFrame(scrollStep);
+          scroller.style.cursor = 'pointer';
+          console.log('%cDrag Stop', 'color: #ccc;', 'via:', eventName, 'Has dragged?', hasDragged);
         };
 
-        scroller.addEventListener('mouseleave', stopDragging);
-        scroller.addEventListener('mouseup', stopDragging);
+        scroller.addEventListener('mouseup', () => stopDragging('mouseup'));
+        scroller.addEventListener('mouseleave', () => {
+          stopDragging('mouseleave');
+          isHovering = false;
+          console.log('Mouse Leave');
+        });
+
+        scroller.addEventListener('mouseenter', () => {
+          isHovering = true;
+          console.log('Mouse Enter');
+        });
 
         scroller.addEventListener('mousemove', (e) => {
           if (!isDown) return;
           e.preventDefault();
           hasDragged = true;
-          const x = e.pageX - scroller.offsetLeft;
-          const walk = (x - startX) * 2;
-          scroller.scrollLeft = scrollLeft - walk;
-        });
-        
-        scroller.addEventListener('click', (e) => {
-          if (hasDragged && !e.target.closest('a.news-card-read-more')) {
-            e.preventDefault();
+
+          const x = e.pageX;
+          const walk = x - startX; // How far the mouse has moved
+          const newScrollLeft = scrollLeft - walk;
+          scroller.scrollLeft = newScrollLeft;
+          // Throttled log to avoid spamming the console
+          if (Math.abs(walk) % 10 < 2) {
+            console.log('Dragging...', 'walk:', walk, 'newScrollLeft:', newScrollLeft);
           }
-        }, true);
+        });
 
-        // Start the animation
-        requestAnimationFrame(scrollStep);
+        // --- 6. Click Prevention ---
+        scroller.addEventListener(
+          'click',
+          (e) => {
+            if (hasDragged) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('%cClick Prevented', 'color: red;', 'Target:', e.target);
+            } else {
+              console.log('Click Allowed');
+            }
+          },
+          true // Use capture phase to stop click before it reaches the link
+        );
 
+        // --- 7. Unified Auto-Scroll and Drag Loop ---
+        function autoScrollLoop(timestamp) {
+          if (lastTimestamp === 0) {
+            lastTimestamp = timestamp;
+            console.log('Starting autoscroll loop...');
+          }
+
+          const deltaTime = (timestamp - lastTimestamp) / 1000; // Time in seconds
+          lastTimestamp = timestamp;
+
+          // Only auto-scroll if NOT being dragged and NOT hovered
+          if (!isDown && !isHovering) {
+            scroller.scrollLeft += pixelsPerSecond * deltaTime;
+
+            // Loop back to the start
+            if (scroller.scrollLeft >= totalAnimatedWidth) {
+              console.log('Looping animation');
+              scroller.scrollLeft -= totalAnimatedWidth;
+            }
+          } else {
+            // Log when paused (throttled)
+            if (timestamp % 1000 < 50) {
+              // Log approx once per second
+              console.log('Autoscroll Paused (hovering or dragging)');
+            }
+          }
+
+          // Continue the loop
+          requestAnimationFrame(autoScrollLoop);
+        }
+
+        // Start the loop
+        requestAnimationFrame(autoScrollLoop);
       }, 100);
     });
   </script>
