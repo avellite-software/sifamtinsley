@@ -88,10 +88,42 @@
             "product": "va16",
             "second_image": false
           }
+        },
+        "product_X9efAW": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": false
+          }
+        },
+        "product_T6whYE": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": false
+          }
+        },
+        "product_39Y7cg": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": false
+          }
+        },
+        "product_8Lz9JX": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": false
+          }
         }
       },
       "block_order": [
-        "product_BcMeET"
+        "product_BcMeET",
+        "product_X9efAW",
+        "product_T6whYE",
+        "product_39Y7cg",
+        "product_8Lz9JX"
       ],
       "settings": {
         "heading": "Multimedia collage",
