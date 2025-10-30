@@ -1,8 +1,9 @@
 {% comment %}
   This snippet renders the full-width megamenu dropdown.
-  - V5 Changes:
-    - Megamenu cards are now flexible but have a max-width
-      to prevent over-stretching on lines with few items.
+  - V6 Changes:
+    - Simplified logic to be binary: collection vs. page.
+    - Collection (product-style): Image on the right.
+    - Page (default-style): Image on top with a fallback.
 {% endcomment %}
 
 <div class="megamenu-wrapper">
@@ -30,16 +31,22 @@
           assign box_classes = 'megamenu__column-box'
           assign special_content = ''
 
-          if parent_link.title == 'Products'
+          if child_link.object_type == 'collection'
             assign box_classes = box_classes | append: ' megamenu__column-box--product'
-            if child_link.image != blank
-              assign special_content = child_link.image | image_url: width: 100 | image_tag: loading: 'lazy', class: 'megamenu__product-image'
+
+            assign collection_image = child_link.object.image | default: child_link.object.products.first.featured_image
+
+            if collection_image != blank
+              assign special_content = collection_image | image_url: width: 100 | image_tag: loading: 'lazy', class: 'megamenu__product-image'
             endif
 
-          elsif child_link.object_type == 'page'
+          else
             assign box_classes = box_classes | append: ' megamenu__column-box--page'
-            assign page_object = pages[child_link.handle]
-            assign page_image = page_object.metafields.custom.page_image.value
+            assign page_image = ''
+
+            if child_link.object_type == 'page'
+              assign page_image = child_link.object.metafields.custom.page_image.value
+            endif
 
             assign image_to_use = ''
             if page_image != blank
@@ -167,8 +174,8 @@
   }
 
   .megamenu__column-box {
-    flex: 1 1 250px; /* Grow/shrink from 250px base */
-    max-width: 265px; /* Prevent over-stretching */
+    flex: 1 1 250px;
+    max-width: 265px;
     min-width: 200px;
     padding: 1.5rem;
     background: #fff;
@@ -227,7 +234,7 @@
   .megamenu__column-box--page {
     display: flex;
     flex-direction: column;
-    padding: 1rem; /* Adjust padding to make room for image */
+    padding: 1rem;
   }
   .megamenu__page-image-wrapper {
     width: 100%;
@@ -243,7 +250,7 @@
     object-fit: cover;
   }
   .megamenu__column-box--page .megamenu__title {
-    margin: 0; /* Remove bottom margin since lists are hidden */
+    margin: 0;
   }
 
   /* --- Special Case: Product Box (Image Right) --- */
@@ -261,7 +268,7 @@
     border-radius: 4px;
   }
   .megamenu__column-box--product .megamenu__title {
-    margin: 0; /* Remove bottom margin since lists are hidden */
+    margin: 0;
     text-align: left;
     flex-grow: 1;
   }
