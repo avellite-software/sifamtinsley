@@ -1,7 +1,7 @@
 {% comment %}
   Section: Presenter Banner
-  - V6: Robust Background Logic
-  - The animated background is always present but covered if an image is selected.
+  - V7: Fixed Z-Index Layering
+  - Ensures background image correctly covers the animated background when selected.
 {% endcomment %}
 
 {%- style -%}
@@ -16,14 +16,14 @@
     z-index: 1;
   }
 
-  /* --- LAYER 1: AMBIENT ANIMATED BACKGROUND --- */
+  /* --- LAYER 0: AMBIENT ANIMATED BACKGROUND --- */
   .presenter-interactive-bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
+    z-index: 0; /* Bottom layer */
     pointer-events: none;
     overflow: hidden;
   }
@@ -55,7 +55,7 @@
     z-index: -1;
   }
 
-  /* Subtle Dot Pattern Overlay */
+  /* --- LAYER 1: DOT PATTERN --- */
   .presenter-section-{{ section.id }}::after {
     content: "";
     position: absolute;
@@ -67,7 +67,7 @@
     background-size: 30px 30px;
     opacity: 0.1;
     pointer-events: none;
-    z-index: 1; /* Sits above colors but below content */
+    z-index: 1; /* Above colors */
   }
 
   @keyframes float-1 {
@@ -90,10 +90,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2; /* Sits on top of animated background */
+    z-index: 2; /* Crucial: Sits on top of animated background & dots */
     background-size: {{ section.settings.image_fit }};
     background-repeat: no-repeat;
     background-position: center;
+    background-color: {{ section.settings.background_color }}; /* fallback */
   }
 
   /* --- LAYER 3: IMAGE OVERLAY (Optional) --- */
@@ -113,7 +114,7 @@
   .presenter-section--medium { min-height: 400px; }
   .presenter-section--large { min-height: 550px; }
 
-  /* Content Layout */
+  /* --- LAYER 4: CONTENT --- */
   .presenter-section__content-wrapper {
     max-width: 1200px;
     margin: 0 auto;
@@ -186,12 +187,12 @@
 -%}
 
 <div id="presenter-{{ section.id }}" class="{{ section_classes }}">
-  {% comment %} 1. Always render the animated background {% endcomment %}
+  {% comment %} 1. Always render the animated background (it sits at z-index 0) {% endcomment %}
   <div class="presenter-interactive-bg">
-    <div><div></div></div>
+    <div></div>
   </div>
 
-  {% comment %} 2. Conditionally render the image on top if selected {% endcomment %}
+  {% comment %} 2. Conditionally render the image on top (it sits at z-index 2) {% endcomment %}
   {%- if section.settings.background_type == 'image' and section.settings.background_image != blank -%}
     <div
       class="presenter-image-layer"
@@ -200,7 +201,7 @@
     <div class="presenter-overlay"></div>
   {%- endif -%}
 
-  {% comment %} 3. The Content {% endcomment %}
+  {% comment %} 3. The Content (it sits at z-index 4) {% endcomment %}
   <div class="presenter-section__content-wrapper">
     <div class="presenter-section__content">
       {%- if presenter_title != blank -%}
@@ -283,13 +284,13 @@
     {
       "type": "color",
       "id": "blob_color_1",
-      "label": "Animated Blob Color",
+      "label": "Animated Blob 1 Color",
       "default": "#c1151b"
     },
     {
       "type": "color",
       "id": "blob_color_2",
-      "label": "Animated Blob Color",
+      "label": "Animated Blob 2 Color",
       "default": "#c1151b"
     },
     {
