@@ -23,8 +23,13 @@
       "settings": {
         "title": "Contact Us",
         "description": "",
-        "height": "large",
-        "text_color": "#ffffff"
+        "height": "small",
+        "text_color": "#ffffff",
+        "background_type": "color",
+        "background_color": "#111111",
+        "image_fit": "cover",
+        "overlay_color": "#000000",
+        "overlay_opacity": 50
       }
     },
     "form": {

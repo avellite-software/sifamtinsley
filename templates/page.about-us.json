@@ -24,9 +24,11 @@
         "title": "About Us",
         "description": "<p> </p>",
         "height": "small",
-        "background_type": "color",
-        "background_color": "#f5f5f5",
         "text_color": "#ffffff",
+        "background_type": "color",
+        "background_color": "#121212",
+        "image_fit": "cover",
+        "overlay_color": "#000000",
         "overlay_opacity": 50
       }
     },
@@ -57,6 +59,7 @@
       "type": "simple-image-banner",
       "name": "Simple Image Banner",
       "settings": {
+        "border_radius": 12,
         "image": "shopify://shop_images/newsletter-small-banner-1024x187.jpg",
         "link": "shopify://pages/newsletter-sign-up",
         "padding_top": 36,
