@@ -1,7 +1,7 @@
 {% comment %}
   Section: Presenter Banner
-  - V4: Ambient Animated Background (No Mouse Interaction)
-  - Features overlapping, floating gradients for a premium "breathing" light effect.
+  - V6: Robust Background Logic
+  - The animated background is always present but covered if an image is selected.
 {% endcomment %}
 
 {%- style -%}
@@ -9,16 +9,14 @@
     display: flex;
     align-items: center;
     position: relative;
-    background-color: #111; /* Deep dark base */
+    background-color: {{ section.settings.background_color }}; /* Customizable Base */
     border-bottom-right-radius: 50px;
     overflow: hidden;
-    /* Add a subtle shadow to lift the header off the white page below */
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     z-index: 1;
   }
 
-  /* --- AMBIENT BACKGROUND ANIMATION --- */
-
+  /* --- LAYER 1: AMBIENT ANIMATED BACKGROUND --- */
   .presenter-interactive-bg {
     position: absolute;
     top: 0;
@@ -30,20 +28,20 @@
     overflow: hidden;
   }
 
-  /* Blob 1: The Brand Red */
+  /* Blob 1 */
   .presenter-interactive-bg div {
     position: absolute;
     top: -50%;
     left: -20%;
     width: 100%;
     height: 150%;
-    background: radial-gradient(circle, rgba(193, 21, 27, 0.35) 0%, transparent 60%);
+    background: radial-gradient(circle, {{ section.settings.blob_color_1 | color_modify: 'alpha', 0.35 }} 0%, transparent 60%);
     transform-origin: center center;
     animation: float-1 9s ease-in-out infinite alternate;
     opacity: 0.8;
   }
 
-  /* Blob 2: A Deeper, Darker Red for Contrast/Depth */
+  /* Blob 2 */
   .presenter-interactive-bg::before {
     content: '';
     position: absolute;
@@ -51,13 +49,13 @@
     right: -20%;
     width: 100%;
     height: 150%;
-    background: radial-gradient(circle, rgba(193, 21, 27, 0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, {{ section.settings.blob_color_2 | color_modify: 'alpha', 0.4 }} 0%, transparent 70%);
     transform-origin: center center;
     animation: float-2 12s ease-in-out infinite alternate-reverse;
     z-index: -1;
   }
 
-  /* Subtle Dot Pattern Overlay (Texture) */
+  /* Subtle Dot Pattern Overlay */
   .presenter-section-{{ section.id }}::after {
     content: "";
     position: absolute;
@@ -66,14 +64,12 @@
     width: 100%;
     height: 100%;
     background-image: radial-gradient(#343434 1.5px, transparent 1.5px);
-    background-size: 30px 30px; /* Slightly larger grid */
+    background-size: 30px 30px;
     opacity: 0.1;
     pointer-events: none;
-    z-index: 1;
+    z-index: 1; /* Sits above colors but below content */
   }
 
-  /* Keyframes for organic movement */
-  /* UPDATED: Reduced Y values to prevent clipping, increased X for movement */
   @keyframes float-1 {
     0% { transform: translate(0, 0) scale(2); }
     33% { transform: translate(15%, 2%) scale(2.2); }
@@ -87,13 +83,20 @@
     100% { transform: translate(15%, 3%) scale(1.8); }
   }
 
+  /* --- LAYER 2: IMAGE BACKGROUND (Optional) --- */
+  .presenter-image-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2; /* Sits on top of animated background */
+    background-size: {{ section.settings.image_fit }};
+    background-repeat: no-repeat;
+    background-position: center;
+  }
 
-  /* Height Options */
-  .presenter-section--small { min-height: 250px; }
-  .presenter-section--medium { min-height: 400px; }
-  .presenter-section--large { min-height: 550px; }
-
-  /* Background Image Overlay (If image is selected) */
+  /* --- LAYER 3: IMAGE OVERLAY (Optional) --- */
   .presenter-overlay {
     position: absolute;
     top: 0;
@@ -102,8 +105,13 @@
     bottom: 0;
     background-color: {{ section.settings.overlay_color }};
     opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
-    z-index: 0;
+    z-index: 3; /* Sits on top of image */
   }
+
+  /* Height Options */
+  .presenter-section--small { min-height: 250px; }
+  .presenter-section--medium { min-height: 400px; }
+  .presenter-section--large { min-height: 550px; }
 
   /* Content Layout */
   .presenter-section__content-wrapper {
@@ -112,7 +120,7 @@
     padding: 2rem 1.5rem;
     width: 100%;
     position: relative;
-    z-index: 2;
+    z-index: 4; /* Topmost layer */
   }
 
   /* Glass Box Styles */
@@ -120,12 +128,10 @@
     text-align: left;
     color: {{ section.settings.text_color }};
     max-width: 700px;
-
-    /* Glass Effect */
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(160px);
+    backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
     padding: 3rem;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -146,9 +152,7 @@
     color: inherit;
     opacity: 0.9;
   }
-  .presenter-section__description p {
-    margin: 0;
-  }
+  .presenter-section__description p { margin: 0; }
 
   @media screen and (max-width: 768px) {
     .presenter-section__content {
@@ -160,10 +164,6 @@
 {%- endstyle -%}
 
 {%- liquid
-  assign background_type = section.settings.background_type
-  assign bg_color = section.settings.background_color
-  assign bg_image = section.settings.background_image
-
   assign section_classes = 'presenter-section presenter-section-' | append: section.id | append: ' presenter-section--' | append: section.settings.height
 
   assign presenter_title = section.settings.title
@@ -185,31 +185,18 @@
   endif
 -%}
 
-<div
-  id="presenter-{{ section.id }}"
-  class="{{ section_classes }}"
-  style="
-    {% if background_type == 'image' and bg_image != blank %}
-      background-image: url('{{ bg_image | image_url: width: 1920 }}');
-      background-size: {{ section.settings.image_fit }};
-      background-repeat: no-repeat;
-      background-position: center;
-    {% else %}
-      background-color: {{ bg_color }};
-    {% endif %}
-  "
->
-  {% comment %}
-    1. Ambient Background (Only if 'color' mode is selected or no image present)
-  {% endcomment %}
-  {%- if background_type == 'color' -%}
-    <div class="presenter-interactive-bg">
-      <div><div></div></div>
-    </div>
-  {%- endif -%}
+<div id="presenter-{{ section.id }}" class="{{ section_classes }}">
+  {% comment %} 1. Always render the animated background {% endcomment %}
+  <div class="presenter-interactive-bg">
+    <div></div>
+  </div>
 
-  {% comment %} 2. The Overlay Div (Only if image is used) {% endcomment %}
-  {%- if background_type == 'image' and bg_image != blank -%}
+  {% comment %} 2. Conditionally render the image on top if selected {% endcomment %}
+  {%- if section.settings.background_type == 'image' and section.settings.background_image != blank -%}
+    <div
+      class="presenter-image-layer"
+      style="background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}');"
+    ></div>
     <div class="presenter-overlay"></div>
   {%- endif -%}
 
@@ -274,24 +261,40 @@
     },
     {
       "type": "header",
-      "content": "Background"
+      "content": "Background Settings"
     },
     {
       "type": "select",
       "id": "background_type",
-      "label": "Background type",
+      "label": "Background Mode",
       "options": [
-        { "value": "color", "label": "Animated Color" },
-        { "value": "image", "label": "Image" }
+        { "value": "color", "label": "Animated Colors" },
+        { "value": "image", "label": "Custom Image" }
       ],
-      "default": "color"
+      "default": "color",
+      "info": "Choose between the animated blobs or a static image."
     },
     {
       "type": "color",
       "id": "background_color",
-      "label": "Base background color",
-      "default": "#111111",
-      "info": "Used as the base behind the animated gradients."
+      "label": "Base Background Color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "blob_color_1",
+      "label": "Animated Blob 1 Color",
+      "default": "#c1151b"
+    },
+    {
+      "type": "color",
+      "id": "blob_color_2",
+      "label": "Animated Blob 2 Color",
+      "default": "#c1151b"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings (If 'Custom Image' selected)"
     },
     {
       "type": "image_picker",
@@ -301,11 +304,11 @@
     {
       "type": "select",
       "id": "image_fit",
-      "label": "Background image fit",
+      "label": "Image fit",
       "options": [
         { "value": "cover", "label": "Cover" },
         { "value": "contain", "label": "Contain" },
-        { "value": "auto", "label": "Original size (Auto)" }
+        { "value": "auto", "label": "Original size" }
       ],
       "default": "cover"
     },
