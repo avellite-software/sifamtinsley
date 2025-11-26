@@ -42,7 +42,10 @@
       "type": "product-related-blogs",
       "settings": {
         "heading": "Related Articles",
-        "autoscroll": true
+        "show_date": true,
+        "show_author": false,
+        "autoscroll": false,
+        "autoscroll_duration": 60
       }
     },
     "image_with_text_V4DDNV": {
