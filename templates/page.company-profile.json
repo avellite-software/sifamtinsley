@@ -24,11 +24,7 @@
         "title": "",
         "description": "<p> </p>",
         "height": "small",
-        "background_type": "color",
-        "background_color": "#f5f5f5",
-        "text_color": "#121212",
-        "image_fit": "cover",
-        "overlay_opacity": 50
+        "text_color": "#ffffff"
       }
     },
     "rich_text_FUcatY": {
@@ -81,6 +77,7 @@
       "settings": {
         "image": "shopify://shop_images/alan.jpg",
         "image_fit": "contain",
+        "image_border_radius": 12,
         "height": "small",
         "desktop_image_width": "small",
         "layout": "image_first",
@@ -121,6 +118,7 @@
       "settings": {
         "image": "shopify://shop_images/rob.jpg",
         "image_fit": "cover",
+        "image_border_radius": 12,
         "height": "small",
         "desktop_image_width": "small",
         "layout": "text_first",
@@ -161,6 +159,7 @@
       "settings": {
         "image": "shopify://shop_images/darren_byford.jpg",
         "image_fit": "cover",
+        "image_border_radius": 12,
         "height": "small",
         "desktop_image_width": "small",
         "layout": "image_first",
