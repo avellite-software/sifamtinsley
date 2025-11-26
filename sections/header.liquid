@@ -83,7 +83,12 @@
     <div class="header-center">
       <form action="{{ routes.search_url }}" method="get" class="search-form">
         <input id="SearchBarInput" type="search" name="q" placeholder="Search..." class="search-input">
-        <button type="submit" class="search-btn">Search</button>
+        <button type="submit" class="search-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" class="search-btn-icon" style="width:20px;">
+            <path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z"/>
+          </svg>
+          <span class="visually-hidden">Search</span>
+        </button>
       </form>
     </div>
 
@@ -94,7 +99,7 @@
             {{ link.title }}
             {%- if link.links != empty -%}
               <span class="dropdown-caret">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                   <path d="M7 10l5 5 5-5z"/>
                 </svg>
               </span>
@@ -109,8 +114,22 @@
       {%- if section.settings.contact_button_link != blank and section.settings.contact_button_text != blank -%}
         <a href="{{ section.settings.contact_button_link }}" class="header-btn red-btn">
           {{ section.settings.contact_button_text }}
+          <svg viewBox="0 0 640 640" width="18" height="18" fill="currentColor" style="margin-left: 6px;">
+            <path d="M322.5 351.7L523.4 150.9L391 520.3L322.5 351.7zM489.4 117L288.6 317.8L120 249.3L489.4 117zM70.1 280.8L275.9 364.4L359.5 570.2C364.8 583.3 377.6 591.9 391.8 591.9C406.5 591.9 419.6 582.7 424.6 568.8L602.6 72C606.1 62.2 603.6 51.4 596.3 44C589 36.6 578.1 34.2 568.3 37.7L71.4 215.7C57.5 220.7 48.3 233.8 48.3 248.5C48.3 262.7 56.9 275.5 70 280.8z"/>
+          </svg>
         </a>
       {%- endif -%}
+      <a href="tel:+441376335271">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          width="26"
+          height="26"
+          fill="#333"
+        >
+          <path d="M224.2 89C216.3 70.1 195.7 60.1 176.1 65.4L170.6 66.9C106 84.5 50.8 147.1 66.9 223.3C104 398.3 241.7 536 416.7 573.1C493 589.3 555.5 534 573.1 469.4L574.6 463.9C580 444.2 569.9 423.6 551.1 415.8L453.8 375.3C437.3 368.4 418.2 373.2 406.8 387.1L368.2 434.3C297.9 399.4 241.3 341 208.8 269.3L253 233.3C266.9 222 271.6 202.9 264.8 186.3L224.2 89z"/>
+        </svg>
+      </a>
       <div style="display:none">
         <!-- Hidden until future confirmation of cart usage on this site -->
         <a href="{{ routes.cart_url }}" class="header-btn cart-btn" id="cart-icon-bubble">
@@ -152,7 +171,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 999;
+    z-index: 9999;
   }
   .header-spacer {
     /* Height is set by JS */
@@ -180,7 +199,7 @@
     height: var(--header-height);
     font-family: inherit;
     position: relative;
-    z-index: 999;
+    z-index: 9999;
     outline: none !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* <-- ADD THIS LINE */
   }
@@ -415,7 +434,7 @@
     border-radius: 4px;
     background: none;
     color: black;
-    font-weight: 500;
+    font-weight: 900;
     text-decoration: none;
     font-size: 16px;
     transition: background 0.2s, color 0.2s;
@@ -590,6 +609,12 @@
     .mobile-nav-content .dropdown.is-open > .dropdown-content {
       display: flex;
     }
+    .search-btn-icon {
+      width: 1em; /* Makes icon scale with button's font-size */
+      height: 1em;
+      fill: currentColor; /* Makes icon inherit the button's color (black) */
+      display: block;
+    }
   }
 </style>
 
@@ -679,27 +704,58 @@
     mobileNavOverlay.addEventListener('click', () => toggleMenu(false));
 
     const navContentContainer = mobileNavPanel.querySelector('.mobile-nav-content');
+
+    // --- NEW: Mobile dropdown click logic ---
     navContentContainer.addEventListener('click', (e) => {
       const dropdownLink = e.target.closest('.dropdown-link');
       if (!dropdownLink) return;
+
       const parentDropdown = dropdownLink.closest('.dropdown');
-      const submenu = parentDropdown.querySelector('.dropdown-content');
-      if (!submenu) {
-        toggleMenu(false);
-        return;
+
+      // Find the mobile layout which is a CHILD of the .dropdown
+      const mobileSubmenu = parentDropdown.querySelector('.megamenu__mobile-layout');
+
+      // Find the desktop megamenu which is also a CHILD of the .dropdown
+      const desktopMegamenu = parentDropdown.querySelector('.megamenu-wrapper');
+
+      // If neither a mobile nor desktop submenu exists for this link, let it navigate
+      if (!mobileSubmenu && !desktopMegamenu) {
+        toggleMenu(false); // Close the mobile menu
+        return; // Allow the link to work
       }
+
+      // Prevent default navigation for any link that *has* an associated submenu
       e.preventDefault();
+
+      // If the parent dropdown is already open, clicking again should navigate
+      // This applies to the original dropdownLink's href, not the submenu's
       if (parentDropdown.classList.contains('is-open')) {
         window.location.href = dropdownLink.href;
         return;
       }
-      const openSubmenus = navContentContainer.querySelectorAll('.dropdown.is-open');
-      openSubmenus.forEach((item) => {
+
+      // Close any other open dropdowns and their corresponding submenus
+      const openDropdowns = navContentContainer.querySelectorAll('.dropdown.is-open');
+      openDropdowns.forEach((item) => {
         if (item !== parentDropdown) {
           item.classList.remove('is-open');
+          // Hide its corresponding mobile layout child
+          const otherMobileSubmenu = item.querySelector('.megamenu__mobile-layout');
+          if (otherMobileSubmenu) {
+            otherMobileSubmenu.classList.remove('is-open');
+          }
         }
       });
+
+      // Open the clicked parent dropdown
       parentDropdown.classList.toggle('is-open');
+
+      // And toggle the .is-open class on its mobile submenu child
+      if (mobileSubmenu) {
+        mobileSubmenu.classList.toggle('is-open');
+      }
+      // Note: The desktop megamenu (.megamenu-wrapper) is typically shown/hidden by CSS based on .dropdown.is-open,
+      // so we don't need explicit JS to toggle its class unless its display logic is separate.
     });
 
     // Desktop touch/click support for main navigation

@@ -2329,7 +2329,7 @@ input[type='checkbox'] {
 }
 
 .shopify-section-group-header-group {
-  z-index: 999;
+  z-index: 9999;
 }
 
 .section-header~.shopify-section-group-header-group {

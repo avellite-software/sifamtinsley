@@ -14,115 +14,143 @@
     }
   }
 
-  /*
-   * NEW CUSTOM COLLAGE STYLES
-   */
+  /* --- Core Grid Setup --- */
   .collage-wrapper-title {
-    margin-top: 0;
     margin-bottom: 3rem;
   }
 
   .collage-{{ section.id }} {
     display: grid;
-    gap: 1.5rem;
+    /* Use a 12-column grid for maximum layout flexibility */
+    grid-template-columns: repeat(12, 1fr);
+    /* Rows have a minimum height, but grow with content */
+    grid-auto-rows: minmax(280px, auto);
+    gap: {{ section.settings.spacing | default: 20 }}px;
   }
 
+  /* --- The Grid Cell Container --- */
   .collage__item {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .collage__item:hover {
-    transform: scale(1.03) translateY(-5px);
+    /* This is the key: Flexbox centering handles the "white space" */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    transition: transform 0.3s ease;
   }
 
+  .collage__item:hover {
+    transform: translateY(-5px);
+    z-index: 2;
+  }
+
+  /* --- The Card Wrapper inside the cell --- */
   .collage-card {
-    height: 100%;
+    /* Ensure the card doesn't exceed its grid cell bounds */
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%; /* Try to fill width */
+
+    /* Optional: Add a slight constraint so super-tall/wide images don't look crazy */
+    /* aspect-ratio: 4 / 5;  <- Uncomment if you want to force a portrait ratio container */
+
     border-radius: 12px;
     overflow: hidden;
     box-shadow: {{ section.settings.card_shadow }};
+    background: #fff; /* Ensure card has a background if padding exists */
   }
 
-  /* This makes the inner card transparent to show the background */
+  /* --- Card Component Overrides (Neutralizing theme styles) --- */
+  .collage-card .card-wrapper {
+     height: 100%;
+  }
   .collage-card .card {
-    background-color: transparent !important;
-    border: none;
-    box-shadow: none;
+    height: 100%;
+    border: none !important;
+    box-shadow: none !important;
   }
   .collage-card .card__inner {
-    background-color: transparent !important;
-    border: none;
-    box-shadow: none;
+    border: none !important;
+    box-shadow: none !important;
   }
-  .collage-card .card__inner:after {
-    display: none;
+  .collage-card .card__content {
+      padding: 15px;
+      text-align: center;
+  }
+  .collage-card .card__information {
+    padding-top: 0;
   }
 
-  /* --- Layout for 1 Item --- */
-  .collage--1-items { grid-template-columns: 1fr; }
 
-  /* --- Layout for 2 Items --- */
-  .collage--2-items { grid-template-columns: 1fr 1fr; }
+  /* =========================================
+     LAYOUT DEFINITIONS (Using 12-col spans)
+     ========================================= */
 
-  /* --- Layout for 3 Items --- */
-  .collage--3-items { grid-template-columns: repeat(3, 1fr); }
+  /* --- 1 Item --- */
+  .collage--1-items .collage__item { grid-column: span 12; grid-row: span 2; }
 
-  /* --- Layout for 4 Items --- */
-  .collage--4-items { grid-template-columns: repeat(2, 1fr); }
+  /* --- 2 Items --- */
+  .collage--2-items .collage__item { grid-column: span 6; grid-row: span 2; }
 
-  /* --- Layout for 5 Items --- */
-  .collage--5-items {
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(250px, auto);
+  /* --- 3 Items --- */
+  .collage--3-items .collage__item { grid-column: span 4; grid-row: span 2; }
+
+  /* --- 4 Items --- */
+  .collage--4-items .collage__item { grid-column: span 6; grid-row: span 2; }
+
+  /* --- 5 Items (Hero Left, 2x2 Right) --- */
+  .collage--5-items .collage__item:nth-child(1) { grid-column: span 6; grid-row: span 2; } /* Hero Left */
+  .collage--5-items .collage__item:nth-child(2),
+  .collage--5-items .collage__item:nth-child(3),
+  .collage--5-items .collage__item:nth-child(4),
+  .collage--5-items .collage__item:nth-child(5) { grid-column: span 3; grid-row: span 1; } /* Small grid items */
+
+
+  /* --- 6 Items (Asymmetrical Layout) --- */
+  /*
+     Row 1: [ Tall (3col) ] [ Big Center (6col) ] [ Top Right (3col) ]
+     Row 2: [ Tall (cont) ] [ Big Center (cont) ] [ Mid Right (3col) ]
+     Row 3: [ Bot Left (3col)] [ Wide Bottom Right (9col)          ]
+  */
+  .collage--6-items { grid-auto-rows: minmax(220px, auto); /* Slightly shorter rows for dense 6-item layout */ }
+  .collage--6-items .collage__item:nth-child(1) { grid-column: span 3; grid-row: span 2; } /* Tall Left */
+  .collage--6-items .collage__item:nth-child(3) { grid-column: span 6; grid-row: span 2; } /* Big Center */
+  .collage--6-items .collage__item:nth-child(4) { grid-column: span 3; grid-row: span 1; } /* Top Right */
+  .collage--6-items .collage__item:nth-child(5) { grid-column: span 3; grid-row: span 1; grid-column-start: 10; } /* Mid Right (forced start) */
+  .collage--6-items .collage__item:nth-child(2) { grid-column: span 3; grid-row: span 1; grid-row-start: 3; } /* Bottom Left */
+  .collage--6-items .collage__item:nth-child(6) { grid-column: span 9; grid-row: span 1; grid-row-start: 3; } /* Wide Bottom Right */
+
+
+  /* --- 7 Items (Hero + 6 grid) --- */
+  .collage--7-items .collage__item:nth-child(1) { grid-column: span 12; grid-row: span 2; } /* Big Hero Top */
+  .collage--7-items .collage__item:not(:first-child) { grid-column: span 4; grid-row: span 1; } /* 3x2 grid below */
+
+
+  /* =========================================
+     RESPONSIVE
+     ========================================= */
+
+  /* Tablet (e.g., 2 columns) */
+  @media screen and (max-width: 990px) {
+     .collage-{{ section.id }} { grid-template-columns: repeat(2, 1fr); }
+
+     /* Reset all spans to simple 1x1 on tablet for stability */
+     [class*="collage--"] .collage__item { grid-column: span 1 !important; grid-row: span 1 !important; }
+
+     /* Optional: make first item bigger on odd counts */
+     .collage--1-items .collage__item,
+     .collage--3-items .collage__item:first-child,
+     .collage--5-items .collage__item:first-child,
+     .collage--7-items .collage__item:first-child { grid-column: span 2 !important; }
   }
-  .collage--5-items .collage__item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
-  .collage--5-items .collage__item:nth-child(2) { grid-column: span 2; }
-  .collage--5-items .collage__item:nth-child(3) { grid-column: span 2; }
 
-  /* --- Layout for 6 Items (Matches your image) --- */
-  .collage--6-items {
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(250px, auto);
-  }
-  .collage--6-items .collage__item:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 2; }
-  .collage--6-items .collage__item:nth-child(2) { grid-column: 1 / 2; grid-row: 2 / 4; }
-  .collage--6-items .collage__item:nth-child(3) { grid-column: 2 / 4; grid-row: 1 / 3; }
-  .collage--6-items .collage__item:nth-child(4) { grid-column: 4 / 5; grid-row: 1 / 2; }
-  .collage--6-items .collage__item:nth-child(5) { grid-column: 4 / 5; grid-row: 2 / 3; }
-  .collage--6-items .collage__item:nth-child(6) { grid-column: 2 / 5; grid-row: 3 / 4; }
-
-  /* --- Layout for 7 Items --- */
-  .collage--7-items {
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(250px, auto);
-  }
-  .collage--7-items .collage__item:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; }
-  .collage--7-items .collage__item:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; }
-  .collage--7-items .collage__item:nth-child(3) { grid-column: 4 / 5; grid-row: 1 / 2; }
-  .collage--7-items .collage__item:nth-child(4) { grid-column: 3 / 4; grid-row: 2 / 3; }
-  .collage--7-items .collage__item:nth-child(5) { grid-column: 4 / 5; grid-row: 2 / 3; }
-  .collage--7-items .collage__item:nth-child(6) { grid-column: 1 / 3; grid-row: 3 / 4; }
-  .collage--7-items .collage__item:nth-child(7) { grid-column: 3 / 5; grid-row: 3 / 4; }
-
-  /* --- Responsive Stacking --- */
+  /* Mobile (1 column stack) */
   @media screen and (max-width: 749px) {
-    .collage-{{ section.id }} {
-      grid-template-columns: 1fr 1fr;
-    }
-    .collage--1-items .collage__item,
-    .collage--2-items .collage__item,
-    .collage--3-items .collage__item,
-    .collage--4-items .collage__item,
-    .collage--5-items .collage__item,
-    .collage--6-items .collage__item,
-    .collage--7-items .collage__item {
-      grid-column: span 1 !important;
-      grid-row: span 1 !important;
-    }
-    .collage--1-items .collage__item:first-child,
-    .collage--3-items .collage__item:first-child,
-    .collage--5-items .collage__item:first-child,
-    .collage--7-items .collage__item:first-child {
-      grid-column: span 2 !important;
-    }
+    .collage-{{ section.id }} { grid-template-columns: 1fr; gap: 15px; }
+    [class*="collage--"] .collage__item { grid-column: span 1 !important; grid-row: span 1 !important; }
+    /* Ensure cards have enough height on mobile */
+    .collage-card { min-height: 350px; }
   }
 {%- endstyle -%}
 

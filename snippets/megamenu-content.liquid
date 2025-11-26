@@ -1,10 +1,31 @@
 {% comment %}
   This snippet renders the full-width megamenu dropdown.
   - V6 Changes:
-    - Simplified logic to be binary: collection vs. page.
-    - Collection (product-style): Image on the right.
-    - Page (default-style): Image on top with a fallback.
+    - Removed large liquid block.
+    - Moved conditional logic (collection vs. page) inside the HTML loop.
 {% endcomment %}
+
+{% comment %} --- 2. MOBILE-ONLY LAYOUT --- {% endcomment %}
+<div class="megamenu__mobile-layout">
+  <ul class="megamenu-m__list">
+    {%- for child_link in parent_link.links -%}
+      <li class="megamenu-m__item">
+        <a href="{{ child_link.url }}" class="megamenu-m__link megamenu-m__link--l2">{{ child_link.title }}</a>
+        {%- if child_link.links != empty -%}
+          <ul class="megamenu-m__list megamenu-m__list--l3">
+            {%- for grandchild_link in child_link.links -%}
+              <li class="megamenu-m__item">
+                <a href="{{ grandchild_link.url }}" class="megamenu-m__link megamenu-m__link--l3">
+                  {{- grandchild_link.title -}}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
 
 <div class="megamenu-wrapper">
   <div class="megamenu__backgrounds">
@@ -28,58 +49,115 @@
             assign is_link_box = true
           endif
 
-          assign box_classes = 'megamenu__column-box'
-          assign special_content = ''
-
-          if child_link.object_type == 'collection'
-            assign box_classes = box_classes | append: ' megamenu__column-box--product'
-
-            assign collection_image = child_link.object.image | default: child_link.object.products.first.featured_image
-
-            if collection_image != blank
-              assign special_content = collection_image | image_url: width: 100 | image_tag: loading: 'lazy', class: 'megamenu__product-image'
-            endif
-
-          else
-            assign box_classes = box_classes | append: ' megamenu__column-box--page'
-            assign page_image = ''
-
-            if child_link.object_type == 'page'
-              assign page_image = child_link.object.metafields.custom.page_image.value
-            endif
-
-            assign image_to_use = ''
-            if page_image != blank
-              assign image_to_use = page_image | image_url: width: 400 | image_tag: loading: 'lazy', class: 'megamenu__page-image'
-            else
-              assign fallback_image_url = 'https://cdn.shopify.com/s/files/1/0949/2745/4595/files/sifam_tinsley_instrumentation_limited_logo.jpg?v=1759850304'
-              assign image_to_use = fallback_image_url | image_tag: loading: 'lazy', class: 'megamenu__page-image'
-            endif
-            assign special_content = '<div class="megamenu__page-image-wrapper">' | append: image_to_use | append: '</div>'
+          assign tag = 'div'
+          if is_link_box
+            assign tag = 'a'
           endif
         -%}
 
-        {% comment %} Box is an <a> tag if it's a direct link for full clickability {% endcomment %}
-        {%- if is_link_box -%}
-          <a href="{{ child_link.url }}" class="{{ box_classes }}">
-            {{ special_content }}
+        {% comment %}
+          ============================================================
+          START: Conditional Rendering Logic
+          ============================================================
+        {% endcomment %}
+
+        {%- if child_link.type == 'collection_link' -%}
+          {% comment %}
+            --- 1. COLLECTION LAYOUT (Horizontal) ---
+            The link points to a Collection.
+          {% endcomment %}
+
+          {%- assign collection_object = child_link.object -%}
+          {%- assign collection_image = collection_object.image
+            | default: collection_object.products.first.featured_image
+          -%}
+
+          <{{ tag }}
+            {% if is_link_box %}
+              href="{{ child_link.url }}"
+            {% endif %}
+            class="megamenu__column-box megamenu__column-box--product"
+          >
             <h3 class="megamenu__title">{{ child_link.title }}</h3>
-          </a>
-        {%- else -%}
-          <div class="{{ box_classes }}">
-            {{ special_content }}
-            <h3 class="megamenu__title">{{ child_link.title }}</h3>
-            {%- if child_link.links != empty -%}
-              <ul class="megamenu__list">
-                {%- for grandchild_link in child_link.links -%}
-                  <li>
-                    <a href="{{ grandchild_link.url }}">{{ grandchild_link.title }}</a>
-                  </li>
-                {%- endfor -%}
-              </ul>
+
+            {%- if collection_image != blank -%}
+              <img
+                src="{{ collection_image | image_url: width: 100 }}"
+                alt="{{ child_link.title | escape }}"
+                class="megamenu__product-image"
+                loading="lazy"
+                width="50"
+                height="50"
+              >
             {%- endif -%}
-          </div>
+
+            {%- unless is_link_box -%}
+              {%- if child_link.links != empty -%}
+                <ul class="megamenu__list">
+                  {%- for grandchild_link in child_link.links -%}
+                    <li>
+                      <a href="{{ grandchild_link.url }}">{{ grandchild_link.title }}</a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            {%- endunless -%}
+          </{{ tag }}>
+
+        {%- else -%}
+          {% comment %}
+            --- 2. PAGE LAYOUT (Vertical) ---
+            This is the default for Pages, Blogs, or any other link type.
+          {% endcomment %}
+
+          {%- liquid
+            assign page_image = ''
+            if child_link.type == 'page_link' and child_link.object != blank
+              assign page_image = child_link.object.metafields.custom.page_image.value
+            endif
+          -%}
+
+          <{{ tag }}
+            {% if is_link_box %}
+              href="{{ child_link.url }}"
+            {% endif %}
+            class="megamenu__column-box megamenu__column-box--page"
+          >
+            <div class="megamenu__page-image-wrapper">
+              {%- if page_image != blank -%}
+                {{ page_image | image_url: width: 400 | image_tag: loading: 'lazy', class: 'megamenu__page-image' }}
+              {%- else -%}
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0949/2745/4595/files/sifam_tinsley_instrumentation_limited_logo.jpg?v=1759850304"
+                  alt="{{ child_link.title | escape }}"
+                  class="megamenu__page-image"
+                  loading="lazy"
+                  width="200"
+                  height="200"
+                >
+              {%- endif -%}
+            </div>
+
+            <h3 class="megamenu__title">{{ child_link.title }}</h3>
+
+            {%- unless is_link_box -%}
+              {%- if child_link.links != empty -%}
+                <ul class="megamenu__list">
+                  {%- for grandchild_link in child_link.links -%}
+                    <li>
+                      <a href="{{ grandchild_link.url }}">{{ grandchild_link.title }}</a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            {%- endunless -%}
+          </{{ tag }}>
         {%- endif -%}
+        {% comment %}
+          ============================================================
+          END: Conditional Rendering Logic
+          ============================================================
+        {% endcomment %}
       {%- endfor -%}
     </div>
   </div>
@@ -87,19 +165,28 @@
 
 <style>
   .megamenu-wrapper {
-    display: none;
+    display: block; /* Always display block so we can animate height */
     position: fixed;
     left: 0;
     right: 0;
-    top: var(--header-total-height, 96px); /* Set by JS in header-wrapper */
+    top: var(--header-total-height, 96px);
     border-top: 1px solid #eee;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 5;
-    min-height: 400px;
+
+    /* Animation Props */
+    max-height: 0; /* Start closed */
+    overflow: hidden; /* Hide content when closed */
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height 0.4s ease-in-out, opacity 0.3s ease, visibility 0s linear 0.4s;
   }
 
   .dropdown.is-open .megamenu-wrapper {
-    display: block;
+    max-height: 600px; /* Animate to open height (adjust if your menu is taller) */
+    opacity: 1;
+    visibility: visible;
+    transition: max-height 0.4s ease-in-out, opacity 0.3s ease, visibility 0s linear 0s;
   }
 
   .megamenu__backgrounds {
@@ -109,7 +196,7 @@
     width: 100%;
     height: 100%;
     display: grid;
-    grid-template-columns: calc((100vw - 1200px) / 2 + 300px) 1fr;
+    grid-template-columns: calc(max(0px, (100vw - 1200px) / 2) + 300px) 1fr;
     z-index: 0;
   }
 
@@ -125,6 +212,7 @@
   }
   .megamenu__content-bg {
     background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   .megamenu__layout-container {
@@ -174,8 +262,8 @@
   }
 
   .megamenu__column-box {
-    flex: 1 1 250px;
-    max-width: 265px;
+    flex: 1 1 250px; /* Grow/shrink from 250px base */
+    max-width: 265px; /* Prevent over-stretching */
     min-width: 200px;
     padding: 1.5rem;
     background: #fff;
@@ -234,7 +322,7 @@
   .megamenu__column-box--page {
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    padding: 1rem; /* Adjust padding to make room for image */
   }
   .megamenu__page-image-wrapper {
     width: 100%;
@@ -247,10 +335,10 @@
   .megamenu__page-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: scale-down;
   }
   .megamenu__column-box--page .megamenu__title {
-    margin: 0;
+    margin: 0; /* Remove bottom margin since lists are hidden */
   }
 
   /* --- Special Case: Product Box (Image Right) --- */
@@ -268,7 +356,7 @@
     border-radius: 4px;
   }
   .megamenu__column-box--product .megamenu__title {
-    margin: 0;
+    margin: 0; /* Remove bottom margin since lists are hidden */
     text-align: left;
     flex-grow: 1;
   }
@@ -277,5 +365,59 @@
   .megamenu__column-box--product:hover .megamenu__title,
   .megamenu__column-box--page:hover .megamenu__title {
     color: #c1151b;
+  }
+
+  /* --- Hide Megamenu on Mobile --- */
+
+  .megamenu__mobile-layout {
+    display: none; /* Hidden by default */
+    padding: 1.5rem;
+    background: #fff;
+  }
+  .megamenu__mobile-layout.is-open {
+    display: block;
+  }
+  .megamenu-m__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .megamenu-m__list--l3 {
+    padding-left: 1rem;
+    border-left: 2px solid #f3f3f3;
+    margin-top: 0.75rem;
+  }
+  .megamenu-m__item {
+    margin-bottom: 0.75rem;
+  }
+  .megamenu-m__link {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: color 0.2s ease;
+  }
+  .megamenu-m__link--l2 {
+    font-weight: 700;
+  }
+  .megamenu-m__link--l3 {
+    font-size: 0.95rem;
+  }
+  .megamenu-m__link:hover {
+    color: #c1151b;
+  }
+
+  @media screen and (max-width: 1200px) {
+    .megamenu__nav-bg {
+      background-color: #fff;
+      border: none;
+    }
+    .megamenu__content-bg {
+      box-shadow: none;
+    }
+  }
+  @media screen and (max-width: 1000px) {
+    .megamenu-wrapper {
+      display: none !important;
+    }
   }
 </style>
