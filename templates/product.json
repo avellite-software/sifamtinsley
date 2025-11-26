@@ -38,6 +38,13 @@
         "padding_bottom": 28
       }
     },
+    "related-blogs": {
+      "type": "product-related-blogs",
+      "settings": {
+        "heading": "Related Articles",
+        "autoscroll": true
+      }
+    },
     "image_with_text_V4DDNV": {
       "type": "image-with-text",
       "blocks": {
@@ -83,6 +90,7 @@
   "order": [
     "main",
     "related-products",
+    "related-blogs",
     "image_with_text_V4DDNV"
   ]
 }
