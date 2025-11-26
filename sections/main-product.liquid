@@ -1,19 +1,67 @@
 {% comment %}
-  V5 - Custom Product Page
-  - Fixed rich text rendering by using the 'metafield_tag' filter.
-  - Removed top padding setting to eliminate the gap above the product info.
+  V7 - Custom Product Page
+  - Moved 'Back to Collection' button inside the info column to fix background layout.
+  - Preserved all previous functionality (Tabs, Modal Form, etc.).
 {% endcomment %}
 
 {%- style -%}
   /* The main section now acts as an overflow container for the full-bleed element */
   .product-page-section {
     overflow-x: hidden;
+    padding-top: 0; /* Removed extra padding */
   }
 
   .product-section-wrapper {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
+    position: relative;
+  }
+
+  /* --- Back Button Styles --- */
+  .back-to-collection {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 2rem; /* Increased spacing */
+    transition: color 0.2s ease;
+  }
+  .back-to-collection:hover {
+    color: #c1151b;
+  }
+  .back-to-collection svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 0.5rem;
+    fill: currentColor;
+  }
+
+  /* Ensure the container clips the ribbon */
+  .product-image-column {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px; /* Optional: matches your other cards */
+  }
+
+  .status-ribbon {
+    position: absolute;
+    top: 25px;
+    right: -55px;
+    width: 200px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 0;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    pointer-events: none;
+    line-height: 1.2;
   }
 
   /* ==============================================
@@ -23,7 +71,6 @@
     display: grid;
     grid-template-columns: 45fr 55fr;
     gap: 0;
-    /* margin-top removed to close the gap */
     margin-bottom: 4rem;
   }
 
@@ -75,7 +122,7 @@
   }
 
   /* ==============================================
-     SUPPORT BOX STYLES (Integrated)
+     SUPPORT BOX STYLES
      ============================================== */
   .support-box-wrapper {
     margin-top: auto;
@@ -115,6 +162,7 @@
   }
   .support-box-button {
     display: block;
+    width: 100%;
     background-color: #c1151b;
     color: #fff;
     text-decoration: none;
@@ -123,6 +171,8 @@
     padding: 15px 20px;
     transition: background-color 0.2s;
     border-radius: 0 0 12px 12px;
+    border: none;
+    cursor: pointer;
   }
   .support-box-button:hover {
     background-color: #a10f16;
@@ -181,7 +231,6 @@
   .product-tabs-content__panel.is-active {
     display: block;
   }
-  /* The metafield_tag filter will generate its own .rte class, so we style that directly */
   .product-tabs-content__panel .rte p {
     margin: 0 0 1em;
   }
@@ -211,6 +260,89 @@
   }
   .product-file-list a:hover {
     text-decoration: underline;
+  }
+
+  /* ==============================================
+     CONTACT MODAL STYLES
+     ============================================== */
+  .contact-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .contact-modal.is-open {
+    display: flex;
+    opacity: 1;
+  }
+  .contact-modal__content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+  .contact-modal.is-open .contact-modal__content {
+    transform: translateY(0);
+  }
+  .contact-modal__close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+  }
+  .contact-modal__title {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  .contact-form__field {
+    margin-bottom: 1rem;
+  }
+  .contact-form__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .contact-form__input,
+  .contact-form__textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .contact-form__submit {
+    background-color: #c1151b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  .contact-form__submit:hover {
+    background-color: #a10f16;
   }
 
   /* Mobile responsiveness */
@@ -254,15 +386,53 @@
   assign features_metafield = product.metafields.custom.features
   assign downloads_content = product.metafields.custom.downloads.value
   assign certifications_content = product.metafields.custom.certifications.value
+
+  # Logic to find the "Back to" link
+  assign back_url = routes.all_products_collection_url
+  assign back_text = 'All Products'
+
+  if collection
+    assign back_url = collection.url
+    assign back_text = collection.title
+  elsif product.collections.first
+    assign back_url = product.collections.first.url
+    assign back_text = product.collections.first.title
+  endif
 -%}
 
-<section
-  class="color-{{ section.settings.color_scheme }} product-page-section"
-  style="padding-top: {{ section.settings.padding_top }}px;"
->
+<section class="color-{{ section.settings.color_scheme }} product-page-section">
   <div class="product-section-wrapper">
     <div class="product-main-container">
       <div class="product-image-column">
+        {% comment %} --- INSERT THIS BLOCK START --- {% endcomment %}
+        {%- liquid
+          assign ribbon_text = ''
+          assign ribbon_bg = ''
+          assign ribbon_txt_color = '#ffffff'
+
+          # 1. Check Sold Out
+          if product.available == false
+            assign ribbon_text = 'Sold Out'
+            assign ribbon_bg = '#555555'
+            # 2. Check Sale
+          elsif product.compare_at_price > product.price
+            assign ribbon_text = 'Sale'
+            assign ribbon_bg = '#c1151b'
+            # 3. Check Custom Metafield
+          elsif product.metafields.custom.status_label.value != blank
+            assign ribbon_text = product.metafields.custom.status_label.value
+            assign ribbon_bg = product.metafields.custom.status_color.value | default: '#333333'
+            assign ribbon_txt_color = product.metafields.custom.status_text_color.value | default: '#ffffff'
+          endif
+        -%}
+
+        {%- if ribbon_text != blank -%}
+          <div class="status-ribbon" style="background-color: {{ ribbon_bg }}; color: {{ ribbon_txt_color }};">
+            {{ ribbon_text }}
+          </div>
+        {%- endif -%}
+        {% comment %} --- INSERT THIS BLOCK END --- {% endcomment %}
+
         {%- if product.featured_image -%}
           <img
             src="{{ product.featured_image | image_url: width: 1024 }}"
@@ -275,7 +445,16 @@
           {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
         {%- endif -%}
       </div>
+
       <div class="product-info-column">
+        {% comment %} --- MODIFIED: Back Button Moved Here --- {% endcomment %}
+        <a href="{{ back_url }}" class="back-to-collection">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Back to {{ back_text }}
+        </a>
+
         <p class="product-info-column__vendor">{{ product.vendor }}</p>
         <h1 class="product-info-column__title">{{ product.title }}</h1>
 
@@ -293,11 +472,9 @@
               <span class="support-box-phone">{{ section.settings.box_phone }}</span>
             </div>
 
-            {% if section.settings.button_label != blank and section.settings.button_email != blank %}
-              <a href="mailto:{{ section.settings.button_email }}" class="support-box-button">
-                {{ section.settings.button_label }}
-              </a>
-            {% endif %}
+            <button type="button" class="support-box-button js-open-contact-modal">
+              {{ section.settings.button_label }}
+            </button>
           </div>
         </div>
       </div>
@@ -321,12 +498,10 @@
         <div class="product-tabs-content">
           {%- if features_metafield.value != blank -%}
             <div class="product-tabs-content__panel" data-content="features" role="tabpanel">
-              {% comment %} MODIFICATION: Use metafield_tag for rich text {% endcomment %}
               {{ features_metafield | metafield_tag }}
             </div>
           {%- endif -%}
           {%- if downloads_content != blank -%}
-            {{ downloads_content.url }}
             <div class="product-tabs-content__panel" data-content="downloads" role="tabpanel">
               <ul class="product-file-list">
                 {%- for file in downloads_content -%}
@@ -356,20 +531,73 @@
       </div>
     {%- endif -%}
   </div>
+
+  {% comment %} --- CONTACT MODAL --- {% endcomment %}
+  <div id="ProductContactModal" class="contact-modal" role="dialog" aria-modal="true">
+    <div class="contact-modal__content">
+      <button type="button" class="contact-modal__close js-close-contact-modal" aria-label="Close">&times;</button>
+      <h2 class="contact-modal__title">Email Support</h2>
+
+      {%- form 'contact', id: 'ProductContactForm' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="form-status form-status--success" style="color: green; margin-bottom: 1rem;">
+            Thanks for contacting us. We'll get back to you as soon as possible.
+          </p>
+        {%- elsif form.errors -%}
+          <div class="form-status form-status--error" style="color: red; margin-bottom: 1rem;">
+            {{ form.errors | default_errors }}
+          </div>
+        {%- endif -%}
+
+        <div class="contact-form__field">
+          <label class="contact-form__label" for="ContactForm-name">Name</label>
+          <input
+            class="contact-form__input"
+            type="text"
+            id="ContactForm-name"
+            name="contact[name]"
+            value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+            required
+          >
+        </div>
+        <div class="contact-form__field">
+          <label class="contact-form__label" for="ContactForm-email">Email</label>
+          <input
+            class="contact-form__input"
+            type="email"
+            id="ContactForm-email"
+            name="contact[email]"
+            value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+            required
+          >
+        </div>
+        <div class="contact-form__field">
+          <label class="contact-form__label" for="ContactForm-body">Message</label>
+          <textarea
+            class="contact-form__textarea"
+            id="ContactForm-body"
+            name="contact[body]"
+            rows="5"
+            required>Enquiry about {{ product.title }}</textarea>
+        </div>
+        <button type="submit" class="contact-form__submit">Send Message</button>
+      {%- endform -%}
+    </div>
+  </div>
 </section>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Tab Logic
     const tabsContainer = document.querySelector('.product-tabs-container');
     if (tabsContainer) {
       const tabs = tabsContainer.querySelectorAll('.product-tabs-nav__item');
       const contentPanels = tabsContainer.querySelectorAll('.product-tabs-content__panel');
 
-      const firstTab = tabs[0];
-      if (firstTab) {
+      if (tabs.length > 0) {
+        const firstTab = tabs[0];
         const firstContentId = firstTab.getAttribute('data-tab');
         const firstContentPanel = tabsContainer.querySelector(`[data-content="${firstContentId}"]`);
-
         firstTab.classList.add('is-active');
         if (firstContentPanel) firstContentPanel.classList.add('is-active');
       }
@@ -385,6 +613,26 @@
             activePanel.classList.add('is-active');
           }
         });
+      });
+    }
+
+    // Modal Logic
+    const modal = document.getElementById('ProductContactModal');
+    const openBtn = document.querySelector('.js-open-contact-modal');
+    const closeBtn = document.querySelector('.js-close-contact-modal');
+
+    if (modal && openBtn && closeBtn) {
+      openBtn.addEventListener('click', () => {
+        modal.classList.add('is-open');
+      });
+
+      const closeModal = () => {
+        modal.classList.remove('is-open');
+      };
+
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
       });
     }
   });
@@ -423,12 +671,6 @@
       "id": "button_label",
       "label": "Button Label",
       "default": "Email Support"
-    },
-    {
-      "type": "text",
-      "id": "button_email",
-      "label": "Button Email Address",
-      "info": "Enter the email address for the support button."
     },
     {
       "type": "header",

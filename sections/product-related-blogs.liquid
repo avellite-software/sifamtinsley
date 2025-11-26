@@ -1,7 +1,8 @@
 {% comment %}
-  Section: Product Related Blogs (Scroller)
-  - Fetches articles from the product metafield 'custom.related_blogs'.
-  - Uses the 'News Scroller' layout and JavaScript.
+  Section: Product Related Blogs (Grid)
+  - Fetches articles from 'custom.related_blogs'.
+  - Displays in a responsive grid (3 columns desktop, 1 column mobile).
+  - Maintains the 'News Scroller' card styling.
 {% endcomment %}
 
 {%- liquid
@@ -14,51 +15,37 @@
 
 {%- if has_related_blogs -%}
   <style>
-    /* Reusing News Scroller Styles */
-    .news-scroller-section {
-      padding: 60px 0;
-      background-color: #f9f9f9;
+    /* Section Container */
+    .related-blogs-section {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      background-color: {{ section.settings.background_color }};
     }
-    .news-scroller-header {
-      max-width: 1200px;
-      margin: 0 auto 30px auto;
-      padding: 0 20px;
+
+    /* Header */
+    .related-blogs-header {
+      text-align: center;
+      margin-bottom: 40px;
     }
-    .news-scroller-heading {
+    .related-blogs-heading {
       font-size: 28px;
       font-weight: 700;
       color: #1c1c1c;
       margin: 0;
-      font-family: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
     }
-    .news-scroller-wrapper {
-      overflow: hidden;
-      padding: 20px 0;
-      max-width: 100%;
-    }
-    .news-scroller-container {
-      display: flex;
-      gap: 20px;
+
+    /* Grid Layout */
+    .related-blogs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); /* 3 Columns by default */
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 0 20px;
-      user-select: none;
-      width: max-content;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      scroll-behavior: smooth;
     }
-    .news-scroller-container::-webkit-scrollbar {
-      display: none;
-    }
-    .news-scroller-container.not-scrollable {
-      justify-content: center;
-    }
-    .news-scroller-container.is-dragging {
-      cursor: grabbing;
-      scroll-behavior: auto;
-    }
+
+    /* --- Card Styles (Preserved from previous version) --- */
     .news-card {
-      flex: 0 0 320px;
       background-color: #fff;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
@@ -66,29 +53,42 @@
       display: flex;
       flex-direction: column;
       color: #333;
+      height: 100%; /* Full height of grid cell */
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+    .news-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
     .news-card-image-link {
       display: block;
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 16 / 9; /* Fixed aspect ratio for grid consistency */
+      overflow: hidden;
     }
     .news-card-image {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      pointer-events: none;
+      object-fit: contain;
+      transition: transform 0.4s ease;
     }
+    .news-card:hover .news-card-image {
+      transform: scale(1.05);
+    }
+
     .news-card-content {
       padding: 25px;
       display: flex;
       flex-direction: column;
       flex-grow: 1;
     }
+
     .news-card-meta {
       font-size: 13px;
       color: #777;
       margin-bottom: 10px;
-      font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
     }
+
     .news-card-title {
       font-size: 20px;
       font-weight: 700;
@@ -97,16 +97,21 @@
       line-height: 1.4;
       text-decoration: none;
     }
+    .news-card-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     .news-card-excerpt {
       font-size: 15px;
       line-height: 1.6;
-      margin: 0;
+      margin: 0 0 20px 0;
       flex-grow: 1;
-      font-family: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+      color: #555;
     }
+
     .news-card-read-more {
       display: inline-block;
-      margin-top: 20px;
       padding: 10px 22px;
       background: #c1151b;
       color: #fff;
@@ -116,186 +121,95 @@
       font-weight: 500;
       font-size: 16px;
       text-align: center;
-      transition: background-color 0.2s, color 0.2s;
+      transition: background-color 0.2s;
       align-self: flex-start;
+      margin-top: auto; /* Pushes button to bottom */
     }
     .news-card-read-more:hover {
       background: #a10f16;
       color: #fff;
     }
-    @media (max-width: 768px) {
-      .news-card {
-        flex-basis: 280px;
+
+    /* Responsive */
+    @media screen and (max-width: 990px) {
+      .related-blogs-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 Columns on Tablet */
+      }
+    }
+    @media screen and (max-width: 768px) {
+      .related-blogs-grid {
+        grid-template-columns: 1fr; /* 1 Column on Mobile */
+      }
+      .related-blogs-heading {
+        font-size: 24px;
       }
     }
   </style>
 
-  <div class="news-scroller-section">
-    <div class="news-scroller-header">
-      {% if section.settings.heading != blank %}
-        <h2 class="news-scroller-heading">{{ section.settings.heading | escape }}</h2>
-      {% endif %}
-    </div>
-    <div class="news-scroller-wrapper">
-      <div class="news-scroller-container" data-section-id="{{ section.id }}">
-        {%- for article in related_blogs -%}
-          <div class="news-card">
-            {%- if article.image -%}
-              <a href="{{ article.url }}" class="news-card-image-link">
-                {{
-                  article.image
-                  | image_url: width: 320, height: 320, crop: 'center'
-                  | image_tag: loading: 'lazy', class: 'news-card-image'
-                }}
-              </a>
-            {%- else -%}
-              <div class="news-card-image-link">
-                {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
-              </div>
-            {%- endif -%}
-            <div class="news-card-content">
-              <div class="news-card-meta">
-                {%- if section.settings.show_date -%}
-                  <span>{{ article.published_at | time_tag: format: 'date' }}</span>
-                {%- endif -%}
-                {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
-                {%- if section.settings.show_author -%}
-                  <span>by {{ article.author }}</span>
-                {%- endif -%}
-              </div>
-              <h3 class="news-card-title">
-                <a href="{{ article.url }}" style="color: inherit; text-decoration: none;">{{ article.title }}</a>
-              </h3>
-              <p class="news-card-excerpt">{{ article.excerpt_or_content | strip_html | truncate: 120 }}</p>
-              <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
-            </div>
-          </div>
-        {%- endfor -%}
+  <div class="related-blogs-section">
+    {%- if section.settings.heading != blank -%}
+      <div class="related-blogs-header page-width">
+        <h2 class="related-blogs-heading">{{ section.settings.heading | escape }}</h2>
       </div>
+    {%- endif -%}
+
+    <div class="related-blogs-grid">
+      {%- for article in related_blogs -%}
+        <div class="news-card">
+          {%- if article.image -%}
+            <a href="{{ article.url }}" class="news-card-image-link">
+              {{ article.image | image_url: width: 600 | image_tag: loading: 'lazy', class: 'news-card-image' }}
+            </a>
+          {%- else -%}
+            <div class="news-card-image-link">
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg news-card-image' }}
+            </div>
+          {%- endif -%}
+
+          <div class="news-card-content">
+            <div class="news-card-meta">
+              {%- if section.settings.show_date -%}
+                <span>{{ article.published_at | time_tag: format: 'date' }}</span>
+              {%- endif -%}
+              {%- if section.settings.show_author and section.settings.show_date %} | {% endif %}
+              {%- if section.settings.show_author -%}
+                <span>by {{ article.author }}</span>
+              {%- endif -%}
+            </div>
+
+            <h3 class="news-card-title">
+              <a href="{{ article.url }}">{{ article.title }}</a>
+            </h3>
+
+            <div class="news-card-excerpt">
+              {{ article.excerpt_or_content | strip_html | truncate: 120 }}
+            </div>
+
+            <a href="{{ article.url }}" class="news-card-read-more">Read More</a>
+          </div>
+        </div>
+      {%- endfor -%}
     </div>
   </div>
-
-  {% if section.settings.autoscroll %}
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const scroller = document.querySelector(`.news-scroller-container[data-section-id="{{ section.id }}"]`);
-        if (!scroller) return;
-
-        setTimeout(() => {
-          const originalItems = Array.from(scroller.children);
-          if (originalItems.length === 0) return;
-
-          // --- 1. Measure Content ---
-          const gap = parseInt(window.getComputedStyle(scroller).gap) || 20;
-          let originalContentWidth = 0;
-          originalItems.forEach((item) => {
-            originalContentWidth += item.offsetWidth;
-          });
-          originalContentWidth += (originalItems.length - 1) * gap; // Width of items + gaps
-
-          // --- 2. Check if Scrolling is Needed ---
-          const isScrollable = originalContentWidth > 1200;
-
-          if (!isScrollable) {
-            scroller.classList.add('not-scrollable');
-            return;
-          }
-
-          scroller.classList.add('is-scrollable');
-
-          // --- 3. Duplicate Items for Infinite Loop ---
-          originalItems.forEach((item) => {
-            const clonedItem = item.cloneNode(true);
-            clonedItem.setAttribute('aria-hidden', 'true');
-            scroller.appendChild(clonedItem);
-          });
-
-          // --- 4. Auto-Scroll Logic ---
-          let animationFrameId;
-          let isPaused = false;
-          const durationInSeconds = {{ section.settings.autoscroll_duration }};
-          const speed = (originalContentWidth / (durationInSeconds * 60));
-          let currentScroll = scroller.scrollLeft;
-
-          function scrollStep() {
-            if (!isPaused) {
-              currentScroll += speed;
-              
-              // Seamless loop logic
-              if (currentScroll >= originalContentWidth) {
-                const excess = currentScroll - originalContentWidth;
-                scroller.scrollLeft = excess;
-                currentScroll = excess;
-              } else {
-                scroller.scrollLeft = currentScroll;
-              }
-            }
-            animationFrameId = requestAnimationFrame(scrollStep);
-          }
-
-          // --- 5. Click-and-Drag Logic ---
-          let isDown = false;
-          let startX;
-          let hasDragged = false;
-
-          scroller.addEventListener('mousedown', (e) => {
-            if (e.target.closest('a')) return;
-            e.preventDefault();
-            isDown = true;
-            isPaused = true;
-            hasDragged = false;
-            scroller.classList.add('is-dragging');
-            startX = e.pageX - scroller.offsetLeft;
-            currentScroll = scroller.scrollLeft;
-            cancelAnimationFrame(animationFrameId);
-          });
-
-          const stopDragging = () => {
-            if (!isDown) return;
-            isDown = false;
-            isPaused = false;
-            scroller.classList.remove('is-dragging');
-            currentScroll = scroller.scrollLeft;
-            requestAnimationFrame(scrollStep);
-          };
-
-          scroller.addEventListener('mouseleave', stopDragging);
-          scroller.addEventListener('mouseup', stopDragging);
-
-          scroller.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            hasDragged = true;
-            const x = e.pageX - scroller.offsetLeft;
-            const walk = (x - startX) * 2;
-            scroller.scrollLeft = scrollLeft - walk;
-            currentScroll = scroller.scrollLeft;
-          });
-
-          scroller.addEventListener('click', (e) => {
-            if (hasDragged && !e.target.closest('a.news-card-read-more')) {
-              e.preventDefault();
-            }
-          }, true);
-
-          requestAnimationFrame(scrollStep);
-
-        }, 100);
-      });
-    </script>
-  {% endif %}
 {%- endif -%}
 
 {% schema %}
 {
   "name": "Product Related Blogs",
   "tag": "section",
+  "class": "section",
   "settings": [
     {
       "type": "text",
       "id": "heading",
       "label": "Heading",
       "default": "Related Articles"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background",
+      "default": "#f9f9f9"
     },
     {
       "type": "checkbox",
@@ -311,22 +225,26 @@
     },
     {
       "type": "header",
-      "content": "Auto-scroll Settings"
-    },
-    {
-      "type": "checkbox",
-      "id": "autoscroll",
-      "label": "Enable auto-scroll",
-      "default": true
+      "content": "Spacing"
     },
     {
       "type": "range",
-      "id": "autoscroll_duration",
-      "min": 20,
-      "max": 120,
-      "step": 10,
-      "unit": "s",
-      "label": "Scroll duration (longer is slower)",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
       "default": 60
     }
   ],

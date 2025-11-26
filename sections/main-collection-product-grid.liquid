@@ -1,7 +1,5 @@
 {% comment %}
-  V6 - Redesigned Collection Page
-  - Updated short description to correctly render Rich Text metafields using 'metafield_tag'.
-  - Adjusted CSS to handle line-clamping for rich text output.
+  V7 - Added Status Ribbons via Metafields
 {% endcomment %}
 
 <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
@@ -69,17 +67,38 @@
   }
 
   /* ==============================================
-     CUSTOM PRODUCT CARD (Based on News Card)
+     CUSTOM PRODUCT CARD
      ============================================== */
   .custom-product-card {
     background-color: #fff;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+    overflow: hidden; /* Important for clipping the ribbon */
     display: flex;
     flex-direction: column;
     color: #333;
     height: 100%;
+    position: relative; /* Required for ribbon positioning */
+  }
+
+  /* --- NEW RIBBON STYLES --- */
+  .status-ribbon {
+    position: absolute;
+    top: 25px;
+    right: -55px; /* Adjust based on width to center diagonally */
+    width: 200px; /* Needs to be wide enough to span the corner */
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 0;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 10;
+    pointer-events: none;
+    line-height: 1.2;
   }
 
   .custom-product-card__image-wrapper {
@@ -118,7 +137,6 @@
     color: #c1151b;
   }
 
-  /* MODIFICATION: Wrapper now handles spacing, children handle text styles */
   .custom-product-card__description-wrapper {
     flex-grow: 1;
   }
@@ -134,7 +152,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
 
   .custom-product-card__buttons {
     margin-top: 20px;
@@ -188,7 +205,6 @@
     .grid--4-col-desktop .custom-product-card__title {
       font-size: 18px;
     }
-    /* MODIFICATION: Updated selector */
     .grid--4-col-desktop .custom-product-card__description-wrapper > p,
     .grid--4-col-desktop .custom-product-card__description-wrapper .rte p {
       font-size: 14px;
@@ -223,18 +239,6 @@
         </aside>
 
         <main class="collection-main-content">
-          {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
-            <div class="collection-filters">
-              {% render 'facets',
-                results: collection,
-                enable_filtering: section.settings.enable_filtering,
-                enable_sorting: section.settings.enable_sorting,
-                filter_type: 'horizontal',
-                paginate: paginate
-              %}
-            </div>
-          {%- endif -%}
-
           <div class="product-grid-container" id="ProductGridContainer">
             {%- if collection.products.size == 0 -%}
               <div class="collection--empty" id="product-grid" data-id="{{ section.id }}">
@@ -256,8 +260,45 @@
                   "
                 >
                   {%- for product in collection.products -%}
+                    {% comment %} --- START: RIBBON LOGIC --- {% endcomment %}
+                    {%- liquid
+                      assign ribbon_text = ''
+                      assign ribbon_bg = ''
+                      assign ribbon_txt_color = '#ffffff'
+
+                      # 1. Check Sold Out
+                      if product.available == false
+                        assign ribbon_text = 'Sold Out'
+                        assign ribbon_bg = '#555555'
+
+                        # 2. Check Sale
+                      elsif product.compare_at_price > product.price
+                        assign ribbon_text = 'Sale'
+                        assign ribbon_bg = '#c1151b'
+
+                        # 3. Check Custom Metafield
+                      elsif product.metafields.custom.status_label.value != blank
+                        assign ribbon_text = product.metafields.custom.status_label.value
+                        # Use selected bg color or default to dark grey
+                        assign ribbon_bg = product.metafields.custom.status_color.value | default: '#333333'
+                        # Use selected text color or default to white (custom.status_text_color)
+                        assign ribbon_txt_color = product.metafields.custom.status_text_color.value | default: '#ffffff'
+                      endif
+                    -%}
+                    {% comment %} --- END: RIBBON LOGIC --- {% endcomment %}
+
                     <li class="grid__item">
                       <div class="custom-product-card">
+                        {% comment %} Render Ribbon if text exists {% endcomment %}
+                        {%- if ribbon_text != blank -%}
+                          <div
+                            class="status-ribbon"
+                            style="background-color: {{ ribbon_bg }}; color: {{ ribbon_txt_color }};"
+                          >
+                            {{ ribbon_text }}
+                          </div>
+                        {%- endif -%}
+
                         <a href="{{ product.url }}" class="custom-product-card__image-wrapper">
                           {% if product.featured_image %}
                             <img
@@ -275,7 +316,6 @@
                         <div class="custom-product-card__content">
                           <a href="{{ product.url }}" class="custom-product-card__title">{{ product.title }}</a>
 
-                          {% comment %} MODIFICATION: Logic updated for Rich Text {% endcomment %}
                           <div class="custom-product-card__description-wrapper">
                             {%- if product.metafields.custom.shortdescription.value != blank -%}
                               {{ product.metafields.custom.shortdescription | metafield_tag }}
@@ -287,10 +327,11 @@
                           <div class="custom-product-card__buttons">
                             <a href="{{ product.url }}" class="custom-product-card__btn btn--solid"> See More </a>
 
+                            {% comment %} FIX: Access the .url property directly from the file object {% endcomment %}
                             {%- assign datasheet = product.metafields.custom.downloads.value | first -%}
                             {%- if datasheet -%}
                               <a
-                                href="{{ datasheet | file_url }}"
+                                href="{{ datasheet.url }}"
                                 class="custom-product-card__btn btn--outline"
                                 target="_blank"
                                 rel="noopener"
