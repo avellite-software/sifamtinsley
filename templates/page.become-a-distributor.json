@@ -24,17 +24,14 @@
         "title": "",
         "description": "",
         "height": "small",
-        "background_type": "color",
-        "background_color": "#f5f5f5",
-        "text_color": "#121212",
-        "image_fit": "cover",
-        "overlay_opacity": 90
+        "text_color": "#ffffff"
       }
     },
     "simple_image_banner_eaNjtD": {
       "type": "simple-image-banner",
       "name": "Simple Image Banner",
       "settings": {
+        "border_radius": 12,
         "image": "shopify://shop_images/banner-distributor.jpg",
         "link": "",
         "padding_top": 36,
