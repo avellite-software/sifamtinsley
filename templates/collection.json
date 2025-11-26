@@ -28,8 +28,9 @@
         "text_color": "#ffffff",
         "background_type": "color",
         "background_color": "#111111",
+        "background_image": "shopify://shop_images/VA38-nb.png",
         "image_fit": "cover",
-        "overlay_color": "#000000",
+        "overlay_color": "#e90000",
         "overlay_opacity": 50
       }
     },

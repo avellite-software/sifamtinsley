@@ -16,10 +16,11 @@
         "title": "News Feed",
         "description": "",
         "height": "small",
+        "text_color": "#ffffff",
         "background_type": "color",
-        "background_color": "#F5f5f5",
-        "text_color": "#000000",
+        "background_color": "#000000",
         "image_fit": "cover",
+        "overlay_color": "#000000",
         "overlay_opacity": 50
       }
     },
