@@ -24,11 +24,7 @@
         "title": "",
         "description": "",
         "height": "small",
-        "background_type": "color",
-        "background_color": "#f5f5f5",
-        "text_color": "#121212",
-        "image_fit": "cover",
-        "overlay_opacity": 50
+        "text_color": "#ffffff"
       }
     },
     "main_downloads_page_teFz73": {

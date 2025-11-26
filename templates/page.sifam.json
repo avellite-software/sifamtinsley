@@ -24,10 +24,7 @@
         "title": "",
         "description": "<p> </p>",
         "height": "small",
-        "background_type": "color",
-        "background_color": "#f5f5f5",
-        "text_color": "#121212",
-        "overlay_opacity": 50
+        "text_color": "#ffffff"
       }
     },
     "image_with_text_7EwP7U": {
@@ -56,6 +53,7 @@
       "settings": {
         "image": "shopify://shop_images/sifam-248x75.jpg",
         "image_fit": "contain",
+        "image_border_radius": 12,
         "height": "adapt",
         "desktop_image_width": "small",
         "layout": "text_first",
