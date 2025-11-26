@@ -1,7 +1,7 @@
 {% comment %}
   Section: Presenter Banner
-  - V3: Interactive gradient background & Glass content box.
-  - Updates: Larger glow, off-center default position, white text default.
+  - V4: Ambient Animated Background (No Mouse Interaction)
+  - Features overlapping, floating gradients for a premium "breathing" light effect.
 {% endcomment %}
 
 {%- style -%}
@@ -9,17 +9,16 @@
     display: flex;
     align-items: center;
     position: relative;
-    background-color: #111; /* Fallback color */
+    background-color: #111; /* Deep dark base */
     border-bottom-right-radius: 50px;
     overflow: hidden;
-    /* Initialize variables for mouse position (Default: Bottom Left) */
-    --mouse-x: 20%;
-    --mouse-y: 80%;
+    /* Add a subtle shadow to lift the header off the white page below */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    z-index: 1;
   }
 
-  /* Interactive Background Layer
-     - Uses CSS variables set by JS to move the gradient.
-  */
+  /* --- AMBIENT BACKGROUND ANIMATION --- */
+
   .presenter-interactive-bg {
     position: absolute;
     top: 0;
@@ -28,26 +27,83 @@
     height: 100%;
     z-index: 0;
     pointer-events: none;
-    /* The Gradient: Larger Red glow following mouse, fading to dark */
-    background: radial-gradient(
-      1200px circle at var(--mouse-x) var(--mouse-y),
-      rgba(193, 21, 27, 0.4),
-      transparent 60%
-    );
-    /* Add a subtle second animation for when mouse isn't moving */
-    animation: pulse-glow 10s infinite alternate;
+    overflow: hidden;
   }
 
-  /* Keyframes to keep it alive even without mouse movement */
-  @keyframes pulse-glow {
-    0% { opacity: 0.8; }
-    100% { opacity: 1; }
+  /* Blob 1: The Brand Red */
+  .presenter-interactive-bg div {
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 100%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(193, 21, 27, 0.35) 0%, transparent 60%);
+    transform-origin: center center;
+    animation: float-1 9s ease-in-out infinite alternate;
+    opacity: 0.8;
   }
+
+  /* Blob 2: A Deeper, Darker Red for Contrast/Depth */
+  .presenter-interactive-bg::before {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    right: -20%;
+    width: 100%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(193, 21, 27, 0.4) 0%, transparent 70%);
+    transform-origin: center center;
+    animation: float-2 12s ease-in-out infinite alternate-reverse;
+    z-index: -1;
+  }
+
+  /* Subtle Dot Pattern Overlay (Texture) */
+  .presenter-section-{{ section.id }}::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(#343434 1.5px, transparent 1.5px);
+    background-size: 30px 30px; /* Slightly larger grid */
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Keyframes for organic movement */
+  /* UPDATED: Reduced Y values to prevent clipping, increased X for movement */
+  @keyframes float-1 {
+    0% { transform: translate(0, 0) scale(2); }
+    33% { transform: translate(15%, 2%) scale(2.2); }
+    66% { transform: translate(-10%, 4%) scale(1.8); }
+    100% { transform: translate(5%, -2%) scale(2.1); }
+  }
+
+  @keyframes float-2 {
+    0% { transform: translate(0, 0) scale(2); }
+    50% { transform: translate(-15%, -5%) scale(2.4); }
+    100% { transform: translate(15%, 3%) scale(1.8); }
+  }
+
 
   /* Height Options */
   .presenter-section--small { min-height: 250px; }
   .presenter-section--medium { min-height: 400px; }
   .presenter-section--large { min-height: 550px; }
+
+  /* Background Image Overlay (If image is selected) */
+  .presenter-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ section.settings.overlay_color }};
+    opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    z-index: 0;
+  }
 
   /* Content Layout */
   .presenter-section__content-wrapper {
@@ -56,7 +112,7 @@
     padding: 2rem 1.5rem;
     width: 100%;
     position: relative;
-    z-index: 2; /* Above the background */
+    z-index: 2;
   }
 
   /* Glass Box Styles */
@@ -66,10 +122,10 @@
     max-width: 700px;
 
     /* Glass Effect */
-    background: rgba(255, 255, 255, 0.05); /* Very subtle white tint */
-    backdrop-filter: blur(16px); /* Strong blur */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(160px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 3rem;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -98,12 +154,18 @@
     .presenter-section__content {
       text-align: center;
       padding: 2rem;
-      margin: 0 auto; /* Center the box itself */
+      margin: 0 auto;
     }
   }
 {%- endstyle -%}
 
 {%- liquid
+  assign background_type = section.settings.background_type
+  assign bg_color = section.settings.background_color
+  assign bg_image = section.settings.background_image
+
+  assign section_classes = 'presenter-section presenter-section-' | append: section.id | append: ' presenter-section--' | append: section.settings.height
+
   assign presenter_title = section.settings.title
   if presenter_title == blank
     if product.title != blank
@@ -125,16 +187,33 @@
 
 <div
   id="presenter-{{ section.id }}"
-  class="presenter-section presenter-section-{{ section.id }} presenter-section--{{ section.settings.height }}"
+  class="{{ section_classes }}"
+  style="
+    {% if background_type == 'image' and bg_image != blank %}
+      background-image: url('{{ bg_image | image_url: width: 1920 }}');
+      background-size: {{ section.settings.image_fit }};
+      background-repeat: no-repeat;
+      background-position: center;
+    {% else %}
+      background-color: {{ bg_color }};
+    {% endif %}
+  "
 >
   {% comment %}
-    Interactive Background Container
-    (Contains empty div to prevent Shopify hiding it)
+    1. Ambient Background (Only if 'color' mode is selected or no image present)
   {% endcomment %}
-  <div class="presenter-interactive-bg">
-    <div></div>
-  </div>
+  {%- if background_type == 'color' -%}
+    <div class="presenter-interactive-bg">
+      <div><div></div></div>
+    </div>
+  {%- endif -%}
 
+  {% comment %} 2. The Overlay Div (Only if image is used) {% endcomment %}
+  {%- if background_type == 'image' and bg_image != blank -%}
+    <div class="presenter-overlay"></div>
+  {%- endif -%}
+
+  {% comment %} 3. The Content {% endcomment %}
   <div class="presenter-section__content-wrapper">
     <div class="presenter-section__content">
       {%- if presenter_title != blank -%}
@@ -149,24 +228,6 @@
     </div>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const section = document.querySelector('.presenter-section-{{ section.id }}');
-    if (!section) return;
-
-    section.addEventListener('mousemove', (e) => {
-      const rect = section.getBoundingClientRect();
-      // Calculate mouse position relative to the section
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      // Update CSS variables
-      section.style.setProperty('--mouse-x', `${x}px`);
-      section.style.setProperty('--mouse-y', `${y}px`);
-    });
-  });
-</script>
 
 {% schema %}
 {
@@ -216,8 +277,53 @@
       "content": "Background"
     },
     {
-      "type": "paragraph",
-      "content": "This section uses an interactive gradient background."
+      "type": "select",
+      "id": "background_type",
+      "label": "Background type",
+      "options": [
+        { "value": "color", "label": "Animated Color" },
+        { "value": "image", "label": "Image" }
+      ],
+      "default": "color"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Base background color",
+      "default": "#111111",
+      "info": "Used as the base behind the animated gradients."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Background image fit",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "auto", "label": "Original size (Auto)" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Image Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 90,
+      "step": 10,
+      "unit": "%",
+      "label": "Image overlay opacity",
+      "default": 50
     }
   ],
   "presets": [
