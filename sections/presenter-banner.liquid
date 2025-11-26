@@ -1,6 +1,7 @@
 {% comment %}
   Section: Presenter Banner
-  - A universal banner section with dynamic title/description fallbacks.
+  - V3: Interactive gradient background & Glass content box.
+  - Updates: Larger glow, off-center default position, white text default.
 {% endcomment %}
 
 {%- style -%}
@@ -8,69 +9,85 @@
     display: flex;
     align-items: center;
     position: relative;
-    background-size: cover;
-    background-position: center;
+    background-color: #111; /* Fallback color */
+    border-bottom-right-radius: 50px;
+    overflow: hidden;
+    /* Initialize variables for mouse position (Default: Bottom Left) */
+    --mouse-x: 20%;
+    --mouse-y: 80%;
   }
 
-  /* Height Options */
-  .presenter-section--small {
-    position: relative;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-  }
-
-  .presenter-section--medium {
-    position: relative;
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-  }
-
-  .presenter-section--large {
-    position: relative;
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-  }
-
-  /* Background Image Overlay */
-  .presenter-section--image-bg::before {
-    content: '';
+  /* Interactive Background Layer
+     - Uses CSS variables set by JS to move the gradient.
+  */
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #ffffffff;
-    opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
-    z-index: 1;
+    z-index: 0;
+    pointer-events: none;
+    /* The Gradient: Larger Red glow following mouse, fading to dark */
+    background: radial-gradient(
+      1200px circle at var(--mouse-x) var(--mouse-y),
+      rgba(193, 21, 27, 0.4),
+      transparent 60%
+    );
+    /* Add a subtle second animation for when mouse isn't moving */
+    animation: pulse-glow 10s infinite alternate;
   }
 
+  /* Keyframes to keep it alive even without mouse movement */
+  @keyframes pulse-glow {
+    0% { opacity: 0.8; }
+    100% { opacity: 1; }
+  }
+
+  /* Height Options */
+  .presenter-section--small { min-height: 250px; }
+  .presenter-section--medium { min-height: 400px; }
+  .presenter-section--large { min-height: 550px; }
+
+  /* Content Layout */
   .presenter-section__content-wrapper {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
     width: 100%;
     position: relative;
-    z-index: 2;
+    z-index: 2; /* Above the background */
   }
 
+  /* Glass Box Styles */
   .presenter-section__content {
     text-align: left;
     color: {{ section.settings.text_color }};
+    max-width: 700px;
+
+    /* Glass Effect */
+    background: rgba(255, 255, 255, 0.05); /* Very subtle white tint */
+    backdrop-filter: blur(16px); /* Strong blur */
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   }
 
   .presenter-section__title {
     font-size: 32px;
     font-weight: 700;
     line-height: 1.2;
+    margin-bottom: 1rem;
+    color: inherit;
   }
 
   .presenter-section__description {
     font-size: 16px;
     line-height: 1.6;
-    max-width: 60ch; /* Limits the width for better readability */
+    max-width: 100%;
+    color: inherit;
+    opacity: 0.9;
   }
   .presenter-section__description p {
     margin: 0;
@@ -79,20 +96,13 @@
   @media screen and (max-width: 768px) {
     .presenter-section__content {
       text-align: center;
+      padding: 2rem;
+      margin: 0 auto; /* Center the box itself */
     }
   }
 {%- endstyle -%}
 
 {%- liquid
-  assign background_type = section.settings.background_type
-  assign bg_color = section.settings.background_color
-  assign bg_image = section.settings.background_image
-
-  assign section_classes = 'presenter-section presenter-section--' | append: section.settings.height
-  if background_type == 'image' and bg_image != blank
-    assign section_classes = section_classes | append: ' presenter-section--image-bg'
-  endif
-
   assign presenter_title = section.settings.title
   if presenter_title == blank
     if product.title != blank
@@ -114,17 +124,16 @@
 
 <div
   id="presenter-{{ section.id }}"
-  class="{{ section_classes }}"
-  style="
-    {% if background_type == 'image' and bg_image != blank %}
-      background-image: url('{{ bg_image | image_url: width: 1920 }}');
-      background-size: {{ section.settings.image_fit }};
-      background-repeat: no-repeat;
-    {% else %}
-      background-color: {{ bg_color }};
-    {% endif %}
-  "
+  class="presenter-section presenter-section-{{ section.id }} presenter-section--{{ section.settings.height }}"
 >
+  {% comment %}
+    Interactive Background Container
+    (Contains empty div to prevent Shopify hiding it)
+  {% endcomment %}
+  <div class="presenter-interactive-bg">
+    <div></div>
+  </div>
+
   <div class="presenter-section__content-wrapper">
     <div class="presenter-section__content">
       {%- if presenter_title != blank -%}
@@ -140,6 +149,24 @@
   </div>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const section = document.querySelector('.presenter-section-{{ section.id }}');
+    if (!section) return;
+
+    section.addEventListener('mousemove', (e) => {
+      const rect = section.getBoundingClientRect();
+      // Calculate mouse position relative to the section
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Update CSS variables
+      section.style.setProperty('--mouse-x', `${x}px`);
+      section.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
+</script>
+
 {% schema %}
 {
   "name": "Presenter Banner",
@@ -154,13 +181,13 @@
       "type": "text",
       "id": "title",
       "label": "Title",
-      "info": "Leave blank to use the current page's title (e.g., Product name, Collection name)."
+      "info": "Leave blank to use current page title."
     },
     {
       "type": "richtext",
       "id": "description",
       "label": "Description",
-      "info": "Leave blank to use the current page's SEO description."
+      "info": "Leave blank to use SEO description."
     },
     {
       "type": "header",
@@ -178,63 +205,18 @@
       "default": "medium"
     },
     {
-      "type": "select",
-      "id": "background_type",
-      "label": "Background type",
-      "options": [
-        { "value": "color", "label": "Color" },
-        { "value": "image", "label": "Image" }
-      ],
-      "default": "color"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color",
-      "default": "#F5f5f5"
-    },
-    {
       "type": "color",
       "id": "text_color",
       "label": "Text color",
-      "default": "#000000"
+      "default": "#FFFFFF"
     },
     {
-      "type": "image_picker",
-      "id": "background_image",
-      "label": "Background image"
+      "type": "header",
+      "content": "Background"
     },
     {
-      "type": "select",
-      "id": "image_fit",
-      "label": "Background image fit",
-      "options": [
-        {
-          "value": "cover",
-          "label": "Cover"
-        },
-        {
-          "value": "contain",
-          "label": "Contain"
-        },
-        {
-          "value": "auto",
-          "label": "Original size (Auto)"
-        }
-      ],
-      "default": "cover",
-      "info": "'Cover' fills the space (may crop). 'Contain' shows the full image (may leave empty space)."
-    },
-    {
-      "type": "range",
-      "id": "overlay_opacity",
-      "min": 0,
-      "max": 90,
-      "step": 10,
-      "unit": "%",
-      "label": "Image overlay opacity",
-      "info": "Increases contrast for text readability on images.",
-      "default": 50
+      "type": "paragraph",
+      "content": "This section uses an interactive gradient background."
     }
   ],
   "presets": [
