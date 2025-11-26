@@ -193,13 +193,11 @@
   </div>
 
   {% comment %} 2. Conditionally render the image on top (it sits at z-index 2) {% endcomment %}
-  {%- if section.settings.background_type == 'image' and section.settings.background_image != blank -%}
-    <div
-      class="presenter-image-layer"
-      style="background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}');"
-    ></div>
-    <div class="presenter-overlay"></div>
-  {%- endif -%}
+  <div
+    class="presenter-image-layer"
+    style="background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}');"
+  ></div>
+  <div class="presenter-overlay"></div>
 
   {% comment %} 3. The Content (it sits at z-index 4) {% endcomment %}
   <div class="presenter-section__content-wrapper">
