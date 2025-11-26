@@ -25,8 +25,11 @@
         "description": "<p> </p>",
         "height": "small",
         "text_color": "#ffffff",
-        "background_type": "color",
+        "background_type": "image",
         "background_color": "#121212",
+        "blob_color_1": "#c1151b",
+        "blob_color_2": "#c1151b",
+        "background_image": "shopify://shop_images/pexels-anete-lusina-4792285.jpg",
         "image_fit": "cover",
         "overlay_color": "#000000",
         "overlay_opacity": 50
