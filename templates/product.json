@@ -47,53 +47,11 @@
         "autoscroll": false,
         "autoscroll_duration": 60
       }
-    },
-    "image_with_text_V4DDNV": {
-      "type": "image-with-text",
-      "blocks": {
-        "heading_j3hdyk": {
-          "type": "heading",
-          "settings": {
-            "heading": "Free Shipping",
-            "heading_size": "h1"
-          }
-        },
-        "text_3cKgcT": {
-          "type": "text",
-          "settings": {
-            "text": "<p>An example of a feature that can be added to the product page.</p>",
-            "text_style": "body"
-          }
-        }
-      },
-      "block_order": [
-        "heading_j3hdyk",
-        "text_3cKgcT"
-      ],
-      "name": "t:sections.image-with-text.presets.name",
-      "settings": {
-        "image": "shopify://shop_images/truck-fast-solid-full.svg",
-        "image_fit": "contain",
-        "image_border_radius": 12,
-        "height": "small",
-        "desktop_image_width": "medium",
-        "layout": "text_first",
-        "image_behavior": "none",
-        "content_layout": "no-overlap",
-        "desktop_content_position": "top",
-        "desktop_content_alignment": "left",
-        "mobile_content_alignment": "left",
-        "section_color_scheme": "",
-        "color_scheme": "",
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
     }
   },
   "order": [
     "main",
     "related-products",
-    "related-blogs",
-    "image_with_text_V4DDNV"
+    "related-blogs"
   ]
 }
