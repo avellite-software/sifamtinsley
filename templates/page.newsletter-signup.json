@@ -23,8 +23,8 @@
       "settings": {
         "title": "",
         "description": "",
-        "height": "medium",
-        "text_color": "#FFFFFF",
+        "height": "small",
+        "text_color": "#ffffff",
         "background_type": "color",
         "background_color": "#111111",
         "blob_color_1": "#c1151b",
