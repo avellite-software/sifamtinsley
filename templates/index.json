@@ -149,12 +149,55 @@
         "autoscroll": true,
         "autoscroll_duration": 90
       }
+    },
+    "trusted_by_rf8wTV": {
+      "type": "trusted-by",
+      "blocks": {
+        "brand_xhFpHr": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        },
+        "brand_Jg8Pii": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        },
+        "brand_fxNiEa": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        },
+        "brand_j6gMcq": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        }
+      },
+      "block_order": [
+        "brand_xhFpHr",
+        "brand_Jg8Pii",
+        "brand_fxNiEa",
+        "brand_j6gMcq"
+      ],
+      "name": "Trusted By",
+      "settings": {
+        "heading": "Trusted By",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
     "image_banner",
     "presenter_text_and_box_jFHKEL",
     "why_us_kQQ9H4",
+    "trusted_by_rf8wTV",
     "collage",
     "news_scroller_Petjzp"
   ]
