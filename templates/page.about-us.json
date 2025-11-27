@@ -26,9 +26,9 @@
         "height": "small",
         "text_color": "#ffffff",
         "background_type": "color",
-        "background_color": "#121212",
-        "blob_color_1": "#c1151b",
-        "blob_color_2": "#c1151b",
+        "background_color": "#6b0504",
+        "blob_color_1": "#742424",
+        "blob_color_2": "#f26767",
         "image_fit": "auto",
         "overlay_color": "#000000",
         "overlay_opacity": 0
