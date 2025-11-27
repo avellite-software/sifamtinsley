@@ -79,6 +79,49 @@
         "main_heading": "Why Sifam Tinsley"
       }
     },
+    "trusted_by_rf8wTV": {
+      "type": "trusted-by",
+      "blocks": {
+        "brand_xhFpHr": {
+          "type": "brand",
+          "settings": {
+            "logo": "shopify://shop_images/sifam_tinsley_instrumentation_limited_logo.jpg",
+            "name": "Company Name"
+          }
+        },
+        "brand_Jg8Pii": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        },
+        "brand_fxNiEa": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        },
+        "brand_j6gMcq": {
+          "type": "brand",
+          "settings": {
+            "name": "Company Name"
+          }
+        }
+      },
+      "block_order": [
+        "brand_xhFpHr",
+        "brand_Jg8Pii",
+        "brand_fxNiEa",
+        "brand_j6gMcq"
+      ],
+      "name": "Trusted By",
+      "settings": {
+        "heading": "Trusted By",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
     "collage": {
       "type": "collage",
       "blocks": {
@@ -148,48 +191,6 @@
         "see_all_button_text": "See All News",
         "autoscroll": true,
         "autoscroll_duration": 90
-      }
-    },
-    "trusted_by_rf8wTV": {
-      "type": "trusted-by",
-      "blocks": {
-        "brand_xhFpHr": {
-          "type": "brand",
-          "settings": {
-            "name": "Company Name"
-          }
-        },
-        "brand_Jg8Pii": {
-          "type": "brand",
-          "settings": {
-            "name": "Company Name"
-          }
-        },
-        "brand_fxNiEa": {
-          "type": "brand",
-          "settings": {
-            "name": "Company Name"
-          }
-        },
-        "brand_j6gMcq": {
-          "type": "brand",
-          "settings": {
-            "name": "Company Name"
-          }
-        }
-      },
-      "block_order": [
-        "brand_xhFpHr",
-        "brand_Jg8Pii",
-        "brand_fxNiEa",
-        "brand_j6gMcq"
-      ],
-      "name": "Trusted By",
-      "settings": {
-        "heading": "Trusted By",
-        "color_scheme": "",
-        "padding_top": 36,
-        "padding_bottom": 36
       }
     }
   },
