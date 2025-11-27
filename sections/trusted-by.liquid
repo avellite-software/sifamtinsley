@@ -1,5 +1,3 @@
-/* Section: Trusted By - Displays a flexible grid of logos and names. - Wraps automatically within the page width. */
-
 {%- style -%}
   .section-{{ section.id }}-padding {
     padding-top: {{ section.settings.padding_top }}px;
@@ -100,7 +98,6 @@
             {%- if block.settings.logo != blank -%}
               {{ block.settings.logo | image_url: width: 300 | image_tag: loading: 'lazy', class: 'trusted-by__image' }}
             {%- else -%}
-              /* Placeholder SVG if no logo selected */
               {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
             {%- endif -%}
           </div>
