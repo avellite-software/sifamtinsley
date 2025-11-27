@@ -11,13 +11,50 @@
   "sections": {
     "main": {
       "type": "main-page",
+      "disabled": true,
       "settings": {
         "padding_top": 28,
         "padding_bottom": 28
       }
+    },
+    "presenter_banner_Nip4we": {
+      "type": "presenter-banner",
+      "name": "Presenter Banner",
+      "settings": {
+        "title": "",
+        "description": "",
+        "height": "medium",
+        "text_color": "#FFFFFF",
+        "background_type": "color",
+        "background_color": "#111111",
+        "blob_color_1": "#c1151b",
+        "blob_color_2": "#c1151b",
+        "image_fit": "cover",
+        "overlay_color": "#000000",
+        "overlay_opacity": 50
+      }
+    },
+    "distributor_form_DLaiWL": {
+      "type": "distributor-form",
+      "name": "Custom Form",
+      "settings": {
+        "heading": "News Letter Sign Up",
+        "description": "<p>Sign up for our news letter!</p>",
+        "name_label": "Name",
+        "email_label": "Email Address",
+        "phone_label": "Phone Number",
+        "company_label": "Company Name",
+        "terms_label": "I agree to the terms of use.",
+        "button_label": "Send Message",
+        "button_font_size": 16,
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "presenter_banner_Nip4we",
+    "distributor_form_DLaiWL"
   ]
 }
